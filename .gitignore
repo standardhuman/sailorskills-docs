@@ -1,0 +1,17 @@
+# Exclude all service subdirectories (each has its own git repo)
+sailorskills-billing/
+sailorskills-booking/
+sailorskills-dashboard/
+sailorskills-estimator/
+sailorskills-inventory/
+sailorskills-operations/
+sailorskills-shared/
+sailorskills-site/
+sailorskills-video/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
