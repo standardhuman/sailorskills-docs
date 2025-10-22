@@ -1,6 +1,6 @@
 # Sailorskills Suite - Roadmap
 
-Last updated: 2025-10-20
+Last updated: 2025-10-22
 
 ## Overview
 This roadmap tracks major cross-service initiatives, architectural changes, and strategic priorities for the Sailorskills suite.
@@ -65,6 +65,44 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
   - **Dependencies:** Notion service log import (historical data), Stripe integration, email service setup
   - **Priority:** High
   - **Estimated Effort:** 8-10 days (10 phases)
+
+- [ ] **Internal Admin Design System Modernization**
+  - **Rationale:** Unify visual design across internal admin services (Dashboard, Operations, Inventory, Completion/Billing, Video, Booking) with modern, polished aesthetic from Billing. Separate internal admin UX from customer-facing Estimator brand. Improve daily experience for team workflows.
+  - **Scope:** Internal services only (excludes Estimator, Site)
+  - **Visual Updates:**
+    - **Border Radius:** Sharp corners (0px) → Rounded (4-12px scale)
+    - **Color Palette:** Add purple accent (#667eea) + gradients for modern feel
+    - **Shadows:** Minimal flat → Stronger depth (cards, modals, nav)
+    - **Interactive States:** Add card elevation on hover, gradient nav accents
+    - **Three-Tier Nav:** Keep structure, apply visual polish (rounded active states, gradient backgrounds)
+  - **Technical Approach:**
+    - Phase 1 (Week 1): Update `sailorskills-shared/src/ui/design-tokens.css` + `styles.css`
+    - Phase 2 (Week 1): Pilot implementation on Dashboard, test thoroughly
+    - Phase 3 (Week 2): Roll out to Operations → Inventory → Completion
+    - Phase 4 (Week 3): Complete Video → Booking, final polish + documentation
+  - **Component Updates:**
+    - Buttons: Rounded corners, keep brightness hover
+    - Cards: Rounded + hover lift effect (translateY + shadow)
+    - Modals: Rounded, stronger shadows
+    - Forms: Rounded inputs, better focus states
+    - Navigation (all 3 tiers): Rounded active states, gradient accents
+    - Badges: Add gradient variant option
+    - New Shared components: Extract Billing's condition sliders, card patterns
+  - **Impact:** Unified, modern, delightful UX across all internal tools. Clearer separation between internal admin (modern/polished) and customer acquisition (professional/minimal). Improved daily experience for team with consistent, pleasant interface.
+  - **Dependencies:** None (self-contained design system update)
+  - **Priority:** High (Q1 2026 - foundational improvement)
+  - **Estimated Effort:** 24-35 hours over 3 weeks
+    - Shared updates: 6-9 hours
+    - Dashboard pilot: 3-4 hours
+    - 5 services rollout: 10-15 hours
+    - Testing/polish: 5-7 hours
+  - **Rollout Strategy:** Controlled pilot (Dashboard first) reduces risk, allows refinement before full expansion
+  - **Deliverables:**
+    - Updated Shared design tokens with purple palette, radius scale, stronger shadows, gradients
+    - Modernized Shared component library (buttons, cards, modals, forms, nav)
+    - All 6 internal services using consistent modern styling
+    - Visual regression test suite (Playwright screenshots)
+    - Design system documentation
 
 - [ ] **Admin Settings & Configuration Panels**
   - **Rationale:** Need centralized control over business operations: email notifications, pricing variables, and customer-facing content. Currently these are hardcoded or require code changes.
