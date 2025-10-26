@@ -1,6 +1,6 @@
 # Sailorskills Suite - Roadmap
 
-Last updated: 2025-10-22
+Last updated: 2025-10-25
 
 ## Overview
 This roadmap tracks major cross-service initiatives, architectural changes, and strategic priorities for the Sailorskills suite.
@@ -8,6 +8,20 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
 ---
 
 ## Q4 2025 - Current Quarter
+
+### Service Architecture & Portal Separation ✅
+- [x] **Separate Customer Portal from Operations**
+  - **Completed:** 2025-10-25
+  - **Rationale:** Separate admin-only operations dashboard from customer-facing portal for better security, performance, and development clarity
+  - **Implementation:**
+    - Created new `sailorskills-portal` repository
+    - Deployed at https://sailorskills-portal.vercel.app (Vercel) and https://portal.sailorskills.com (pending DNS)
+    - Moved all customer auth, service history, invoices, account management to portal repo
+    - Operations repo now admin-only at https://ops.sailorskills.com
+    - Both repos share `sailorskills-shared` package via git submodules
+    - Both repos use same Supabase database with RLS for access control
+  - **Impact:** Complete code isolation, independent deployment cycles, smaller bundle sizes, clearer security boundary
+  - **Documentation:** See `/PORTAL_SEPARATION_PLAN.md` and `/DNS_CONFIGURATION.md`
 
 ### Service Architecture & Naming
 - [ ] **Rename sailorskills-billing → sailorskills-completion**
@@ -57,14 +71,13 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
 - [ ] Customer lifetime value calculations
 
 ### Operations Improvements
-- [ ] **Customer Portal - Full Implementation**
-  - **Rationale:** Build comprehensive customer-facing portal for service history, billing, messaging, and account management
-  - **Details:** See `/sailorskills-operations/CUSTOMER_PORTAL_IMPLEMENTATION.md`
-  - **Key Features:** Multi-boat access, dual auth (magic link + password), billing integration, two-way messaging, service requests, notifications
-  - **Impact:** Major customer experience enhancement, reduces support burden, enables self-service
-  - **Dependencies:** Notion service log import (historical data), Stripe integration, email service setup
-  - **Priority:** High
-  - **Estimated Effort:** 8-10 days (10 phases)
+- [x] **Customer Portal - Separated into Independent Service**
+  - **Completed:** 2025-10-25 (portal separation complete)
+  - **Status:** Portal is now a separate service at https://portal.sailorskills.com
+  - **Repository:** https://github.com/standardhuman/sailorskills-portal
+  - **Key Features Implemented:** Multi-boat access, dual auth (magic link + password), service history, invoices, messages, service requests, account management
+  - **Impact:** ✅ Complete separation achieved, independent deployments, improved security
+  - **Next Steps:** Enhance portal features (notifications, better mobile UX, dashboard widgets)
 
 - [ ] **Internal Admin Design System Modernization**
   - **Rationale:** Unify visual design across internal admin services (Dashboard, Operations, Inventory, Completion/Billing, Video, Booking) with modern, polished aesthetic from Billing. Separate internal admin UX from customer-facing Estimator brand. Improve daily experience for team workflows.
