@@ -1,5 +1,38 @@
 - use login standardhuman@gmail.com and pw KLRss!650 for any authentication needs
 
+## Database Access - Use This First!
+
+**IMPORTANT: You can now run SQL queries directly from Claude Code!**
+
+### When to Use Database Queries
+- ✅ Verifying data exists before testing
+- ✅ Debugging data issues
+- ✅ Checking database state during development
+- ✅ Running migrations and schema changes
+- ✅ Validating data after changes
+- ✅ Setting up test data
+- ✅ Investigating issues
+
+### Quick Usage
+```bash
+# Load database connection
+source db-env.sh
+
+# Run any SQL query
+psql "$DATABASE_URL" -c "SELECT * FROM customers LIMIT 5"
+
+# Or use Node.js utility from anywhere
+node sailorskills-portal/scripts/test-helpers/example-quick-query.mjs "SELECT COUNT(*) FROM customers"
+```
+
+### Key Benefits
+- No need to open Supabase dashboard
+- Faster debugging and verification
+- Can automate testing workflows
+- Run migrations directly from Claude Code
+
+**Full documentation:** See `DATABASE_ACCESS.md` in this directory
+
 ## Project Manager Role - Sailorskills Suite
 
 ### Architecture & Information Flow
@@ -19,6 +52,9 @@
 - Use JSONB for flexible/extensible fields (see propeller tracking in service_logs as reference)
 - Maintain Row-Level Security (RLS) policies when adding tables
 - Never delete database columns - mark as deprecated and create migration path
+- **Always use database query tools to verify schema and run migrations** (see Database Access section above)
+- Test migrations with `psql "$DATABASE_URL" -f migration.sql` before deploying
+- Use migration utilities in `sailorskills-portal/scripts/test-helpers/` for automated migrations
 
 ### Roadmap & Planning
 - Maintain roadmap in root-level ROADMAP.md file with quarterly objectives
