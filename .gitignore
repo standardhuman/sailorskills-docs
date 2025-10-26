@@ -9,6 +9,9 @@ sailorskills-shared/
 sailorskills-site/
 sailorskills-video/
 
+# Environment variables (contains database password)
+.env
+
 # macOS
 .DS_Store
 
