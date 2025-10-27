@@ -243,9 +243,10 @@ Git submodules prevent breaking change risks by allowing controlled rollout of s
 
 ---
 
-### Task 2.2: Migrate to Shared Utilities ⏳ READY TO START
-**Effort:** 6-8 hours
-**Status:** Ready - Task 2.1 verification complete
+### Task 2.2: Migrate to Shared Utilities ⏳ IN PROGRESS
+**Effort:** 6-8 hours (Actual so far: 1.5 hours)
+**Status:** Batch 1 (Dashboard) in progress - Option D approach identified
+**Started:** 2025-10-27
 
 **Problem:**
 - Auth utilities duplicated (SimpleAuth, InventoryAuth)
@@ -253,16 +254,33 @@ Git submodules prevent breaking change risks by allowing controlled rollout of s
 - Stripe helpers duplicated
 - UI components duplicated
 
-**Steps:**
-1. Audit duplicated code in services without shared pkg
-2. Replace with shared package imports:
-   - Auth: Use `SimpleAuth` from shared
-   - Supabase: Use `createSupabaseClient()` from shared
-   - Stripe: Use `initStripe()`, `createCardElement()` from shared
-   - UI: Use `createModal()`, `showToast()` from shared
-3. Remove duplicated code files
-4. Test authentication flows
-5. Test payment flows
+**Approach:** Sequential service-by-service migration using **Option D**:
+- **Build System:** Add Vite to services without it
+- **Auth:** Use `initSupabaseAuth()` from shared package
+- **Supabase Library:** Keep CDN script tag (pragmatic)
+- **Order:** Dashboard → Inventory → Operations → Billing
+
+**Batch 1 Progress (Dashboard):**
+1. ✅ Updated 3 HTML files to import from shared
+2. ✅ Removed `js/supabase-auth.js` (209 lines)
+3. ✅ Added Vite build system + config
+4. ✅ Updated `vercel.json` with build command
+5. ⏸️ Auth implementation (needs Option D fix)
+6. ⏳ Local testing pending
+7. ⏳ Deployment pending
+
+**Discovery:**
+- Shared package has `initSupabaseAuth()` (Supabase-based) not `SimpleAuth` (password-based)
+- Static services need Vite to resolve ES module imports
+- CDN script tag for Supabase library is acceptable
+- Plan checkpoint caught issue before affecting other services ✅
+
+**Next Session:**
+- Implement Option D in Dashboard (30-45 min)
+- Test and deploy Dashboard
+- Proceed to Batch 2-4
+
+**Detailed Notes:** See `TASK_2.2_BATCH1_SESSION_NOTES.md`
 
 **Success Criteria:**
 - ✅ No duplicated utility code
