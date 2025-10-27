@@ -22,3 +22,6 @@ sailorskills-video/
 
 # Archive
 docs/archive/
+
+# Development worktrees
+.worktrees/
