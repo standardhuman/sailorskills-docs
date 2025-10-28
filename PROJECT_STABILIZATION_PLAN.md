@@ -174,10 +174,11 @@ This plan addresses critical security, compliance, and stability issues identifi
 ## PHASE 2: SHARED PACKAGE ADOPTION ⏳ IN PROGRESS
 **Goal:** Establish consistent design system and eliminate code duplication
 **Duration:** Week 2 (5-7 days)
-**Effort:** 15-20 hours
+**Effort:** 15-20 hours (Actual so far: 12 hours)
 **Priority:** 🟠 HIGH
-**Status:** 1/4 tasks complete (25%)
+**Status:** 2/4 tasks complete (50%)
 **Started:** 2025-10-27
+**Tasks 2.1 & 2.2 Completed:** 2025-10-28
 
 ### Task 2.1: Add Shared Submodule to Missing Services ✅ COMPLETE & VERIFIED
 **Affected Services:** billing, dashboard, inventory, operations, video (5 services)
@@ -243,13 +244,15 @@ Git submodules prevent breaking change risks by allowing controlled rollout of s
 
 ---
 
-### Task 2.2: Migrate to Shared Utilities ⏳ IN PROGRESS
-**Effort:** 6-8 hours (Actual so far: 5.5 hours - Batch 1, 3 complete; Batch 2 blocked)
-**Status:** Batch 1 ✅ | Batch 2 ⚠️ BLOCKED | Batch 3 ✅ COMPLETE | Next: Batch 4 (Billing)
+### Task 2.2: Migrate to Shared Utilities ✅ COMPLETE
+**Effort:** 6-8 hours (Actual: 8 hours across 4 batches)
+**Status:** ALL 4 BATCHES COMPLETE ✅
 **Started:** 2025-10-27
+**Completed:** 2025-10-28
 **Batch 1 (Dashboard) Completed:** 2025-10-27
-**Batch 2 (Inventory) Started:** 2025-10-27 (blocked - production build issues)
+**Batch 2 (Inventory) Completed:** 2025-10-28 (resolved build issues)
 **Batch 3 (Operations) Completed:** 2025-10-27
+**Batch 4 (Billing) Completed:** 2025-10-28
 
 **Problem:**
 - Auth utilities duplicated (SimpleAuth, InventoryAuth)
@@ -307,17 +310,44 @@ Git submodules prevent breaking change risks by allowing controlled rollout of s
 - Both straightforward migrations (~1 hour each)
 - Inventory is outlier with unique config system
 
-**Next Batch:**
-- Batch 4: Billing (already has Vite, ~1.5-2 hours) ← NEXT
-- Return to Inventory with fresh approach after Batch 4
+**Batch 4 (Billing) Status:** ✅ COMPLETE (2025-10-28)
+- Migrated to shared auth in 2 hours (including debugging)
+- Removed 479 lines of duplicated auth code (src/auth/)
+- Updated dist/index.html and transactions.html to use shared auth
+- Fixed top-level await issue with async IIFE wrapper
+- Local testing: PASSED ✅
+- Production testing: PASSED ✅
+- Commits: 6df7cef, f4f4367, ce52e7b
+- URL: https://sailorskills-billing.vercel.app
+
+**Batch 2 (Inventory) Resolution:** ✅ COMPLETE (2025-10-28)
+- Returned after Batch 3/4 validated pattern
+- Issue: top-level await in HTML script tags
+- Solution: Wrapped initSupabaseAuth() in async IIFE (same as Billing)
+- Build now succeeds without errors
+- Production testing: PASSED ✅
+- Commit: 1fe0364
+- URL: https://sailorskills-inventory.vercel.app
+
+**Final Results - All 4 Batches:**
+- **Total code removed:** 10,837 lines of duplicated auth code
+- **Dashboard:** -9,888 lines
+- **Operations:** -470 lines
+- **Billing:** -479 lines
+- **Inventory:** -443 lines (from earlier commits)
+
+**Pattern Validated:** Async IIFE wrapper for initSupabaseAuth()
+- Required for top-level await compatibility
+- Works across all services (Vite and non-Vite)
+- Consistent implementation pattern
 
 **Detailed Notes:** See `TASK_2.2_BATCH1_SESSION_NOTES.md` and `TASK_2.2_IMPLEMENTATION_PLAN.md`
 
 **Success Criteria:**
 - ✅ Dashboard: No duplicated utility code, all tests passing
-- ⚠️ Inventory: Local complete, production blocked (needs investigation)
+- ✅ Inventory: Production build issues resolved, all tests passing
 - ✅ Operations: No duplicated utility code, all tests passing
-- ⏳ Billing: Pending
+- ✅ Billing: No duplicated utility code, all tests passing
 
 ---
 
@@ -621,11 +651,11 @@ Git submodules prevent breaking change risks by allowing controlled rollout of s
 
 ### Phase Completion Status:
 - Phase 1 (Security & Compliance): ✅ 4/4 tasks complete (100%) - DONE 2025-10-27
-- Phase 2 (Shared Package): ⏳ 1/4 tasks complete (25%) - IN PROGRESS
+- Phase 2 (Shared Package): ⏳ 2/4 tasks complete (50%) - IN PROGRESS
 - Phase 3 (Testing & Architecture): ⏳ 0/4 tasks complete (0%)
 - Phase 4 (Roadmap & Auth): ⏳ 0/4 tasks complete (0%)
 
-### Overall Progress: 5/16 tasks complete (31%)
+### Overall Progress: 6/16 tasks complete (38%)
 
 ---
 
@@ -634,7 +664,7 @@ Git submodules prevent breaking change risks by allowing controlled rollout of s
 | Phase | Tasks | Effort | Duration | Priority |
 |-------|-------|--------|----------|----------|
 | Phase 1: Security & Compliance | 4 | 20-25 hours (actual: 8-10) | Week 1 ✅ | 🔴 CRITICAL |
-| Phase 2: Shared Package | 4 | 15-20 hours | Week 2 | 🟠 HIGH |
+| Phase 2: Shared Package | 4 | 15-20 hours (actual so far: 12) | Week 2 ⏳ | 🟠 HIGH |
 | Phase 3: Testing & Architecture | 4 | 25-30 hours | Weeks 3-4 | 🟠 HIGH |
 | Phase 4: Roadmap & Auth | 4 | 20-25 hours | Weeks 5-6 | 🟡 MEDIUM |
 | **TOTAL** | **16** | **80-100 hours** | **6 weeks** | |
@@ -707,21 +737,23 @@ Git submodules prevent breaking change risks by allowing controlled rollout of s
 
 ## NEXT ACTIONS
 
-### Completed This Session (2025-10-27):
-1. ✅ Task 2.1 production verification with Playwright
-2. ✅ Fixed incomplete Billing migration
-3. ✅ Verified all 4 services in production
-4. ✅ Generated comprehensive verification report
+### Completed This Session (2025-10-28):
+1. ✅ Task 2.2 Batch 4 (Billing): Migrated to shared auth, removed 479 lines
+2. ✅ Task 2.2 Batch 2 (Inventory): Resolved build issues, wrapped auth in async IIFE
+3. ✅ Task 2.2 Complete: All 4 services migrated, 10,837 lines of duplicated code removed
+4. ✅ Production verification for all services with Playwright
 
-### Next Up:
-1. ⏳ **Task 2.2:** Migrate to Shared Utilities (6-8 hours)
-   - Remove duplicated auth code
-   - Remove duplicated Supabase client code
-   - Use shared package exports
-2. ⏳ **Task 2.3:** Implement Shared Navigation System (4-6 hours)
-3. ⏳ **Task 2.4:** Design Token Audit (2-3 hours)
+### Next Up (Phase 2 Remaining):
+1. ⏳ **Task 2.3:** Implement Shared Navigation System (4-6 hours)
+   - Add navigation to services missing it (Operations, Estimator, Billing)
+   - Configure breadcrumbs for each service
+   - Run navigation compliance tests
+2. ⏳ **Task 2.4:** Design Token Audit (2-3 hours)
+   - Search for hardcoded colors
+   - Replace with CSS variables
+   - Verify visual consistency
 
-**Estimated completion of Phase 2:** End of Week 2
+**Estimated completion of Phase 2:** 6-9 hours remaining (~1-2 days)
 
 ---
 
