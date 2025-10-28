@@ -76,9 +76,24 @@ async function importInvoices() {
     withPaymentIntent: paymentsByPaymentIntent.size
   });
 
+  // Deduplicate invoices (CSV has one row per line item, so same invoice appears multiple times)
+  const uniqueInvoicesMap = new Map();
+  zohoInvoices.forEach(invoice => {
+    const invoiceNum = invoice['Invoice Number'];
+    if (!uniqueInvoicesMap.has(invoiceNum)) {
+      uniqueInvoicesMap.set(invoiceNum, invoice);
+    }
+  });
+  const uniqueInvoices = Array.from(uniqueInvoicesMap.values());
+
+  log('INFO', 'Deduplicated invoices', {
+    totalRows: zohoInvoices.length,
+    uniqueInvoices: uniqueInvoices.length
+  });
+
   // Process invoices
   const results = {
-    total: zohoInvoices.length,
+    total: uniqueInvoices.length,
     processed: 0,
     stripeLinked: 0,
     stripePaymentCreated: 0,
@@ -90,7 +105,7 @@ async function importInvoices() {
 
   const invoicesToInsert = [];
 
-  for (const zohoInvoice of zohoInvoices) {
+  for (const zohoInvoice of uniqueInvoices) {
     try {
       const invoiceNumber = zohoInvoice['Invoice Number'];
       const zohoCustomerId = zohoInvoice['Customer ID'];
@@ -161,20 +176,22 @@ async function importInvoices() {
       }
 
       // Build invoice record
+      // Status must match constraint: paid = paid_at NOT NULL, not paid = paid_at NULL
+      const invoiceStatus = paidAt ? 'paid' :
+                           status === 'Overdue' ? 'overdue' : 'pending';
+
       const invoiceRecord = {
         invoice_number: `${INVOICE_PREFIX}${invoiceNumber}`,
         customer_id: sailorCustomerId,
         boat_id: null, // Will link in service log step
         service_id: null,
         amount: total,
-        status: status === 'Closed' || status === 'Paid' ? 'paid' :
-                status === 'Open' ? 'pending' : 'pending',
+        status: invoiceStatus,
         issued_at: invoiceDate,
         due_at: dueDate,
         paid_at: paidAt,
         payment_method: paymentMethod,
         payment_reference: paymentReference,
-        payment_id: linkedPaymentId,
         customer_details: {
           zoho_customer_id: zohoCustomerId,
           migrated_from_zoho: true

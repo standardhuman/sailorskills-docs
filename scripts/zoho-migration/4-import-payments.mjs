@@ -27,15 +27,38 @@ async function importPayments() {
 
   log('INFO', 'Filtered Zoho Payments', { count: zohoOnlyPayments.length });
 
-  // Fetch migrated invoices to link payments
-  const { data: migratedInvoices, error } = await supabase
+  // Fetch count of migrated invoices
+  const { count: invoiceCount, error: invCountError } = await supabase
     .from('invoices')
-    .select('id, invoice_number, customer_id, amount')
+    .select('*', { count: 'exact', head: true })
     .like('invoice_number', `${INVOICE_PREFIX}%`);
 
-  if (error) {
-    log('ERROR', 'Failed to fetch invoices', { error: error.message });
+  if (invCountError) {
+    log('ERROR', 'Failed to count invoices', { error: invCountError.message });
     process.exit(1);
+  }
+
+  log('INFO', 'Total migrated invoices', { count: invoiceCount });
+
+  // Fetch all migrated invoices (handling pagination)
+  const migratedInvoices = [];
+  const pageSize = 1000;
+
+  for (let offset = 0; offset < invoiceCount; offset += pageSize) {
+    log('INFO', `Fetching invoices ${offset}-${Math.min(offset + pageSize, invoiceCount)}...`);
+
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('id, invoice_number, customer_id, amount')
+      .like('invoice_number', `${INVOICE_PREFIX}%`)
+      .range(offset, offset + pageSize - 1);
+
+    if (error) {
+      log('ERROR', 'Failed to fetch invoices', { error: error.message });
+      process.exit(1);
+    }
+
+    migratedInvoices.push(...data);
   }
 
   const invoiceMap = new Map();
@@ -57,7 +80,6 @@ async function importPayments() {
   };
 
   const paymentsToInsert = [];
-  const invoiceUpdates = [];
 
   for (const payment of zohoOnlyPayments) {
     try {
@@ -78,26 +100,12 @@ async function importPayments() {
         customer_id: invoice.customer_id,
         invoice_id: invoice.id,
         amount: parseFloat(payment['Amount'] || 0),
-        payment_method: 'zoho',
-        payment_reference: payment['Payment Number'],
-        status: 'completed',
-        created_at: payment['Date'],
-        metadata: {
-          zoho_payment_id: payment['Payment ID'],
-          zoho_mode: payment['Mode'],
-          migrated_from_zoho: true,
-          migration_date: new Date().toISOString()
-        }
+        status: 'succeeded',
+        payment_date: payment['Date'],
+        created_at: payment['Date']
       };
 
       paymentsToInsert.push(paymentRecord);
-
-      // Prepare invoice update to link payment
-      invoiceUpdates.push({
-        id: invoice.id,
-        payment_method: 'zoho',
-        payment_reference: payment['Payment Number']
-      });
 
       results.processed++;
       results.linked++;
@@ -114,36 +122,20 @@ async function importPayments() {
   if (!DRY_RUN && paymentsToInsert.length > 0) {
     log('INFO', 'Inserting Zoho payments...', { count: paymentsToInsert.length });
 
-    const insertedPayments = await processBatch(paymentsToInsert, BATCH_SIZE, async (batch) => {
-      const { data, error } = await supabase
+    await processBatch(paymentsToInsert, BATCH_SIZE, async (batch) => {
+      const { error } = await supabase
         .from('payments')
-        .insert(batch)
-        .select('id, invoice_id');
+        .insert(batch);
 
       if (error) {
         log('ERROR', 'Batch insert failed', { error: error.message });
         throw error;
       }
 
-      return data;
+      return batch;
     });
 
-    // Update invoices with payment_id
-    log('INFO', 'Updating invoices with payment_id...');
-
-    for (const payment of insertedPayments) {
-      const { error: updateError } = await supabase
-        .from('invoices')
-        .update({ payment_id: payment.id })
-        .eq('id', payment.invoice_id);
-
-      if (updateError) {
-        log('ERROR', 'Failed to update invoice', {
-          invoiceId: payment.invoice_id,
-          error: updateError.message
-        });
-      }
-    }
+    log('INFO', 'Zoho payments inserted successfully');
   }
 
   // Write results
