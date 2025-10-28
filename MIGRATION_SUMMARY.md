@@ -257,6 +257,33 @@ This section defines which service "owns" each table (can modify schema) and whi
 
 **Impact:** Improved data integrity, prevented orphaned records
 
+#### Migration 015: Invoice-Service Linkage
+**File:** `migrations/2025-10-27-add-invoice-service-linkage.sql`
+**Date:** 2025-10-27
+**Services Affected:** Operations, Billing, Portal
+**Tables Modified:**
+- `service_logs` - Added `invoice_id` column (uuid, nullable, FK to invoices)
+- `payments` - Added RLS policy "Customers can view own payments"
+
+**Views Created:**
+- `transaction_details` - Optimized view joining invoices, payments, service_logs
+
+**Purpose:**
+Enable bi-directional invoice-service linkage for transaction viewing interface. Provides optimized query view and customer data isolation via RLS.
+
+**Impact:**
+- Operations: Can link service logs to invoices via service_logs.invoice_id
+- Billing: Can query services related to invoices efficiently
+- Portal: Uses transaction_details view for customer transaction pages
+
+**Rollback:**
+```sql
+DROP VIEW IF EXISTS transaction_details;
+DROP POLICY IF EXISTS "Customers can view own payments" ON payments;
+DROP INDEX IF EXISTS idx_service_logs_invoice_id;
+ALTER TABLE service_logs DROP COLUMN IF EXISTS invoice_id;
+```
+
 ---
 
 ### Phase 4: Inventory System (2025)
@@ -581,13 +608,13 @@ For migrations without automatic rollback:
 
 **Total Migrations:** 50+ (exact count varies by service)
 **Services with Migrations:**
-- Billing: 14 migrations
+- Billing: 15 migrations
 - Site/Estimator: 14 migrations
 - Inventory: 6 migrations
 - Operations: 2 migrations
 - Dashboard: 7 migrations (some shared with Billing)
 
-**Most Recent Migration:** 014 (2025-10-26)
+**Most Recent Migration:** 015 (2025-10-27)
 **Last Schema Validation:** 2025-10-27
 **Total Database Tables:** 55
 
