@@ -13,28 +13,73 @@ async function linkServiceLogs() {
     console.log('\n🔍 DRY RUN MODE - No data will be written\n');
   }
 
-  // Fetch uninvoiced service logs
-  const { data: serviceLogs, error: logsError } = await supabase
+  // Fetch count of uninvoiced service logs
+  const { count: totalCount, error: countError } = await supabase
     .from('service_logs')
-    .select('id, customer_id, boat_id, order_id, service_date')
+    .select('*', { count: 'exact', head: true })
     .is('invoice_id', null);
 
-  if (logsError) {
-    log('ERROR', 'Failed to fetch service logs', { error: logsError.message });
+  if (countError) {
+    log('ERROR', 'Failed to count service logs', { error: countError.message });
     process.exit(1);
+  }
+
+  log('INFO', 'Total uninvoiced service logs', { count: totalCount });
+
+  // Fetch all uninvoiced service logs (handling pagination)
+  const serviceLogs = [];
+  const pageSize = 1000;
+
+  for (let offset = 0; offset < totalCount; offset += pageSize) {
+    log('INFO', `Fetching service logs ${offset}-${Math.min(offset + pageSize, totalCount)}...`);
+
+    const { data, error: logsError } = await supabase
+      .from('service_logs')
+      .select('id, customer_id, boat_id, order_id, service_date')
+      .is('invoice_id', null)
+      .range(offset, offset + pageSize - 1);
+
+    if (logsError) {
+      log('ERROR', 'Failed to fetch service logs', { error: logsError.message });
+      process.exit(1);
+    }
+
+    serviceLogs.push(...data);
   }
 
   log('INFO', 'Loaded uninvoiced service logs', { count: serviceLogs.length });
 
-  // Fetch migrated invoices
-  const { data: invoices, error: invoicesError } = await supabase
+  // Fetch count of migrated invoices
+  const { count: invoiceCount, error: invCountError } = await supabase
     .from('invoices')
-    .select('id, invoice_number, customer_id, boat_id, amount, issued_at, payment_method, payment_reference')
+    .select('*', { count: 'exact', head: true })
     .like('invoice_number', `${INVOICE_PREFIX}%`);
 
-  if (invoicesError) {
-    log('ERROR', 'Failed to fetch invoices', { error: invoicesError.message });
+  if (invCountError) {
+    log('ERROR', 'Failed to count invoices', { error: invCountError.message });
     process.exit(1);
+  }
+
+  log('INFO', 'Total migrated invoices', { count: invoiceCount });
+
+  // Fetch all migrated invoices (handling pagination)
+  const invoices = [];
+
+  for (let offset = 0; offset < invoiceCount; offset += pageSize) {
+    log('INFO', `Fetching invoices ${offset}-${Math.min(offset + pageSize, invoiceCount)}...`);
+
+    const { data, error: invoicesError } = await supabase
+      .from('invoices')
+      .select('id, invoice_number, customer_id, boat_id, amount, issued_at, payment_method, payment_reference')
+      .like('invoice_number', `${INVOICE_PREFIX}%`)
+      .range(offset, offset + pageSize - 1);
+
+    if (invoicesError) {
+      log('ERROR', 'Failed to fetch invoices', { error: invoicesError.message });
+      process.exit(1);
+    }
+
+    invoices.push(...data);
   }
 
   log('INFO', 'Loaded migrated invoices', { count: invoices.length });
