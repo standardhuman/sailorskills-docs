@@ -150,6 +150,84 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
 - [ ] Improve service history visualization
 - [ ] Mobile optimization for field use
 
+### Development Workflow & Infrastructure
+- [ ] **Implement Development Branch Strategy for All Services**
+  - **Rationale:** Currently all 10 services develop directly on `main` branch with immediate production deployment on every push. This creates significant risks: untested code can reach production, no staging environment for integration testing, difficulty rolling back problematic deployments, and inability to test cross-service features together. Need proper development → staging → production workflow with safety gates.
+  - **Current State:**
+    - All services (Portal, Operations, Billing/Completion, Estimator, Dashboard, Inventory, Booking, Video, Site, Shared) use single `main` branch
+    - Every push to `main` triggers immediate Vercel production deployment
+    - No `develop`, `staging`, or formal branching strategy exists
+    - Vercel preview deployments available but not utilized
+    - CLAUDE.md instructs to push directly to main after local testing
+    - Only 1 feature branch exists across all 10 services (estimator feature/transaction-viewing)
+  - **Proposed Workflow:** Modified GitHub Flow with `develop` branch
+    - **Branch Structure:** `feature/* → develop (staging) → main (production)`
+    - **Development Process:**
+      - Create feature branches from `develop` for new work
+      - Feature branch PRs merge to `develop` after review
+      - `develop` auto-deploys to Vercel preview URL (staging environment)
+      - Feature branches get individual preview URLs for PR review
+      - `main` remains production-only, updated via PR from `develop`
+      - Emergency hotfixes can bypass and go direct to `main` with backport to `develop`
+    - **Benefits:**
+      - Leverages existing Vercel preview deployment infrastructure (no new tools needed)
+      - Staging environment for integration testing before production
+      - Test database migrations on preview deployment first
+      - Coordinate cross-service releases (test compatible versions together on develop)
+      - Easy rollbacks (revert PR to main)
+      - Individual preview URLs for every feature PR
+  - **Implementation Plan:**
+    - **Phase 1 (Week 1):** Core Services Setup
+      - Create `develop` branches for Portal, Operations, and Billing/Completion
+      - Update Vercel project settings (main = production, develop = preview)
+      - Test workflow with small feature on each service
+      - Document preview URLs and staging access
+    - **Phase 2 (Week 2):** Remaining Services Rollout
+      - Create `develop` branches for remaining 7 services (Estimator, Dashboard, Inventory, Booking, Video, Site)
+      - Create `develop` branch for sailorskills-shared (special handling as submodule)
+      - Update git submodule references in services to point to shared@develop during development
+      - Verify all services have working preview deployments
+    - **Phase 3 (Week 3):** Documentation & Training
+      - Update all CLAUDE.md files with new branching workflow
+      - Document: feature branch creation, PR process, staging testing procedures, promote-to-production process
+      - Create workflow diagram showing feature → develop → main flow
+      - Document emergency hotfix procedure (when to bypass develop)
+      - Add database migration testing workflow (test on develop preview first)
+    - **Phase 4 (Week 4):** Protection & Validation
+      - Configure GitHub branch protection rules on all `main` branches
+      - Prevent direct pushes to `main` (require PR from develop)
+      - Set up status checks for automated tests (where applicable)
+      - Document rollback procedures (revert commits, revert merges)
+      - Test full workflow end-to-end on all services
+      - Update project manager guidelines in root CLAUDE.md
+  - **Special Considerations:**
+    - **Git Submodules (sailorskills-shared):** Need coordinated strategy - create shared@develop, services reference shared@develop during development, only update to shared@main when promoting to production. Document submodule branch coordination workflow.
+    - **Database Migrations:** Establish testing workflow - always test migrations on `develop` preview deployment before running on production. Document migration rollback procedures.
+    - **Cross-Service Dependencies:** When multiple services need compatible changes (e.g., database schema change affecting Portal + Operations + Billing), coordinate versions on `develop` branches and test together before promoting to `main`.
+    - **Environment Variables:** Document any differences between develop (staging) and main (production) environment configs.
+  - **Impact:**
+    - **Safety:** Significantly reduced risk of production bugs (staging environment catches issues first)
+    - **Testing:** Ability to test in production-like environment before release
+    - **Collaboration:** Better code review process with preview URLs
+    - **Rollbacks:** Easier to revert problematic changes (just revert PR)
+    - **Coordination:** Can test cross-service features together on develop before production
+    - **Confidence:** Team can deploy with higher confidence knowing changes passed staging validation
+  - **Dependencies:** None (self-contained workflow improvement, leverages existing Vercel infrastructure)
+  - **Priority:** High (reduces production risk, enables safer rapid development)
+  - **Estimated Effort:** 12-16 hours spread over 4 weeks
+    - Branch creation & Vercel configuration: 4-6 hours
+    - Documentation updates: 3-4 hours
+    - GitHub protection configuration: 2-3 hours
+    - Testing & validation across all services: 3-3 hours
+  - **Success Criteria:**
+    - All 10 services have `develop` branch created and set as default branch for development
+    - Vercel preview URLs working for all service `develop` branches
+    - All CLAUDE.md files updated with new workflow instructions
+    - Branch protection active on all `main` branches (prevent direct pushes)
+    - Emergency hotfix procedure documented
+    - At least one feature successfully deployed through full workflow (feature → develop → main) on each service
+    - sailorskills-shared submodule workflow documented and validated
+
 ---
 
 ## Q2 2026
