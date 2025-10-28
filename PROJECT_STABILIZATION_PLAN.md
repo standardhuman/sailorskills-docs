@@ -244,10 +244,12 @@ Git submodules prevent breaking change risks by allowing controlled rollout of s
 ---
 
 ### Task 2.2: Migrate to Shared Utilities ⏳ IN PROGRESS
-**Effort:** 6-8 hours (Actual so far: 2.5 hours - Batch 1 complete)
-**Status:** Batch 1 (Dashboard) ✅ COMPLETE | Batch 2-4 pending
+**Effort:** 6-8 hours (Actual so far: 5.5 hours - Batch 1, 3 complete; Batch 2 blocked)
+**Status:** Batch 1 ✅ | Batch 2 ⚠️ BLOCKED | Batch 3 ✅ COMPLETE | Next: Batch 4 (Billing)
 **Started:** 2025-10-27
-**Batch 1 Completed:** 2025-10-27
+**Batch 1 (Dashboard) Completed:** 2025-10-27
+**Batch 2 (Inventory) Started:** 2025-10-27 (blocked - production build issues)
+**Batch 3 (Operations) Completed:** 2025-10-27
 
 **Problem:**
 - Auth utilities duplicated (SimpleAuth, InventoryAuth)
@@ -284,19 +286,37 @@ Git submodules prevent breaking change risks by allowing controlled rollout of s
 - CDN script tag for Supabase library is acceptable
 - Plan checkpoint caught issue before affecting other services ✅
 
-**Next Batch:**
-- Batch 2: Inventory (similar approach, ~2 hours)
-- Batch 3: Operations (already has Vite, ~1.5 hours)
-- Batch 4: Billing (most complex, ~2 hours)
+**Batch 2 (Inventory) Status:** ⚠️ BLOCKED (2025-10-27)
+- Local migration complete (443 lines removed, 3 commits: ff80d86, c4adc30, bb45d17)
+- Production build failing - config.js generation/copy issues
+- Decision: Skip to Batch 3, return after validating pattern
+- Time: 2 hours debugging
+- **TODO: Return after Batch 3/4 complete**
 
-**Detailed Notes:** See `TASK_2.2_BATCH1_SESSION_NOTES.md`
+**Batch 3 (Operations) Status:** ✅ COMPLETE (2025-10-27)
+- Migrated to shared auth in 1 hour (as predicted!)
+- Removed 470 lines of duplicated auth code (src/auth/ directory)
+- Updated src/main.js to use initSupabaseAuth from shared package
+- Local testing: PASSED ✅
+- Production testing: PASSED ✅
+- Commit: a827e84
+- URL: https://ops.sailorskills.com
+
+**Pattern Validated:** 2/3 services migrated successfully (Dashboard + Operations)
+- Both used Vite build system
+- Both straightforward migrations (~1 hour each)
+- Inventory is outlier with unique config system
+
+**Next Batch:**
+- Batch 4: Billing (already has Vite, ~1.5-2 hours) ← NEXT
+- Return to Inventory with fresh approach after Batch 4
+
+**Detailed Notes:** See `TASK_2.2_BATCH1_SESSION_NOTES.md` and `TASK_2.2_IMPLEMENTATION_PLAN.md`
 
 **Success Criteria:**
-- ✅ Dashboard: No duplicated utility code
-- ✅ Dashboard: Using shared exports
-- ✅ Dashboard: All tests passing
-- ⏳ Inventory: Pending
-- ⏳ Operations: Pending
+- ✅ Dashboard: No duplicated utility code, all tests passing
+- ⚠️ Inventory: Local complete, production blocked (needs investigation)
+- ✅ Operations: No duplicated utility code, all tests passing
 - ⏳ Billing: Pending
 
 ---
