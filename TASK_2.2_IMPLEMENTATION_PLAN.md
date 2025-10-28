@@ -465,9 +465,9 @@ If full migration too risky:
 
 **Ready to Execute:** ✅ BATCH 1 COMPLETE | Ready for Batch 2
 
-**Status:** Dashboard (Batch 1) ✅ COMPLETE (2025-10-27)
+**Status:** Dashboard (Batch 1) ✅ | Inventory (Batch 2) ⚠️ BLOCKED | Operations (Batch 3) ✅ COMPLETE | Next: Billing (Batch 4)
 
-**Batch 1 Completed:**
+**Batch 1 (Dashboard) Completed:** ✅
 1. ✅ HTML files updated to use `initSupabaseAuth`
 2. ✅ Local auth file removed (js/supabase-auth.js)
 3. ✅ Vite build system added
@@ -483,7 +483,53 @@ If full migration too risky:
 - **Status:** ✅ Live and working
 - **Tests:** All passing (local + production)
 
-**Next Batch:**
-- Batch 2: Inventory service migration using same Option D approach
+**Batch 2 (Inventory) - BLOCKED:** ⚠️
+1. ✅ Created vite.config.js with esnext target
+2. ✅ Updated inventory.html and ai-assistant.html to use initSupabaseAuth
+3. ✅ Removed duplicated auth files (443 lines)
+4. ✅ Local testing passed with Playwright
+5. ✅ Committed and pushed (3 commits: ff80d86, c4adc30, bb45d17)
+6. ❌ **BLOCKER: Production build failing - config.js not found (404)**
+
+**Blocker Details:**
+- **Issue:** `build-config.js` generates config.js from env vars, but file not accessible in production
+- **Evidence:** Local tests pass ✅, production returns 404 on /config.js
+- **Attempted fixes:**
+  - Updated vercel.json to copy files: `cp config.js config-loader.js ... dist/`
+  - Added esnext target for top-level await support
+  - 3 deployment attempts, all failed same way
+- **Root cause:** Complex build chain with 10+ files to copy, config generation, may need custom build script
+- **Decision:** Skip to Batch 3 (Operations) to validate pattern, return to Inventory with fresh approach
+- **Time invested:** ~2 hours debugging
+
+**TODO: Return to Inventory after Batch 3/4 complete**
+- Investigate Vercel build logs
+- Consider alternative approaches:
+  - Custom build script instead of `cp` commands
+  - Move config generation into Vite plugin
+  - Use different env var pattern (like other services)
+
+**Batch 3 (Operations) - COMPLETE:** ✅ (2025-10-27)
+1. ✅ Updated src/main.js to import initSupabaseAuth from shared package
+2. ✅ Added inline logout() function using Supabase client
+3. ✅ Replaced all adminLogout references with new logout
+4. ✅ Removed duplicated auth files (src/auth/ - 470 lines)
+5. ✅ Tested locally with Playwright - PASSED
+6. ✅ Committed and pushed (commit: a827e84)
+7. ✅ Production deployment verified - PASSED
+
+**Batch 3 Results:**
+- **Commit:** a827e84 - "[PHASE2-2.2] Migrate Operations to shared auth (Batch 3 - Option D)"
+- **Code Reduction:** -470 lines (removed src/auth/admin-auth.js, src/auth/init-supabase-auth.js)
+- **Production URL:** https://ops.sailorskills.com
+- **Status:** ✅ Live and working
+- **Tests:** All passing (local + production)
+- **Time:** ~1 hour (as predicted - Operations already had Vite)
+
+**Key Learnings - Batch 3:**
+- Operations was straightforward because Vite was already configured
+- Pattern validated: 2/3 successful migrations (Dashboard + Operations)
+- Inventory is the outlier with unique config generation system
+- Services with Vite are fast to migrate (~1 hour each)
 
 **See:** `TASK_2.2_BATCH1_SESSION_NOTES.md` for detailed session notes

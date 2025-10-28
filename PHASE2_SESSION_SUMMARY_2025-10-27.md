@@ -338,6 +338,53 @@ All original success criteria now verified:
 
 ---
 
-**Session End Status:** ✅ Task 2.1 Complete & Verified
+**Task 2.1 Status:** ✅ Complete & Verified
 
-**Next Session Goal:** Begin Task 2.2 (Shared Utilities Migration - 6-8 hours estimated)
+---
+
+## Task 2.2: Shared Utilities Migration (IN PROGRESS)
+
+**Started:** 2025-10-27 (after Task 2.1 verification)
+**Time Invested:** 5.5 hours
+**Status:** 2/4 batches complete, 1 blocked
+
+### Batch 1 (Dashboard) - ✅ COMPLETE
+- **Duration:** 1.5 hours
+- **Code Reduction:** -9,888 net lines (removed 10,180, added 292)
+- **Commit:** 1f19e95
+- **Status:** Production verified, all tests passing
+
+### Batch 2 (Inventory) - ⚠️ BLOCKED
+- **Duration:** 2 hours (debugging)
+- **Code Reduction:** -443 lines locally
+- **Commits:** ff80d86, c4adc30, bb45d17
+- **Status:** Local tests pass, production build failing
+- **Blocker:** config.js generation/copy issues in Vercel build
+- **Decision:** Skip to Batch 3, return later with fresh approach
+
+### Batch 3 (Operations) - ✅ COMPLETE
+- **Duration:** 1 hour
+- **Code Reduction:** -470 lines (removed src/auth/ directory)
+- **Commit:** a827e84
+- **Status:** Production verified, all tests passing
+- **URL:** https://ops.sailorskills.com
+
+### Pattern Validation
+- ✅ Services with Vite: Fast migrations (~1 hour each)
+- ✅ Option D approach validated on 2 services
+- ⚠️ Inventory unique: config generation adds complexity
+
+### Total Progress (Task 2.2)
+- **Services Migrated:** 2/4 (Dashboard, Operations)
+- **Code Removed:** 913 lines of duplicated auth code
+- **Services Blocked:** 1 (Inventory - needs investigation)
+- **Next:** Batch 4 (Billing) - estimated 1.5-2 hours
+
+---
+
+**Session End Status:** ✅ Task 2.1 Complete | Task 2.2 In Progress (2/4 batches complete)
+
+**Next Session Goal:**
+1. Complete Batch 4 (Billing migration)
+2. Return to Inventory to resolve build issues
+3. Complete Task 2.2
