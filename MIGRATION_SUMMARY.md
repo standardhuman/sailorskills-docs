@@ -1,8 +1,8 @@
 # Sailorskills Suite - Database Migration Summary
 
-**Last Updated:** 2025-10-27
+**Last Updated:** 2025-10-28
 **Database:** Supabase PostgreSQL (fzygakldvvzxmahkdylq)
-**Current Schema:** 55 tables (see Table Inventory section)
+**Current Schema:** 54 tables + 4 views = 58 database objects
 
 This document tracks all database schema migrations across the Sailorskills suite, as required by CLAUDE.md governance.
 
@@ -74,63 +74,40 @@ v_boat_anodes_with_stock, youtube_playlists
 
 ## Table Ownership Matrix
 
-This section defines which service "owns" each table (can modify schema) and which services read from it.
+**📋 See Comprehensive Documentation:** [TABLE_OWNERSHIP_MATRIX.md](./TABLE_OWNERSHIP_MATRIX.md)
 
-### Estimator-Owned Tables
-| Table | Writer | Readers | Notes |
-|-------|--------|---------|-------|
-| `service_orders` | Estimator | Operations, Dashboard | Customer orders/bookings |
-| `customers` | Estimator | All services | Initial customer creation |
-| `boats` | Estimator | All services | Initial boat creation |
+This section provides a high-level overview. For complete table ownership details, coordination requirements, and service-by-service breakdowns, see the dedicated ownership matrix document.
 
-### Operations-Owned Tables
-| Table | Writer | Readers | Notes |
-|-------|--------|---------|-------|
-| `service_logs` | Operations, Billing | Portal, Dashboard | Service completion records |
-| `service_conditions` | Operations | Portal, Dashboard | Granular condition tracking |
-| `boat_anodes` | Operations | Portal, Inventory | Per-location anode tracking |
-| `paint_repaint_schedule` | Operations (auto) | Operations, Portal | Auto-calculated from conditions |
-| `youtube_playlists` | Operations, Video | Portal | Video playlist URLs per boat |
+### Quick Summary
 
-### Billing-Owned Tables
-| Table | Writer | Readers | Notes |
-|-------|--------|---------|-------|
-| `invoices` | Billing | Portal, Dashboard | Invoice records |
-| `invoice_line_items` | Billing | Portal, Dashboard | Invoice details |
-| `payments` | Billing (via Stripe) | Portal, Dashboard | Payment transactions |
+**Total Tables:** 54 tables + 4 views = 58 database objects
 
-### Portal-Owned Tables
-| Table | Writer | Readers | Notes |
-|-------|--------|---------|-------|
-| `customer_accounts` | Portal | Portal only (RLS) | Customer authentication |
-| `customer_boat_access` | Portal | Portal only (RLS) | Multi-boat customer access |
-| `customer_messages` | Portal, Operations | Portal (RLS) | Customer-admin messaging |
-| `service_requests` | Portal | Operations | Customer service requests |
+**Ownership Distribution:**
+- **Estimator:** 3 tables (service_orders, service_types, pricing_settings)
+- **Operations:** 10 tables (service_logs, scheduled_services, boat_service_schedules, paint_repaint_schedule, etc.)
+- **Billing:** 5 tables (invoices, payments, invoice_line_items, customer_services, invoices_legacy)
+- **Inventory:** 14 tables (anodes_catalog, anode_inventory, inventory_items, purchase_orders, etc.)
+- **Portal:** 5 tables (customer_accounts, customer_messages, service_requests, notification_log, etc.)
+- **Booking:** 7 tables (bookings, booking_settings, availability_rules, business_hours, etc.)
+- **Video:** 1 table (youtube_playlists)
+- **Dashboard:** 0 tables (read-only service)
 
-### Inventory-Owned Tables
-| Table | Writer | Readers | Notes |
-|-------|--------|---------|-------|
-| `anodes_catalog` | Inventory | Operations, Billing | Anode products |
-| `inventory_items` | Inventory | Operations | General inventory |
-| `inventory_transactions` | Inventory | Dashboard | Stock movements |
-| `replenishment_list` | Inventory, Operations | Inventory | Reorder queue |
-| `purchase_orders` | Inventory | Dashboard | PO management |
+**Shared Tables (Require Coordination):** 12 tables
+- Core: customers, boats, boat_owners, boat_anodes, boat_anode_types
+- Flow: service_orders, service_logs, service_requests
+- Support: addresses, marinas, customer_messages
+- Inventory: replenishment_list, youtube_playlists
 
-### Booking-Owned Tables
-| Table | Writer | Readers | Notes |
-|-------|--------|---------|-------|
-| `bookings` | Booking | Dashboard | Training bookings |
-| `booking_settings` | Booking | Booking | Configuration |
-| `availability_rules` | Booking | Booking | Scheduling rules |
+### Coordination Process
 
-### Shared Tables (Multiple Writers - Requires Coordination)
-| Table | Writers | Coordination Required | Notes |
-|-------|---------|----------------------|-------|
-| `customers` | Estimator, Portal, Billing | ✅ Yes | Customer data updates |
-| `boats` | Estimator, Operations | ✅ Yes | Boat details, last_service |
-| `service_logs` | Operations, Billing | ✅ Yes | Created by either service |
+Changes to shared tables **REQUIRE** cross-service coordination:
+1. Create migration proposal
+2. Document impact in MIGRATION_SUMMARY.md
+3. Get approval from affected service owners (48 hours)
+4. Execute migration with rollback plan
+5. Update documentation
 
-**⚠️ IMPORTANT:** Changes to shared tables MUST follow cross-service impact analysis process.
+**⚠️ IMPORTANT:** Always check [TABLE_OWNERSHIP_MATRIX.md](./TABLE_OWNERSHIP_MATRIX.md) before modifying any table schema.
 
 ---
 
@@ -654,7 +631,7 @@ For migrations without automatic rollback:
 
 ---
 
-**Document Version:** 1.0
-**Last Updated:** 2025-10-27
+**Document Version:** 1.1
+**Last Updated:** 2025-10-28 (Added comprehensive TABLE_OWNERSHIP_MATRIX.md)
 **Next Review:** After each migration
 
