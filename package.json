@@ -1,19 +1,30 @@
 {
-  "name": "transaction-viewing",
+  "name": "sailorskills-repos",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Sailorskills Suite - Multi-service architecture with integration tests",
+  "type": "module",
   "directories": {
     "doc": "docs",
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "playwright test",
+    "test:integration": "playwright test tests/integration",
+    "test:e2e": "playwright test tests/e2e",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "integration-tests",
+    "playwright",
+    "sailorskills"
+  ],
+  "author": "Sailorskills",
   "license": "ISC",
-  "description": "",
   "devDependencies": {
-    "@playwright/test": "^1.56.1"
+    "@playwright/test": "^1.56.1",
+    "@supabase/supabase-js": "^2.39.0"
   }
 }
