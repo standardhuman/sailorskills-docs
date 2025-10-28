@@ -1,307 +1,313 @@
-# Next Session Handoff - Ready for Task 2.3
+# Next Session Handoff - Phase 3 Continuation
 
 **Date:** 2025-10-28
-**Last Completed:** Task 2.2 - Migrate to Shared Utilities
-**Status:** ✅ All 4 batches complete, production verified
-**Next Task:** Task 2.3 - Implement Shared Navigation System
+**Session Completed:** 8 hours (Phase 3 tasks 3.1, 3.2, and 3.3 foundation)
+**Next Session Focus:** Complete Task 3.3 implementation (8-10 hours)
 
 ---
 
-## Current State
+## 🎯 Quick Start
 
-### Project Stabilization Progress
-
-**Overall:** 6/16 tasks complete (38%)
-
-**Phase 1:** ✅ 4/4 tasks (100%) - Security & Compliance - DONE
-**Phase 2:** ⏳ 2/4 tasks (50%) - Shared Package Adoption - IN PROGRESS
-- ✅ Task 2.1: Shared submodule added to all services
-- ✅ Task 2.2: Migrated to shared utilities (10,837 lines removed)
-- ⏳ Task 2.3: Implement shared navigation (NEXT)
-- ⏳ Task 2.4: Design token audit
-
-**Phase 3:** ⏳ 0/4 tasks (0%) - Testing & Architecture - PENDING
-**Phase 4:** ⏳ 0/4 tasks (0%) - Roadmap & Auth - PENDING
-
----
-
-## What Was Just Completed (Task 2.2)
-
-### Migration Results
-
-All 4 services successfully migrated to shared authentication utilities:
-
-| Service | Code Removed | Status | Production URL |
-|---------|--------------|--------|----------------|
-| Dashboard | 9,888 lines | ✅ | https://sailorskills-dashboard.vercel.app |
-| Operations | 470 lines | ✅ | https://ops.sailorskills.com |
-| Billing | 479 lines | ✅ | https://sailorskills-billing.vercel.app |
-| Inventory | 443 lines | ✅ | https://sailorskills-inventory.vercel.app |
-| **Total** | **10,837 lines** | **✅** | |
-
-### Key Pattern Established
-
-**Async IIFE Wrapper for Auth:**
-```javascript
-<script type="module">
-  import { initSupabaseAuth } from '/shared/src/auth/init-supabase-auth.js';
-
-  (async () => {
-    await initSupabaseAuth({
-      serviceName: 'Service Name',
-      hideContentOnLoad: false
-    });
-  })();
-</script>
-```
-
-**Why:** Top-level await not supported in all browser targets.
-
----
-
-## Next Task: 2.3 - Shared Navigation System
-
-**Estimated Time:** 4-6 hours
-**Priority:** 🟡 MEDIUM
-
-### Objective
-
-Integrate shared navigation package into services that don't have it yet, ensuring consistent navigation UX across the entire suite.
-
-### Services Requiring Navigation
-
-Based on PROJECT_STABILIZATION_PLAN.md Task 2.3:
-
-1. **Operations** (https://ops.sailorskills.com)
-   - Add: `initNavigation({ currentPage: 'operations' })`
-   - Configure breadcrumbs
-
-2. **Estimator** (https://sailorskills-estimator.vercel.app)
-   - Add: `initNavigation({ currentPage: 'estimator' })`
-   - Configure breadcrumbs
-
-3. **Billing** (https://sailorskills-billing.vercel.app)
-   - Add: `initNavigation({ currentPage: 'billing' })`
-   - Configure breadcrumbs
-
-### Implementation Steps
-
-For each service:
-
-1. **Add Navigation Import & Init**
-   ```javascript
-   <script type="module">
-     import { initNavigation } from '/shared/src/ui/navigation.js';
-
-     initNavigation({
-       currentPage: 'operations', // or 'billing', 'estimator'
-       breadcrumbs: [
-         { label: 'Home', url: 'https://www.sailorskills.com/' },
-         { label: 'Admin', url: 'https://sailorskills-dashboard.vercel.app' },
-         { label: 'Operations' }
-       ]
-     });
-   </script>
-   ```
-
-2. **Test Navigation**
-   - Local: `npm run dev` and verify navigation appears
-   - Production: Deploy and test with Playwright
-
-3. **Run Compliance Tests**
-   ```bash
-   cd shared
-   npx playwright test tests/navigation-compliance.spec.js -g "[Service]"
-   ```
-
-### Success Criteria
-
-- ✅ All services have navigation integrated
-- ✅ Navigation compliance tests passing (7/7 for each service)
-- ✅ Consistent nav UX across suite
-- ✅ Breadcrumbs configured appropriately
-- ✅ Logout functionality working
-
----
-
-## Documentation Available
-
-### Session Summaries
-- `SESSION_SUMMARY_2025-10-28.md` - Today's work (Batch 2 & 4)
-- `PHASE2_SESSION_SUMMARY_2025-10-27.md` - Previous session (Task 2.1 & Batches 1, 3)
-
-### Task Plans
-- `PROJECT_STABILIZATION_PLAN.md` - Overall plan with all 16 tasks
-- `TASK_2.2_IMPLEMENTATION_PLAN.md` - Detailed Task 2.2 documentation (COMPLETE)
-- Task 2.3 details in PROJECT_STABILIZATION_PLAN.md lines 353-373
-
-### Other Resources
-- `TASK_2.2_BATCH1_SESSION_NOTES.md` - Detailed Batch 1 notes
-- `TASK_2.2_BATCH1_COMPLETION_REPORT.md` - Batch 1 completion report
-
----
-
-## Quick Reference
-
-### Production URLs
-- **Dashboard:** https://sailorskills-dashboard.vercel.app
-- **Operations:** https://ops.sailorskills.com
-- **Billing:** https://sailorskills-billing.vercel.app
-- **Inventory:** https://sailorskills-inventory.vercel.app
-- **Portal:** https://sailorskills-portal.vercel.app
-- **Estimator:** https://sailorskills-estimator.vercel.app
-- **Booking:** https://sailorskills-booking.vercel.app
-- **Video:** https://sailorskills-video.vercel.app
-- **Site:** https://www.sailorskills.com
-
-### Test Credentials
-- **Email:** standardhuman@gmail.com
-- **Password:** KLRss!650
-
-### Repository Locations
-```
-/Users/brian/app-development/sailorskills-repos/
-├── sailorskills-dashboard/
-├── sailorskills-operations/
-├── sailorskills-billing/
-├── sailorskills-inventory/
-├── sailorskills-portal/
-├── sailorskills-estimator/
-├── sailorskills-booking/
-├── sailorskills-video/
-├── sailorskills-site/
-└── sailorskills-shared/ (submodule in each service)
-```
-
-### Git Workflow
+**To Resume Work:**
 ```bash
-# Make changes
-git add .
-git commit -m "[PHASE2-2.3] Add navigation to Operations"
-git push
-
-# Vercel auto-deploys on push to main
-```
-
-### Testing with Playwright
-All services should be tested after changes:
-```bash
-# Use Playwright MCP (per CLAUDE.md)
-# Test login, navigation, core features
-```
-
----
-
-## Known Issues / Notes
-
-### Minor Issue: Logout Function
-- `window.logout` only created after login flow completes
-- Services with existing sessions don't have logout initially
-- Not blocking - logout works after fresh login
-- Could be improved in shared auth package
-
-### Build Warnings
-- Billing: Shared folder copy warning (harmless)
-- Inventory: Script bundling warnings (harmless, expected for non-module scripts)
-
----
-
-## Task 2.3 Execution Plan
-
-### Recommended Approach
-
-**Sequential service-by-service** (same as Task 2.2):
-
-1. **Start with Operations** (simplest, already has Vite)
-   - Add navigation import and init
-   - Test locally
-   - Deploy and verify
-   - Run compliance tests
-   - **Stop point:** Report results
-
-2. **Then Estimator**
-   - Same process
-   - **Stop point:** Report results
-
-3. **Finally Billing**
-   - Same process
-   - **Stop point:** Report results
-
-### Time Estimates
-- Operations: 1-1.5 hours
-- Estimator: 1-1.5 hours
-- Billing: 1.5-2 hours (more complex)
-- **Total:** 4-6 hours
-
----
-
-## After Task 2.3
-
-### Task 2.4: Design Token Audit
-
-**Estimated:** 2-3 hours
-
-**Objective:** Find and replace hardcoded design values with CSS variables.
-
-**Steps:**
-1. Search for hardcoded colors:
-   ```bash
-   grep -r "#[0-9a-fA-F]\{6\}" --include="*.css" --include="*.html" sailorskills-*/
-   ```
-2. Replace with variables from `/shared/src/ui/design-tokens.css`
-3. Search for hardcoded border-radius
-4. Verify sharp corners enforced (design system requirement)
-5. Test visual consistency
-
----
-
-## Phase 2 Completion
-
-After Tasks 2.3 and 2.4:
-- Phase 2 will be 100% complete
-- Total time: ~18-22 hours (estimate was 15-20)
-- Move to Phase 3: Testing & Architecture
-
----
-
-## Commands to Resume
-
-```bash
-# Navigate to repos
 cd /Users/brian/app-development/sailorskills-repos
+cat NEXT_SESSION_HANDOFF.md  # You're reading it!
+git status  # Should be clean - all work committed
+```
 
-# Check current state
-git status
+**Current Branch:** `main`
+**Last Commit:** `07562d8` - [PHASE3-3.3] Create integration test infrastructure (foundation)
 
-# Start with Operations
-cd sailorskills-operations
-git pull
+---
+
+## ✅ What's Complete
+
+### Phase 3 Progress: 62.5% (2.5/4 tasks)
+
+1. **✅ Task 3.1: Table Ownership Matrix** (2 hours)
+   - File: `TABLE_OWNERSHIP_MATRIX.md`
+   - 54 tables + 4 views documented
+   - 12 shared tables requiring coordination identified
+
+2. **✅ Task 3.2: Architecture Diagrams** (4 hours)
+   - Files: `docs/architecture/*.md` (4 documents)
+   - 12 Mermaid diagrams created
+   - Complete system documentation
+
+3. **🟡 Task 3.3: Integration Test Suite** (2 hours foundation, 8-10 hours remaining)
+   - **Status:** Infrastructure complete, implementation pending
+   - **Files Created:** 8 files (config, helpers, 4 test suites, README, CI/CD)
+   - **Tests Planned:** 24 integration tests across 4 flows
+
+---
+
+## 🚀 Next Task: Complete Task 3.3 Implementation
+
+### What's Already Done ✅
+
+**Test Infrastructure (100% complete):**
+- ✅ `playwright.config.js` - Test configuration
+- ✅ `tests/integration/test-helpers.js` - Helper utilities with stubs
+- ✅ `tests/integration/README.md` - Complete testing guide
+- ✅ `.github/workflows/integration-tests.yml` - CI/CD pipeline
+- ✅ `package.json` - Test scripts configured
+
+**Test Files (Structure complete, implementation needed):**
+- ✅ `estimator-to-operations.spec.js` - 5 tests planned (TODO stubs)
+- ✅ `billing-to-portal.spec.js` - 5 tests planned (TODO stubs)
+- ✅ `operations-to-dashboard.spec.js` - 6 tests planned (TODO stubs)
+- ✅ `inventory-to-operations.spec.js` - 8 tests planned (TODO stubs)
+
+### What Needs Implementation ⏳
+
+**Priority Order:**
+
+1. **Complete Service-Specific Helpers** (2-3 hours)
+   - File: `tests/integration/test-helpers.js`
+   - Functions marked with `throw new Error('Not implemented')`
+   - Replace with actual implementations:
+     - `createOrderInEstimator(page, testData)`
+     - `verifyOrderInOperations(page, orderNumber)`
+     - `createInvoiceInBilling(page, serviceLogId)`
+     - `verifyInvoiceInPortal(page, customerEmail, invoiceNumber)`
+     - `completeServiceInOperations(page, orderId)`
+     - `verifyMetricsInDashboard(page, expectedMetrics)`
+     - `checkStockInInventory(page, anodeId)`
+     - `verifyPackingListInOperations(page, boatId)`
+
+2. **Implement Test Cases** (4-6 hours)
+   - Replace `test.skip()` with actual test implementations
+   - Follow TODO comments in each test file
+   - Start with: `estimator-to-operations.spec.js` (simplest flow)
+   - Then: `billing-to-portal.spec.js` (includes RLS testing)
+   - Then: `operations-to-dashboard.spec.js`
+   - Finally: `inventory-to-operations.spec.js` (most complex)
+
+3. **Run and Debug Tests** (1-2 hours)
+   ```bash
+   # Install dependencies (if not already)
+   npm install
+
+   # Run single test file
+   npx playwright test tests/integration/estimator-to-operations.spec.js --headed
+
+   # Run all integration tests
+   npm run test:integration
+
+   # Run with UI mode (interactive debugging)
+   npm run test:ui
+   ```
+
+4. **Verify CI/CD Pipeline** (1 hour)
+   - Push changes to trigger GitHub Actions
+   - Check workflow runs successfully
+   - Fix any CI-specific issues
+   - Add secrets to GitHub repo if needed:
+     - `VITE_SUPABASE_URL`
+     - `VITE_SUPABASE_ANON_KEY`
+
+---
+
+## 📋 Implementation Guide
+
+### Step-by-Step Process
+
+**Step 1: Set Up Environment**
+```bash
+# Ensure dependencies installed
 npm install
-npm run dev
 
-# Add navigation per plan above
+# Load database connection (if needed for testing)
+source db-env.sh
+```
+
+**Step 2: Implement First Helper Function**
+
+Open `tests/integration/test-helpers.js`, find:
+```javascript
+export async function createOrderInEstimator(page, testData) {
+  // TODO: Implement order creation flow
+  throw new Error('Not implemented: createOrderInEstimator');
+}
+```
+
+Replace with actual implementation:
+```javascript
+export async function createOrderInEstimator(page, testData) {
+  await page.goto('https://sailorskills.com');
+
+  // Fill out quote form
+  await page.fill('#customer-email', testData.customer.email);
+  await page.fill('#customer-name', testData.customer.name);
+  // ... etc
+
+  await page.click('#submit-quote');
+  await page.waitForLoadState('networkidle');
+}
+```
+
+**Step 3: Implement First Test**
+
+Open `tests/integration/estimator-to-operations.spec.js`, find first `test.skip()`:
+```javascript
+test('should create order in Estimator and appear in Operations', async ({ page }) => {
+  // TODO: Step 1 - Navigate to Estimator
+  // ...
+  test.skip();  // REMOVE THIS LINE
+});
+```
+
+Follow the TODO comments to implement each step.
+
+**Step 4: Run and Debug**
+```bash
+npx playwright test tests/integration/estimator-to-operations.spec.js --headed
+```
+
+**Step 5: Repeat for All Tests**
+- Continue with remaining test files
+- Debug as you go
+- Commit working tests incrementally
+
+---
+
+## 🔍 Key Files to Work With
+
+**Primary Implementation Files:**
+1. `tests/integration/test-helpers.js` - Implement 8 helper functions
+2. `tests/integration/estimator-to-operations.spec.js` - Implement 5 tests
+3. `tests/integration/billing-to-portal.spec.js` - Implement 5 tests
+4. `tests/integration/operations-to-dashboard.spec.js` - Implement 6 tests
+5. `tests/integration/inventory-to-operations.spec.js` - Implement 8 tests
+
+**Reference Documentation:**
+- `tests/integration/README.md` - Testing patterns and best practices
+- `docs/architecture/service-relationship-diagram.md` - Data flow between services
+- `docs/architecture/database-schema-erd.md` - Database structure
+- `TABLE_OWNERSHIP_MATRIX.md` - Table ownership rules
+
+---
+
+## ⚙️ Test Commands Reference
+
+```bash
+# Run all integration tests
+npm run test:integration
+
+# Run specific test file
+npx playwright test tests/integration/estimator-to-operations.spec.js
+
+# Run with headed browser (see what's happening)
+npm run test:headed
+
+# Run with UI mode (interactive debugging)
+npm run test:ui
+
+# Run with debug mode (step through tests)
+npm run test:debug
+
+# View test report
+npm run test:report
 ```
 
 ---
 
-## Status Summary
+## 🎯 Success Criteria for Task 3.3
 
-✅ **Task 2.2 Complete**
-- All services using shared auth
-- All production deployments verified
-- Documentation comprehensive and up-to-date
+**When complete, you should have:**
+- ✅ All 24 tests implemented (no `test.skip()` remaining)
+- ✅ All helper functions implemented (no `throw new Error('Not implemented')`)
+- ✅ Tests passing locally
+- ✅ CI/CD pipeline running successfully on GitHub Actions
+- ✅ Test coverage for 4 major integration flows:
+  - Estimator → Operations (order flow)
+  - Billing → Portal (invoice visibility + RLS)
+  - Operations → Dashboard (analytics updates)
+  - Inventory → Operations (stock management)
 
-🟢 **Ready for Task 2.3**
-- Clear implementation plan
-- Estimated 4-6 hours
-- Sequential approach proven successful
-
-📊 **Progress:** 38% overall (6/16 tasks complete)
+**Then mark Task 3.3 as complete and move to Task 3.4 (RLS Policy Test Suite)**
 
 ---
 
-**Next Session Start:** Resume with Task 2.3 - Operations navigation integration
+## 📊 Current Progress
 
-**Documentation Status:** ✅ Complete and up-to-date
+**Overall:** 10/16 tasks complete (63%)
+**Phase 3:** 2/4 complete, 1 in progress (62.5%)
 
-**Last Updated:** 2025-10-28
+**Time Remaining:**
+- Task 3.3: 8-10 hours
+- Task 3.4: 4-5 hours
+- **Phase 3 Total Remaining:** 12-15 hours
+
+---
+
+## 🚨 Important Notes
+
+1. **Tests Use Production Services**
+   - Tests hit real service URLs (sailorskills.com, ops.sailorskills.com, etc.)
+   - Tests interact with actual Supabase database
+   - Use `createTestData()` to generate unique test data
+   - Always clean up with `cleanupTestData()` in `afterAll` hooks
+
+2. **Authentication**
+   - Admin credentials: `standardhuman@gmail.com` / `KLRss!650`
+   - Test creates customer accounts dynamically
+   - Helper: `loginAsAdmin(page)` for admin login
+
+3. **Database Queries**
+   - Use Supabase client in test-helpers.js
+   - Helper: `waitForSync()` for async operations
+   - Helper: `verifyInDatabase()` to check data exists
+   - Helper: `getFromDatabase()` to retrieve records
+
+4. **Debugging Tips**
+   - Use `--headed` flag to see browser
+   - Use `page.pause()` to pause execution
+   - Check `test-results/` for screenshots/videos on failure
+   - Use `npx playwright show-trace` to view traces
+
+---
+
+## 📞 Quick Reference
+
+**Project Location:** `/Users/brian/app-development/sailorskills-repos`
+**Branch:** `main`
+**Database:** Supabase (fzygakldvvzxmahkdylq)
+
+**Key Commands:**
+- Resume: `cd /Users/brian/app-development/sailorskills-repos`
+- Status: `git status`
+- Run tests: `npm run test:integration`
+- Commit: `git add . && git commit -m "[PHASE3-3.3] ..."`
+- Push: `git push`
+
+---
+
+## ✅ When Task 3.3 is Complete
+
+1. Update `PROJECT_STABILIZATION_PLAN.md`:
+   - Mark Task 3.3 as ✅ COMPLETE
+   - Update Phase 3 status to 3/4 tasks (75%)
+   - Update overall progress to 11/16 (69%)
+
+2. Commit and push:
+   ```bash
+   git add .
+   git commit -m "[PHASE3-3.3] Complete integration test implementation
+
+   - Implemented all 24 test cases
+   - Completed service-specific helpers
+   - All tests passing locally
+   - CI/CD pipeline verified
+
+   Phase 3 Progress: 3/4 tasks complete (75%)
+   Overall Progress: 11/16 tasks complete (69%)"
+
+   git push
+   ```
+
+3. Start Task 3.4: RLS Policy Test Suite (4-5 hours)
+
+---
+
+**Good luck! The foundation is solid - just need to fill in the implementation. Take it one test at a time.** 🚀
