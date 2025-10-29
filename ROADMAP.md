@@ -228,6 +228,114 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
     - At least one feature successfully deployed through full workflow (feature → develop → main) on each service
     - sailorskills-shared submodule workflow documented and validated
 
+### Quality Assurance & Testing
+- [ ] **Comprehensive Responsive Testing Across All Services**
+  - **Rationale:** Currently no systematic responsive testing across the 10-service suite. Services are developed primarily for desktop, but customers increasingly access on mobile/tablet (especially Portal, Estimator, Booking). Need comprehensive testing strategy to ensure all services work properly across all device sizes and orientations.
+  - **Current State:**
+    - Responsive design implemented ad-hoc without formal testing
+    - No automated responsive testing in place
+    - Visual regressions may occur when updating shared design system
+    - Customer-facing services (Portal, Estimator, Booking, Site) critical for mobile UX
+    - Internal admin tools (Dashboard, Operations, Inventory, Billing, Video) used on tablets in field
+  - **Scope:** All 10 services (Portal, Operations, Billing/Completion, Estimator, Dashboard, Inventory, Booking, Video, Site, Shared)
+    - **Customer-Facing Priority:** Portal, Estimator, Booking, Site (highest impact)
+    - **Admin Tools:** Dashboard, Operations, Inventory, Billing, Video (field use on tablets)
+  - **Testing Approaches (Multi-Layered Strategy):**
+    - **1. Automated Viewport Testing (Playwright):**
+      - Test all critical user flows across 3 breakpoints: mobile (375px), tablet (768px), desktop (1440px)
+      - Verify navigation, forms, modals, tables render correctly at each breakpoint
+      - Test both portrait and landscape orientations
+      - Run on every PR via GitHub Actions
+    - **2. Manual Testing Checklist:**
+      - Document comprehensive testing checklist per service
+      - Test on actual devices (iPhone, iPad, Android phone/tablet)
+      - Verify touch interactions (tap targets, swipe gestures, pinch zoom)
+      - Check for text overflow, layout breaks, missing scroll containers
+      - Test keyboard behavior on mobile (input focus, virtual keyboard)
+    - **3. Visual Regression Testing:**
+      - Screenshot comparison across all breakpoints using Playwright
+      - Integrate with design system changes (catch unintended responsive breakage)
+      - Baseline screenshots for all major pages/components
+      - Alert on visual diffs during CI/CD pipeline
+    - **4. Real Device Testing:**
+      - Test on physical devices (iPhone 13/14/15, iPad, Samsung Galaxy, etc.)
+      - Use BrowserStack or similar for broader device coverage
+      - Test on different screen densities (1x, 2x, 3x)
+      - Verify performance on low-end devices
+  - **Implementation Plan:**
+    - **Phase 1 (Week 1):** Setup & Infrastructure
+      - Configure Playwright for multi-viewport testing
+      - Set up visual regression baseline screenshots
+      - Document responsive breakpoints in shared design system
+      - Create manual testing checklist template
+    - **Phase 2 (Week 2):** Customer-Facing Services
+      - Implement automated tests for Portal (login, service history, invoices, messages)
+      - Test Estimator (quote builder, form flows, payment)
+      - Test Booking (calendar picker, confirmation flow)
+      - Test Site (marketing pages, contact forms)
+      - Capture visual regression baselines for all pages
+    - **Phase 3 (Week 3):** Admin Tools & Internal Services
+      - Test Dashboard (analytics widgets, navigation)
+      - Test Operations (service logs, customer management, calendar)
+      - Test Inventory (product search, AI assistant)
+      - Test Billing/Completion (service documentation, condition tracking, payment)
+      - Test Video (playlist management, upload workflows)
+    - **Phase 4 (Week 4):** Real Device Testing & Documentation
+      - Conduct manual testing on 5-8 physical devices
+      - Document device-specific issues and workarounds
+      - Create responsive testing runbook for future development
+      - Add responsive testing to PR template and CLAUDE.md
+      - Set up CI/CD integration for automated tests
+  - **Breakpoints to Test:**
+    - **Mobile Small:** 375px (iPhone SE, small phones)
+    - **Mobile Large:** 414px (iPhone 14 Pro Max)
+    - **Tablet Portrait:** 768px (iPad Mini)
+    - **Tablet Landscape:** 1024px (iPad)
+    - **Desktop Small:** 1280px (laptop)
+    - **Desktop Large:** 1440px+ (monitor)
+  - **Critical Test Scenarios by Service:**
+    - **Portal:** Login flow, service request, invoice viewing, boat selection, messages
+    - **Estimator:** Quote builder, anode selection, service options, pricing display, checkout
+    - **Operations:** Service log creation, condition tracking, customer search, calendar view
+    - **Dashboard:** Analytics widgets, revenue charts, table displays
+    - **Inventory:** Product search, AI assistant chat, order placement
+    - **Billing:** Service completion, condition sliders, payment processing
+    - **Booking:** Date picker, time slot selection, confirmation
+    - **Video:** Playlist management, upload interface
+    - **Site:** Navigation, contact forms, service pages
+  - **Deliverables:**
+    - Automated Playwright test suite covering all services and breakpoints
+    - Visual regression baseline screenshots (100+ pages across services)
+    - Manual testing checklist document
+    - Real device testing report with device compatibility matrix
+    - Responsive testing runbook for developers
+    - CI/CD integration (tests run on every PR)
+    - Documentation updates to CLAUDE.md and service READMEs
+  - **Impact:**
+    - Improved mobile/tablet experience for customers (higher conversion, satisfaction)
+    - Catch responsive regressions before production
+    - Confidence when updating shared design system
+    - Better field experience for technicians using admin tools on tablets
+    - Faster development (automated tests catch issues early)
+    - Professional mobile experience across all touchpoints
+  - **Dependencies:**
+    - Development branch strategy (to test on preview deployments)
+    - Playwright MCP already available for manual testing
+  - **Priority:** High (Q1 2026 - foundational for mobile-first customer experience)
+  - **Estimated Effort:** 5-6 days (40-48 hours)
+    - Infrastructure setup: 0.5 day
+    - Customer-facing services testing: 1.5 days
+    - Admin tools testing: 1.5 days
+    - Real device testing: 1 day
+    - Documentation & CI integration: 0.5-1 day
+  - **Success Criteria:**
+    - Automated tests pass for all services across 6 breakpoints
+    - Visual regression tests integrated into CI/CD
+    - Manual testing completed on 5+ physical devices
+    - Zero critical responsive issues in customer-facing services
+    - All services have documented responsive testing checklist
+    - Responsive testing added to development workflow
+
 ---
 
 ## Q2 2026
