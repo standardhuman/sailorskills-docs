@@ -7,10 +7,11 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase client (uses environment variables)
-export const supabase = createClient(
-  process.env.VITE_SUPABASE_URL || 'https://fzygakldvvzxmahkdylq.supabase.co',
-  process.env.VITE_SUPABASE_ANON_KEY || ''
-);
+// For test data creation, use service role key to bypass RLS
+const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://fzygakldvvzxmahkdylq.supabase.co';
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+
+export const supabase = createClient(supabaseUrl, supabaseKey);
 
 /**
  * Authentication Helpers
