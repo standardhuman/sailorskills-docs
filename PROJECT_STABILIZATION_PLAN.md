@@ -588,13 +588,20 @@ Git submodules prevent breaking change risks by allowing controlled rollout of s
 **Priority:** 🟡 MEDIUM
 **Status:** Not Started
 
-### Task 4.1: Complete Pending Orders Queue 🟠 HIGH (Roadmap Item)
+### Task 4.1: Complete Pending Orders Queue 🟡 IN PROGRESS
 **Effort:** 8-12 hours (1-2 days per roadmap)
+**Status:** Design complete, ready for implementation
+**Started:** 2025-10-28
 
 **Problem:**
 - Roadmap priority: HIGH (critical workflow gap)
 - Currently no dedicated view for incoming orders from Estimator
 - Orders go straight to calendar without confirmation step
+
+**Design Completed:** 2025-10-28
+- Comprehensive design document created: `docs/plans/2025-10-28-pending-orders-queue-design.md`
+- Requirements gathered through brainstorming skill
+- Architecture and implementation plan defined
 
 **Steps:**
 1. Create `pending_orders` view in Operations dashboard
