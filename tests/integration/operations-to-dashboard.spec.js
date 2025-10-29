@@ -44,9 +44,7 @@ test.describe('Operations → Dashboard Integration', () => {
         customer_id: testData.customer.id,
         boat_id: testData.boat.id,
         service_date: new Date().toISOString(),
-        service_total: 125.00,
         service_type: 'cleaning',
-        status: 'completed',
         notes: 'Test service for dashboard metrics'
       })
       .select()
@@ -85,9 +83,7 @@ test.describe('Operations → Dashboard Integration', () => {
         customer_id: testData.customer.id,
         boat_id: testData.boat.id,
         service_date: new Date().toISOString(),
-        service_total: 100.00,
-        service_type: 'inspection',
-        status: 'completed'
+        service_type: 'inspection'
       })
       .select()
       .single();
@@ -145,17 +141,13 @@ test.describe('Operations → Dashboard Integration', () => {
         customer_id: testData.customer.id,
         boat_id: testData.boat.id,
         service_date: new Date().toISOString(),
-        service_total: 75.00,
-        service_type: 'cleaning',
-        status: 'completed'
+        service_type: 'cleaning'
       },
       {
         customer_id: testData.customer.id,
         boat_id: testData.boat.id,
         service_date: new Date().toISOString(),
-        service_total: 75.00,
-        service_type: 'inspection',
-        status: 'scheduled'
+        service_type: 'inspection'
       }
     ]);
 
@@ -188,9 +180,7 @@ test.describe('Operations → Dashboard Integration', () => {
         customer_id: testData.customer.id,
         boat_id: testData.boat.id,
         service_date: new Date().toISOString(),
-        service_total: 150.00,
         service_type: 'propeller',
-        status: 'completed',
         notes: 'Recent activity test'
       })
       .select()
@@ -273,9 +263,7 @@ test.describe('Operations → Dashboard Integration', () => {
         customer_id: testData.customer.id,
         boat_id: testData.boat.id,
         service_date: new Date().toISOString(),
-        service_total: 175.00,
-        service_type: 'anode replacement',
-        status: 'completed'
+        service_type: 'anode replacement'
       })
       .select()
       .single();

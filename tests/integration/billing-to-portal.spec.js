@@ -274,7 +274,6 @@ test.describe('Billing → Portal Integration', () => {
         customer_id: testData.customer.id,
         boat_id: testData.boat.id,
         service_date: new Date().toISOString(),
-        service_total: 185.00,
         service_type: 'inspection',
         notes: 'Test service log for integration test'
       })
