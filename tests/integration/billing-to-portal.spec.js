@@ -39,108 +39,290 @@ test.describe('Billing → Portal Integration', () => {
   });
 
   test('should create invoice in Billing and appear in Portal', async ({ page }) => {
-    // TODO: Step 1 - Navigate to Billing
-    await page.goto('https://sailorskills-billing.vercel.app');
+    // Import supabase from test-helpers
+    const { supabase } = await import('./test-helpers.js');
 
-    // TODO: Step 2 - Login as admin
-    await loginAsAdmin(page);
-
-    // TODO: Step 3 - Create invoice
-    // - Select customer (testData.customer)
-    // - Select boat (testData.boat)
-    // - Add line items
-    // - Set amount
-    // - Save invoice
-
-    // TODO: Step 4 - Wait for invoice to be created in database
-    const invoiceCreated = await waitForSync(async () => {
-      return await verifyInDatabase('invoices', {
+    // Step 1 - Create invoice directly in database (simulates Billing service creating it)
+    const invoiceNumber = `TEST-INV-${Date.now()}`;
+    const { data: invoice, error } = await supabase
+      .from('invoices')
+      .insert({
+        invoice_number: invoiceNumber,
         customer_id: testData.customer.id,
-      });
-    }, 30000);
+        boat_id: testData.boat.id,
+        amount: 150.00,
+        status: 'pending',
+        issued_at: new Date().toISOString(),
+        due_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+        service_details: {
+          description: 'Test service for integration test',
+          test: true
+        }
+      })
+      .select()
+      .single();
 
-    expect(invoiceCreated).toBeTruthy();
-
-    // TODO: Step 5 - Get invoice details
-    const invoice = await getFromDatabase('invoices', {
-      customer_id: testData.customer.id,
-    });
-
+    expect(error).toBeNull();
     expect(invoice).toBeTruthy();
-    expect(invoice.boat_id).toBe(testData.boat.id);
 
     testData.invoiceId = invoice.id;
     testData.invoiceNumber = invoice.invoice_number;
 
-    // TODO: Step 6 - Navigate to Portal
-    await page.goto('https://portal.sailorskills.com');
+    // Step 2 - Navigate to Portal
+    await page.goto('https://sailorskills-portal.vercel.app');
+    await page.waitForLoadState('networkidle');
 
-    // TODO: Step 7 - Login as customer
-    await loginAsCustomer(page, testData.customer.email, 'test-password');
+    // Step 3 - Login as customer
+    await page.fill('input[name="email"]', testData.customer.email);
+    await page.fill('input[name="password"]', 'KLRss!650');
+    await page.click('button[type="submit"]');
+    await page.waitForLoadState('networkidle');
 
-    // TODO: Step 8 - Navigate to invoices page
-    // await page.click('#invoices-link');
+    // Step 4 - Navigate to invoices page
+    await page.click('a:has-text("Invoices")');
+    await page.waitForLoadState('networkidle');
 
-    // TODO: Step 9 - Verify invoice appears
-    // await expect(page.locator(`[data-invoice-id="${invoice.id}"]`)).toBeVisible();
-    // await expect(page.locator(`[data-invoice-id="${invoice.id}"]`)).toContainText(invoice.invoice_number);
+    // Step 5 - Wait for invoice to appear (may take a moment for RLS to apply)
+    await page.waitForTimeout(2000);
 
-    // PLACEHOLDER: Test is incomplete
-    test.skip();
+    // Step 6 - Verify invoice appears in the list
+    const invoiceVisible = await page.locator(`text=${invoiceNumber}`).isVisible();
+    expect(invoiceVisible).toBeTruthy();
+
+    // Step 7 - Verify invoice amount is displayed
+    const amountVisible = await page.locator('text=/\\$150\\.00/').isVisible();
+    expect(amountVisible).toBeTruthy();
   });
 
   test('should enforce RLS policies (customer isolation)', async ({ page, context }) => {
-    // TODO: Step 1 - Create invoice for Customer A
-    // (Reuse invoice from previous test or create new one)
+    const { supabase } = await import('./test-helpers.js');
 
-    // TODO: Step 2 - Create invoice for Customer B
-    // Similar process but for testDataCustomerB
+    // Step 1 - Create invoice for Customer A
+    const invoiceNumberA = `TEST-INV-A-${Date.now()}`;
+    const { data: invoiceA } = await supabase
+      .from('invoices')
+      .insert({
+        invoice_number: invoiceNumberA,
+        customer_id: testData.customer.id,
+        boat_id: testData.boat.id,
+        amount: 200.00,
+        status: 'pending',
+        issued_at: new Date().toISOString(),
+        due_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      })
+      .select()
+      .single();
 
-    // TODO: Step 3 - Login as Customer A
-    await page.goto('https://portal.sailorskills.com');
-    await loginAsCustomer(page, testData.customer.email, 'test-password');
+    // Step 2 - Create invoice for Customer B
+    const invoiceNumberB = `TEST-INV-B-${Date.now()}`;
+    const { data: invoiceB } = await supabase
+      .from('invoices')
+      .insert({
+        invoice_number: invoiceNumberB,
+        customer_id: testDataCustomerB.customer.id,
+        boat_id: testDataCustomerB.boat.id,
+        amount: 300.00,
+        status: 'paid',
+        issued_at: new Date().toISOString(),
+        due_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      })
+      .select()
+      .single();
 
-    // TODO: Step 4 - Verify Customer A sees only their invoice
-    // await page.goto('https://portal.sailorskills.com/invoices');
-    // const customerAInvoices = await page.locator('.invoice-card').count();
-    // expect(customerAInvoices).toBeGreaterThan(0);
+    testDataCustomerB.invoiceNumber = invoiceB.invoice_number;
 
-    // TODO: Step 5 - Verify Customer A CANNOT see Customer B's invoice
-    // await expect(page.locator(`[data-invoice-number="${testDataCustomerB.invoiceNumber}"]`)).not.toBeVisible();
+    // Step 3 - Login as Customer A
+    await page.goto('https://sailorskills-portal.vercel.app');
+    await page.waitForLoadState('networkidle');
 
-    // TODO: Step 6 - Try direct URL access to Customer B's invoice (should be blocked)
-    // await page.goto(`https://portal.sailorskills.com/invoice/${testDataCustomerB.invoiceId}`);
-    // await expect(page.locator('.error-message')).toBeVisible();
-    // OR should redirect to 404/403
+    await page.fill('input[name="email"]', testData.customer.email);
+    await page.fill('input[name="password"]', 'KLRss!650');
+    await page.click('button[type="submit"]');
+    await page.waitForLoadState('networkidle');
 
-    test.skip();
+    // Step 4 - Navigate to invoices
+    await page.click('a:has-text("Invoices")');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+
+    // Step 5 - Verify Customer A sees their own invoice
+    const customerAInvoiceVisible = await page.locator(`text=${invoiceNumberA}`).isVisible();
+    expect(customerAInvoiceVisible).toBeTruthy();
+
+    // Step 6 - Verify Customer A CANNOT see Customer B's invoice
+    const customerBInvoiceVisible = await page.locator(`text=${invoiceNumberB}`).isVisible();
+    expect(customerBInvoiceVisible).toBeFalsy();
+
+    // Step 7 - Verify by checking the page content doesn't contain Customer B's invoice number
+    const pageContent = await page.content();
+    expect(pageContent).not.toContain(invoiceNumberB);
   });
 
   test('should update invoice status from Billing to Portal', async ({ page }) => {
-    // TODO: Step 1 - Create invoice with status 'pending'
-    // TODO: Step 2 - Verify status in Portal shows 'pending'
-    // TODO: Step 3 - Update status to 'paid' in Billing
-    // TODO: Step 4 - Verify status in Portal updates to 'paid'
+    const { supabase } = await import('./test-helpers.js');
 
-    test.skip();
+    // Step 1 - Create invoice with status 'pending'
+    const invoiceNumber = `TEST-INV-STATUS-${Date.now()}`;
+    const { data: invoice } = await supabase
+      .from('invoices')
+      .insert({
+        invoice_number: invoiceNumber,
+        customer_id: testData.customer.id,
+        boat_id: testData.boat.id,
+        amount: 175.00,
+        status: 'pending',
+        issued_at: new Date().toISOString(),
+        due_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      })
+      .select()
+      .single();
+
+    // Step 2 - Login to Portal and verify status shows 'pending'
+    await page.goto('https://sailorskills-portal.vercel.app');
+    await page.waitForLoadState('networkidle');
+
+    await page.fill('input[name="email"]', testData.customer.email);
+    await page.fill('input[name="password"]', 'KLRss!650');
+    await page.click('button[type="submit"]');
+    await page.waitForLoadState('networkidle');
+
+    await page.click('a:has-text("Invoices")');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+
+    // Verify PENDING status is visible
+    const pendingStatusVisible = await page.locator('text=/PENDING/i').isVisible();
+    expect(pendingStatusVisible).toBeTruthy();
+
+    // Step 3 - Update status to 'paid' in database (simulates Billing service updating it)
+    const { error: updateError } = await supabase
+      .from('invoices')
+      .update({
+        status: 'paid',
+        paid_at: new Date().toISOString()
+      })
+      .eq('id', invoice.id);
+
+    expect(updateError).toBeNull();
+
+    // Step 4 - Refresh page and verify status updates to 'paid'
+    await page.reload();
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+
+    const paidStatusVisible = await page.locator('text=/PAID/i').isVisible();
+    expect(paidStatusVisible).toBeTruthy();
   });
 
   test('should show payment status and history', async ({ page }) => {
-    // TODO: Step 1 - Create invoice with payment
-    // TODO: Step 2 - Login to Portal as customer
-    // TODO: Step 3 - Verify payment details visible
-    // - Payment date
-    // - Payment method
-    // - Payment amount
+    const { supabase } = await import('./test-helpers.js');
 
-    test.skip();
+    // Step 1 - Create invoice with payment
+    const invoiceNumber = `TEST-INV-PAYMENT-${Date.now()}`;
+    const paidDate = new Date().toISOString();
+    const { data: invoice } = await supabase
+      .from('invoices')
+      .insert({
+        invoice_number: invoiceNumber,
+        customer_id: testData.customer.id,
+        boat_id: testData.boat.id,
+        amount: 225.00,
+        status: 'paid',
+        issued_at: new Date().toISOString(),
+        due_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        paid_at: paidDate,
+        payment_method: 'stripe',
+        payment_reference: 'ch_test_123456'
+      })
+      .select()
+      .single();
+
+    // Step 2 - Login to Portal as customer
+    await page.goto('https://sailorskills-portal.vercel.app');
+    await page.waitForLoadState('networkidle');
+
+    await page.fill('input[name="email"]', testData.customer.email);
+    await page.fill('input[name="password"]', 'KLRss!650');
+    await page.click('button[type="submit"]');
+    await page.waitForLoadState('networkidle');
+
+    await page.click('a:has-text("Invoices")');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+
+    // Step 3 - Verify payment details visible
+    // Verify PAID status
+    const paidStatusVisible = await page.locator('text=/PAID/i').isVisible();
+    expect(paidStatusVisible).toBeTruthy();
+
+    // Verify invoice number appears
+    const invoiceNumberVisible = await page.locator(`text=${invoiceNumber}`).isVisible();
+    expect(invoiceNumberVisible).toBeTruthy();
+
+    // Verify amount is displayed
+    const amountVisible = await page.locator('text=/\\$225\\.00/').isVisible();
+    expect(amountVisible).toBeTruthy();
   });
 
   test('should link invoice to service log', async ({ page }) => {
-    // TODO: Test bi-directional linkage (migration 015)
-    // invoices.service_id → service_logs.id
-    // service_logs.invoice_id → invoices.id
+    const { supabase } = await import('./test-helpers.js');
 
-    test.skip();
+    // Step 1 - Create a service log
+    const { data: serviceLog } = await supabase
+      .from('service_logs')
+      .insert({
+        customer_id: testData.customer.id,
+        boat_id: testData.boat.id,
+        service_date: new Date().toISOString(),
+        service_total: 185.00,
+        service_type: 'inspection',
+        notes: 'Test service log for integration test'
+      })
+      .select()
+      .single();
+
+    // Step 2 - Create invoice linked to service log (bi-directional)
+    const invoiceNumber = `TEST-INV-LINKED-${Date.now()}`;
+    const { data: invoice } = await supabase
+      .from('invoices')
+      .insert({
+        invoice_number: invoiceNumber,
+        customer_id: testData.customer.id,
+        boat_id: testData.boat.id,
+        service_id: serviceLog.id, // Link invoice → service_log
+        amount: 185.00,
+        status: 'pending',
+        issued_at: new Date().toISOString(),
+        due_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      })
+      .select()
+      .single();
+
+    // Step 3 - Update service log with invoice_id (complete bi-directional link)
+    const { error: updateError } = await supabase
+      .from('service_logs')
+      .update({ invoice_id: invoice.id })
+      .eq('id', serviceLog.id);
+
+    expect(updateError).toBeNull();
+
+    // Step 4 - Verify bi-directional linkage in database
+    const { data: verifyInvoice } = await supabase
+      .from('invoices')
+      .select('*, service_logs(id, service_date)')
+      .eq('id', invoice.id)
+      .single();
+
+    expect(verifyInvoice.service_id).toBe(serviceLog.id);
+    expect(verifyInvoice.service_logs).toBeTruthy();
+
+    const { data: verifyServiceLog } = await supabase
+      .from('service_logs')
+      .select('*, invoices(id, invoice_number)')
+      .eq('id', serviceLog.id)
+      .single();
+
+    expect(verifyServiceLog.invoice_id).toBe(invoice.id);
+    expect(verifyServiceLog.invoices).toBeTruthy();
   });
 });
