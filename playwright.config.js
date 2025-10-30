@@ -1,25 +1,23 @@
 import { defineConfig, devices } from '@playwright/test';
-import dotenv from 'dotenv';
-
-// Load environment variables from .env file
-dotenv.config();
 
 /**
- * Playwright Configuration for Sailorskills Suite Integration Tests
+ * Optimized Playwright Configuration Template
  *
- * These tests verify cross-service integration flows:
- * - Estimator → Operations (order creation → service delivery)
- * - Billing → Portal (invoice creation → customer visibility)
- * - Operations → Dashboard (service completion → analytics)
- * - Inventory → Operations (packing lists, stock)
+ * Configured for:
+ * - CI/CD parallel execution
+ * - Visual regression testing
+ * - Cross-browser testing (optional)
+ * - Fast feedback loop
  */
 
 export default defineConfig({
   testDir: './tests',
 
-  // Run tests in serial (one at a time) to avoid race conditions in shared database
-  fullyParallel: false,
-  workers: 1,
+  // Maximum time one test can run
+  timeout: 30 * 1000,
+
+  // Run tests in parallel
+  fullyParallel: true,
 
   // Fail the build on CI if you accidentally left test.only in the source code
   forbidOnly: !!process.env.CI,
@@ -27,13 +25,19 @@ export default defineConfig({
   // Retry on CI only
   retries: process.env.CI ? 2 : 0,
 
-  // Reporter
-  reporter: process.env.CI ? 'github' : 'html',
+  // Opt out of parallel tests on CI for more stability (optional)
+  workers: process.env.CI ? 2 : undefined,
 
-  // Shared settings for all projects
+  // Reporter to use
+  reporter: [
+    ['html'],
+    ['list'],
+    process.env.CI ? ['github'] : ['list']
+  ],
+
   use: {
-    // Base URL for tests
-    baseURL: process.env.BASE_URL || 'https://sailorskills.com',
+    // Base URL from environment or default
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173',
 
     // Collect trace when retrying the failed test
     trace: 'on-first-retry',
@@ -43,26 +47,16 @@ export default defineConfig({
 
     // Video on failure
     video: 'retain-on-failure',
-
-    // Timeout for each action (e.g., click, fill)
-    actionTimeout: 15000,
   },
 
-  // Global timeout for each test
-  timeout: 120000, // 2 minutes (integration tests may be slow)
-
-  // Expect timeout
-  expect: {
-    timeout: 10000,
-  },
-
-  // Configure projects for major browsers
+  // Configure projects for different browsers (optional - remove if only testing Chrome)
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-    // Uncomment to test on other browsers
+
+    // Uncomment for cross-browser testing
     // {
     //   name: 'firefox',
     //   use: { ...devices['Desktop Firefox'] },
@@ -71,12 +65,22 @@ export default defineConfig({
     //   name: 'webkit',
     //   use: { ...devices['Desktop Safari'] },
     // },
+
+    // Mobile testing (optional)
+    // {
+    //   name: 'Mobile Chrome',
+    //   use: { ...devices['Pixel 5'] },
+    // },
+    // {
+    //   name: 'Mobile Safari',
+    //   use: { ...devices['iPhone 12'] },
+    // },
   ],
 
-  // Run your local dev server before starting the tests (optional)
+  // Run local dev server before starting tests (optional)
   // webServer: {
   //   command: 'npm run dev',
-  //   port: 5173,
+  //   url: 'http://localhost:5173',
   //   reuseExistingServer: !process.env.CI,
   // },
 });
