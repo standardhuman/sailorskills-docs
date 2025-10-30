@@ -33,21 +33,27 @@
 Go to: `https://github.com/[owner]/sailorskills-repos/settings/secrets/actions`
 
 ```
-☐ TEST_DATABASE_URL
+☑ TEST_DATABASE_URL ✅ COMPLETE
    Value: postgresql://postgres.[PROJECT_REF]:[PASSWORD]@...
    Get from: Supabase Dashboard → Project Settings → Database → Connection String (Transaction pooler)
 
-☐ VITE_SUPABASE_URL
+☑ VITE_SUPABASE_URL ✅ COMPLETE
    Value: https://[PROJECT_REF].supabase.co
    Get from: Supabase Dashboard → Project Settings → API → Project URL
 
-☐ VITE_SUPABASE_ANON_KEY
+☑ VITE_SUPABASE_ANON_KEY ✅ COMPLETE
    Value: eyJhbGc...
    Get from: Supabase Dashboard → Project Settings → API → Project API keys (anon/public)
 
-☐ PRODUCTION_URL
+☑ PRODUCTION_URL ✅ COMPLETE
    Value: https://portal.sailorskills.com
    (Or your production URL for smoke tests)
+
+☑ SUPABASE_SERVICE_ROLE_KEY ✅ COMPLETE (Added: 2025-10-29)
+   Value: eyJhbGc... (service_role JWT - very long)
+   Get from: Supabase Dashboard → Project Settings → API → Service Role key
+   Purpose: Full database access for integration tests (bypasses RLS)
+   See: SERVICE_ROLE_KEY_SETUP.md for details
 ```
 
 ### 2. Test Database Setup (RECOMMENDED)
