@@ -1,6 +1,6 @@
 # Sailorskills Suite - Roadmap
 
-Last updated: 2025-10-25
+Last updated: 2025-10-29
 
 ## Overview
 This roadmap tracks major cross-service initiatives, architectural changes, and strategic priorities for the Sailorskills suite.
@@ -22,6 +22,27 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
     - Both repos use same Supabase database with RLS for access control
   - **Impact:** Complete code isolation, independent deployment cycles, smaller bundle sizes, clearer security boundary
   - **Documentation:** See `/PORTAL_SEPARATION_PLAN.md` and `/DNS_CONFIGURATION.md`
+
+### Testing & Quality Infrastructure ✅
+- [x] **Comprehensive Testing Platform**
+  - **Completed:** 2025-10-29
+  - **Rationale:** Establish automated testing infrastructure to catch visual regressions, deployment issues, cross-service integration problems, and database schema errors before production
+  - **Implementation:**
+    - Four-layer testing architecture: Pre-commit hooks, CI/CD pipeline, Post-deployment smoke tests, Visual regression & integration tests
+    - GitHub Actions workflows for automated PR validation
+    - Playwright test framework with visual regression (screenshot comparison)
+    - Database validation scripts (schema validation, RLS policy testing, migration dry-run)
+    - Pre-commit hooks (Husky + lint-staged) in sailorskills-portal
+    - Cross-service integration test framework
+    - Test data management utilities
+    - Created reusable testing-platform skill for future services
+  - **Impact:** Automated testing catches issues before production, validates cross-service data flows, ensures database migrations are safe, visual regressions detected automatically
+  - **Documentation:** See `/TESTING_PLATFORM_GUIDE.md`, `/TESTING_SETUP_CHECKLIST.md`, and `/skills/testing-platform/`
+  - **Next Steps:**
+    - Add SUPABASE_SERVICE_ROLE_KEY secret for full database access in tests
+    - Expand testing to other services (billing, operations, dashboard, inventory)
+    - Generate visual regression baselines for all critical pages
+    - Write feature-specific integration tests as features are implemented
 
 ### Service Architecture & Naming
 - [ ] **Rename sailorskills-billing → sailorskills-completion**
