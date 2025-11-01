@@ -113,13 +113,17 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
   - **Database:** `scheduling_queue` table with RLS policies
   - **Documentation:** See `NEEDS_SCHEDULING_FEATURE.md`
 
-- [ ] **Import Notion service log data to Supabase**
+- [x] **Import Notion service log data to Supabase** ✅
+  - **Completed:** 2025-10-20
   - **Rationale:** Migrate historical service data (Boat Conditions Log + Admin Log) from Notion child databases into service_logs table
-  - **Details:** See `/sailorskills-operations/NOTION_SERVICE_LOG_IMPORT_HANDOFF.md`
-  - **Impact:** Operations service history, YouTube playlist links added to boats table
-  - **Dependencies:** Notion API token, existing boats table from customer profile import
-  - **Priority:** High (foundational data for Operations)
-  - **Estimated Effort:** ~90 minutes
+  - **Implementation:**
+    - 1,465 service logs imported (date range: 2023-01-03 to 2025-10-31)
+    - YouTube playlist columns added to boats table (`playlist_id`, `playlist_url`)
+    - Import infrastructure in `/sailorskills-operations/scripts/notion-import.mjs`
+    - LEFT JOIN logic merging Conditions + Admin logs by service number
+    - Field mappings documented in `notion-service-logs-config.json`
+  - **Status:** Import complete, infrastructure ready for future updates
+  - **Documentation:** See `/sailorskills-operations/scripts/README-SERVICE-LOGS-IMPORT.md`
 
 ---
 
