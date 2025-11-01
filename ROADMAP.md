@@ -73,6 +73,52 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
   - **Priority:** High (critical workflow gap)
   - **Estimated Effort:** 1-2 days
 
+- [ ] **"Needs Scheduling" Queue & Quick Add**
+  - **Rationale:** Ad-hoc service requests (customer calls, emails, in-person requests) need quick capture without immediately committing to a schedule. Owner needs to collect all boats needing service, then batch-schedule by reviewing personal calendar and workload together.
+  - **User Story:** Customer requests pressure washing (or diving, maintenance, etc.) via phone/email. Need to quickly mark boat as "needs service" with service type, then later review all pending boats and schedule them together while checking personal appointments and capacity.
+  - **Features:**
+    - **Quick Add Button:** Prominent "+ Needs Scheduling" button in Operations nav
+    - **Quick Add Modal:**
+      - Customer/boat selector (typeahead search)
+      - Service type dropdown (diving, pressure washing, maintenance, bottom painting, etc.)
+      - Priority selector (urgent, normal, low)
+      - Optional notes field (customer request details, special requirements)
+      - Optional target date range (e.g., "sometime in next 2 weeks")
+      - Quick save (no calendar picker at this stage)
+    - **"Needs Scheduling" Queue View:**
+      - List view showing all boats awaiting scheduling
+      - Sortable by priority, service type, date added, customer name
+      - Filterable by service type, priority, customer
+      - Batch actions: "Schedule Selected", "Mark as Scheduled", "Remove"
+      - Visual indicators: priority badges, days waiting counter
+    - **Scheduling Actions:**
+      - Individual: "Schedule Now" button → opens calendar picker, creates service_order
+      - Batch: Select multiple boats → "Open Calendar View" → drag-and-drop scheduling
+      - Quick status: "Mark as Scheduled" (manually scheduled elsewhere) → removes from queue
+    - **Integration with Calendar:**
+      - When scheduling from queue, automatically create service_order with selected date
+      - Update queue status to "scheduled", remove from "Needs Scheduling" view
+      - Link back to original queue entry for audit trail
+  - **Database Schema:**
+    - New `scheduling_queue` table: `{ id: uuid, customer_id: uuid, boat_id: uuid, service_type: text, priority: text, notes: text, target_date_range: daterange, added_at: timestamp, added_by: uuid (staff_id), status: 'pending'|'scheduled'|'removed', scheduled_service_order_id: uuid }`
+  - **UI Location:** Operations → Scheduling section
+    - New "Needs Scheduling" tab/view alongside calendar
+    - Quick add button in top nav or scheduling header
+  - **Impact:**
+    - Capture ad-hoc service requests immediately without scheduling pressure
+    - Batch scheduling workflow (review all pending boats together with personal calendar)
+    - Nothing falls through the cracks (visible queue of all pending boats)
+    - Faster response to customers (quick acknowledgment: "Got it, I'll schedule you soon")
+    - Better capacity planning (see full workload before committing to dates)
+  - **Dependencies:** None (standalone feature)
+  - **Priority:** High (Q4 2025 - critical workflow gap for daily operations)
+  - **Estimated Effort:** 2-3 days
+    - Database schema & API: 0.5 day
+    - Quick add modal: 0.5 day
+    - Queue view with filtering/sorting: 1 day
+    - Scheduling integration: 0.5 day
+    - Testing & polish: 0.5 day
+
 - [ ] **Import Notion service log data to Supabase**
   - **Rationale:** Migrate historical service data (Boat Conditions Log + Admin Log) from Notion child databases into service_logs table
   - **Details:** See `/sailorskills-operations/NOTION_SERVICE_LOG_IMPORT_HANDOFF.md`
@@ -85,11 +131,98 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
 
 ## Q1 2026
 
+### User Accounts & Multi-User Infrastructure
+- [ ] **User Accounts & Comprehensive Audit Logging System**
+  - **Rationale:** Foundational infrastructure for multi-user/multi-owner operations. Currently no user authentication for staff, no audit trails to track who created/modified data, and no accountability system. Required before onboarding multiple owners, contractors, or employees. Enables revenue attribution, performance tracking, and role-based access control.
+  - **Full Proposal:** See `/docs/roadmap-submission-user-accounts-audit-logging.md`
+  - **Current Gaps:**
+    - No user authentication for internal staff (admin services open to anyone with URL)
+    - No audit trails - cannot determine who created/modified service logs, boats, invoices, schedules
+    - No accountability - actions are anonymous, no way to trace errors to source
+    - No revenue attribution per user/technician
+    - Single-user assumption across all services
+  - **Key Features:**
+    - **User Account System:**
+      - User roles: Owner, Admin, Technician, Contractor, Viewer
+      - Authentication via Supabase Auth (email/password + magic links)
+      - User management UI (create, edit, deactivate accounts)
+      - User profiles with role, type (owner/employee/contractor), hire date, hourly rate
+    - **Comprehensive Audit Logging:**
+      - Track every create/update/delete across all services
+      - Log who, what, when, action, changes (before/after), IP, service name
+      - Add `created_by`, `updated_by`, timestamps to all core tables
+      - Audit log viewer with filtering (user, entity type, date range)
+      - Historical audit trail for compliance and debugging
+    - **Role-Based Access Control (RBAC):**
+      - Permission matrix for all features across all services
+      - Supabase RLS policies based on user role
+      - UI-level guards (hide/disable features by role)
+      - API-level permission validation
+      - Contractors see only assigned work, Viewers are read-only
+    - **Revenue Attribution & Performance Tracking:**
+      - Link invoices to service technician
+      - Track revenue generated per user
+      - Performance metrics: revenue/user, services/user, efficiency ($/hour)
+      - Commission calculation support
+      - User performance dashboard widgets
+  - **Database Schema:**
+    - New `users` table: id, email, full_name, role, type, active, hire_date, hourly_rate, preferences
+    - New `audit_logs` table: user_id, entity_type, entity_id, action, changes (JSONB), ip_address, service_name, timestamp
+    - Add to all tables: `created_by`, `updated_by`, `created_at`, `updated_at`
+    - Add to invoices: `service_technician_id` for revenue attribution
+    - Add to service_logs: `technician_id`, `revenue_generated`
+  - **Implementation Phases:**
+    - **Phase 1 (Week 1):** User accounts foundation - schema, Supabase Auth setup, user management UI, login flow
+    - **Phase 2 (Week 1-2):** Audit logging infrastructure - `audit_logs` table, edge function, add tracking columns, audit viewer UI
+    - **Phase 3 (Week 2-3):** RBAC implementation - permission matrix, RLS policies, UI/API guards, testing
+    - **Phase 4 (Week 3-4):** Service integration - integrate into Operations, Billing, Inventory, Dashboard, Estimator
+    - **Phase 5 (Week 4):** Reporting & analytics - user performance dashboard, revenue reports, commission tracking, audit exports
+  - **Services Affected:**
+    - **Operations:** Track who creates service logs, schedules services, modifies boats
+    - **Billing/Completion:** Track who initiates billing, processes payments, revenue attribution
+    - **Inventory:** Track who adds/modifies inventory, places orders
+    - **Dashboard:** User performance widgets, revenue by user, audit log explorer
+    - **Estimator:** Track who creates quotes, customer acquisition attribution
+    - **Portal:** No changes (customer-facing only)
+  - **Impact:**
+    - ✅ Multi-user accountability - know who did what, when
+    - ✅ Revenue attribution - track performance per technician
+    - ✅ Safe multi-user onboarding - can add owners/contractors/employees
+    - ✅ Compliance/audit trail for business operations
+    - ✅ Role-based permissions - control access by user type
+    - ✅ Performance tracking - revenue/services/efficiency metrics per user
+    - ✅ Foundation for commission tracking, profit sharing, workload balancing
+  - **Dependencies:** Existing Supabase Auth (✅ already used for customer portal), Supabase database (✅ exists)
+  - **Blocks:** Q2 2026 Ownership & Attribution Tracking System (needs user accounts first)
+  - **Priority:** Critical (Q1 2026 - highest priority, foundational for multi-user operations)
+  - **Estimated Effort:** 3-4 weeks (large, cross-service initiative)
+  - **Success Metrics:**
+    - 100% user accountability (every action tracked)
+    - 3+ users onboarded within first week
+    - Zero anonymous actions across all services
+    - 100% of invoices linked to technician for revenue attribution
+    - Role-based permissions working correctly for all user types
+
 ### Dashboard & Analytics
 - [ ] Complete core analytics widgets for sailorskills-dashboard
 - [ ] Implement revenue tracking across all services
 - [ ] Add booking conversion rate metrics
 - [ ] Customer lifetime value calculations
+- [x] **Revenue Efficiency Metrics Widget** ✅
+  - **Completed:** 2025-10-31
+  - **Rationale:** Track operational efficiency and profitability with key performance indicators
+  - **Metrics Delivered:**
+    - Average dollars per hour revenue (total revenue / total service hours)
+    - Average dollars per boat (total revenue / number of boats serviced)
+    - Boats serviced per hour (number of boats / total service hours)
+  - **Features Implemented:**
+    - Real-time calculations from service_logs and invoices data
+    - Date range filters (7 days, 30 days, 90 days, year-to-date)
+    - Service type breakdown toggle
+    - Comparison data (service count and excluded services)
+  - **Impact:** Provides actionable insights into business efficiency, helps identify optimal service mix, supports pricing decisions
+  - **Location:** Dashboard widget (https://sailorskills-dashboard.vercel.app)
+  - **Documentation:** See `/docs/plans/2025-10-31-revenue-efficiency-metrics-widget.md`
 
 ### Operations Improvements
 - [x] **Customer Portal - Separated into Independent Service**
@@ -99,6 +232,63 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
   - **Key Features Implemented:** Multi-boat access, dual auth (magic link + password), service history, invoices, messages, service requests, account management
   - **Impact:** ✅ Complete separation achieved, independent deployments, improved security
   - **Next Steps:** Enhance portal features (notifications, better mobile UX, dashboard widgets)
+
+- [ ] **Scheduling Enhancements - Time-Slot Based Scheduling & Drag-and-Drop**
+  - **Rationale:** Enhance scheduling system with time-slot based scheduling (using historical service duration data), drag-and-drop rescheduling, and multiple calendar view modes (Day/Week/Month) to improve operational efficiency and scheduling accuracy. Currently scheduling is date-only without time awareness or visual rescheduling capabilities.
+  - **Full Proposal:** See `/sailorskills-operations/docs/roadmap-submission-scheduling-enhancements.md`
+  - **Features:**
+    - **Time-Slot Based Scheduling:**
+      - Calculate average service duration per boat from `service_logs.total_hours`
+      - Display time slots (e.g., "9:00 AM - 11:30 AM") instead of just dates
+      - Configurable business hours (default: 8 AM - 6 PM)
+      - Show remaining capacity per time slot
+      - Handle boats with no service history (configurable default duration)
+    - **Drag & Drop Rescheduling:**
+      - Drag scheduled services between dates and time slots
+      - Visual feedback during drag (ghost element, valid/invalid drop zones)
+      - Real-time conflict detection for overlapping time slots
+      - Undo capability for accidental moves
+      - Touch support for mobile/tablet devices
+      - Accessibility: keyboard navigation, screen reader support
+    - **Multiple View Modes:**
+      - **Day View:** Hourly timeline (8 AM - 6 PM, 30-min increments) - best for daily dispatch planning
+      - **Week View:** 7-column grid with time slots - best for weekly route planning
+      - **Month View:** Enhanced calendar grid with time blocks - best for long-term planning
+      - View switcher UI: [Today] [Day] [Week] [Month]
+      - Date picker for navigation, persistent view preference
+  - **Database Schema Changes:**
+    - Add `scheduled_time TIME` and `estimated_duration_hours DECIMAL(4,2)` to `service_orders` table
+    - Create `scheduling_config` table: business hours, default duration, max concurrent services
+    - Migration for existing scheduled services
+  - **Technical Implementation:**
+    - Service duration calculation: `SELECT boat_id, AVG(total_hours) FROM service_logs GROUP BY boat_id`
+    - Drag & Drop library: `@dnd-kit/core` (modern, accessible) or native HTML5 Drag & Drop
+    - Date/Time library: `date-fns` (lightweight)
+    - Conflict detection logic, optimistic UI updates with rollback
+  - **Implementation Phases:**
+    - **Phase 1 (1 week):** Foundation - database schema, duration calculation, basic time slot UI
+    - **Phase 2 (1 week):** View modes - Day/Week view implementation, view switcher, navigation
+    - **Phase 3 (1 week):** Drag & Drop - library integration, conflict detection, undo/redo, accessibility
+    - **Phase 4 (ongoing):** Polish - animations, edge cases, performance, user testing
+  - **Impact:**
+    - Reduce scheduling conflicts by 80%
+    - Reduce time to schedule services by 50%
+    - Better capacity planning with time-aware scheduling
+    - Faster rescheduling with drag-and-drop
+    - Improved mobile/tablet scheduling experience for field use
+  - **Dependencies:** Existing `service_logs` table with `total_hours` (✅ exists)
+  - **Priority:** High (Q1 2026 - critical workflow enhancement)
+  - **Estimated Effort:** 2-3 weeks (large)
+  - **Success Metrics:**
+    - 90%+ adoption of new views within 2 weeks
+    - 80% reduction in scheduling conflicts
+    - 30%+ drag & drop operations from mobile devices
+  - **Questions for Review:**
+    - Should we support multi-day service windows?
+    - Default service duration for boats with no history? (proposed: 2.5 hours)
+    - Allow overlapping time slots for multiple technicians?
+    - Team/technician assignment in Phase 1 or defer?
+    - Include Google Calendar sync in this initiative?
 
 - [ ] **Internal Admin Design System Modernization**
   - **Rationale:** Unify visual design across internal admin services (Dashboard, Operations, Inventory, Completion/Billing, Video, Booking) with modern, polished aesthetic from Billing. Separate internal admin UX from customer-facing Estimator brand. Improve daily experience for team workflows.
@@ -373,7 +563,8 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
 
 ### Business Operations & Multi-Owner Management
 - [ ] **Ownership & Attribution Tracking System**
-  - **Rationale:** As the company adds multiple owners, need comprehensive system to track who brings in clients, assets, and inventory; assign responsibility for ongoing management; and allocate value/credit appropriately. Current system has no ownership attribution or staff assignment capabilities. Critical for multi-owner accountability, contractor/employee management, and eventual profit-sharing calculations.
+  - **Rationale:** As the company adds multiple owners, need comprehensive system to track who brings in clients, assets, and inventory; assign responsibility for ongoing management; and allocate value/credit appropriately. Builds on Q1 2026 User Accounts system to add business ownership tracking. Critical for multi-owner accountability and profit-sharing calculations.
+  - **Prerequisites:** Q1 2026 User Accounts & Audit Logging (provides `users` table, authentication, base audit trail)
   - **Scope - Four Core Tracking Categories:**
     - **Client Relationships:** Track which owner/person brought in each customer, date acquired, acquisition channel, estimated lifetime value
     - **Assets:** Track who contributed equipment, tools, boats, vehicles; date contributed, current value, depreciation, responsible party for maintenance
@@ -387,13 +578,13 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
     - **Historical Records:** Maintain complete audit trail of all contributions and assignments
     - **Reporting:** Generate ownership reports, contribution summaries, staff workload reports
   - **Database Schema:**
-    - New `ownership_attributions` table: `{ type: 'client'|'asset'|'inventory', entity_id: uuid, contributed_by: uuid (staff_id), contributed_at: timestamp, value_at_contribution: decimal, current_value: decimal, notes: text }`
-    - New `staff_assignments` table: `{ assignment_type: 'service'|'job'|'ongoing_management', entity_id: uuid, assigned_to: uuid (staff_id), assigned_at: timestamp, role: text, notes: text }`
-    - New `staff` table: `{ id: uuid, type: 'owner'|'contractor'|'employee', name: text, email: text, active: boolean, hire_date: date, metadata: jsonb }`
-    - Update `customers` table: Add `attributed_to` (staff_id), `acquisition_date`, `acquisition_channel`
-    - Update `service_orders` and `service_logs` tables: Add `assigned_staff` (array of staff_ids)
+    - New `ownership_attributions` table: `{ type: 'client'|'asset'|'inventory', entity_id: uuid, contributed_by: uuid (user_id from Q1), contributed_at: timestamp, value_at_contribution: decimal, current_value: decimal, notes: text }`
+    - New `staff_assignments` table: `{ assignment_type: 'service'|'job'|'ongoing_management', entity_id: uuid, assigned_to: uuid (user_id from Q1), assigned_at: timestamp, role: text, notes: text }`
+    - Update `customers` table: Add `attributed_to` (user_id), `acquisition_date`, `acquisition_channel`
+    - Update `service_orders` and `service_logs` tables: Add `assigned_staff` (array of user_ids)
+    - **Note:** Uses `users` table from Q1 2026, no separate `staff` table needed
   - **Implementation:**
-    - **Phase 1 (Week 1):** Database schema design and migration, create staff management table
+    - **Phase 1 (Week 1):** Database schema design and migration for attribution tables
     - **Phase 2 (Week 2):** Build attribution tracking UI in Dashboard (clients, assets, inventory)
     - **Phase 3 (Week 3):** Implement staff assignment UI in Operations (assign staff to jobs/services)
     - **Phase 4 (Week 3-4):** Build reporting dashboards (contribution summaries, workload reports)
@@ -409,8 +600,8 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
     - Proper staff management and workload distribution
     - Historical audit trail for all business relationships and assets
     - Foundation for future features (commission tracking, performance reviews, revenue sharing)
-  - **Dependencies:** Staff/user management system (create staff table first)
-  - **Priority:** Critical (Q2 2026 - highest priority, foundational for multi-owner operations)
+  - **Dependencies:** Q1 2026 User Accounts & Audit Logging System (provides users table, authentication, base audit infrastructure)
+  - **Priority:** Critical (Q2 2026 - highest priority after user accounts, foundational for multi-owner operations)
   - **Estimated Effort:** 5-6 days (40-48 hours)
     - Database design & migrations: 1 day
     - Attribution tracking UI: 1.5 days
