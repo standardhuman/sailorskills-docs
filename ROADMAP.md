@@ -202,10 +202,45 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
     - Role-based permissions working correctly for all user types
 
 ### Dashboard & Analytics
-- [ ] Complete core analytics widgets for sailorskills-dashboard
-- [ ] Implement revenue tracking across all services
-- [ ] Add booking conversion rate metrics
-- [ ] Customer lifetime value calculations
+- [ ] **Strategic Business Intelligence Dashboard Transformation**
+  - **Rationale:** Transform Dashboard from simple metrics viewer into comprehensive business intelligence & planning hub. Enable data-driven decisions about pricing, capacity, customer focus, and growth through adaptive perspectives and interactive what-if scenario modeling.
+  - **Full Design:** See `/docs/plans/2025-11-01-strategic-dashboard-transformation.md`
+  - **Architecture:** Adaptive dashboard with 4 perspectives (Executive, Financial, Operations, Customer), materialized database views for performance, interactive what-if scenarios
+  - **Key Capabilities:**
+    - **Four Adaptive Perspectives:**
+      - Executive Overview: 30-second daily check-in (KPIs, revenue trends, goals, alerts)
+      - Financial Performance: Revenue by service type, pricing analysis, forecasting, profit margins
+      - Operations Efficiency: Capacity utilization, $/hour by technician, schedule density
+      - Customer Intelligence: LTV segmentation, churn risk, retention metrics
+    - **Interactive What-If Scenarios:**
+      - Pricing: "What if I raise diving prices by 15%?" → projected revenue impact
+      - Capacity: "What if I add 10 hours/week?" → additional revenue potential
+      - Hiring: "What if I hire technician at $X/hour?" → break-even analysis
+      - Retention: "What if I reduce churn by 5%?" → LTV impact
+    - **Materialized Database Views:**
+      - `mv_service_profitability`: Revenue, hours, $/hour by service type
+      - `mv_customer_lifetime_value`: LTV segmentation, churn risk indicators
+      - `mv_capacity_utilization`: Daily capacity metrics, schedule density
+      - `mv_technician_performance`: Performance by technician (requires User Accounts)
+    - **Critical Alerts Integration:** Pull 3-5 urgent items from Operations, Billing, Inventory
+  - **Strategic Questions Answered:**
+    - ✅ Profitability by service type (which services are most profitable after labor/time?)
+    - ✅ Capacity utilization (fully booked? can take more work? schedule gaps?)
+    - ✅ Pricing optimization (should I raise/lower prices? optimal price point?)
+    - ✅ Customer value segmentation (top 20% customers by LTV, service preferences?)
+  - **Implementation Phases (7-8 weeks):**
+    - Phase 1: Foundation (materialized views, perspective framework, alerts bar)
+    - Phase 2: Executive Overview perspective
+    - Phase 3: Financial Performance perspective
+    - Phase 4: Operations Efficiency perspective
+    - Phase 5: Customer Intelligence perspective
+    - Phase 6: What-If scenario modeling
+    - Phase 7: Polish & testing
+  - **Dependencies:** Q1 2026 User Accounts system (provides technician attribution)
+  - **Timeline:** Q1 2026 (starts after User Accounts complete)
+  - **Priority:** High (foundational for business intelligence and strategic planning)
+  - **Estimated Effort:** 7-8 weeks (1 developer full-time)
+
 - [x] **Revenue Efficiency Metrics Widget** ✅
   - **Completed:** 2025-10-31
   - **Rationale:** Track operational efficiency and profitability with key performance indicators
