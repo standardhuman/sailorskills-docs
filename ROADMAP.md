@@ -59,7 +59,8 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
 - [ ] Create INTEGRATIONS.md documenting all external APIs
 
 ### Operations - Workflow & Data
-- [ ] **Pending Orders Queue & Confirmation Workflow**
+- [x] **Pending Orders Queue & Confirmation Workflow** ✅
+  - **Completed:** 2025-10-30
   - **Rationale:** Currently no dedicated view for incoming orders from Estimator - orders go straight to calendar without confirmation step. Need proper order intake workflow.
   - **Features:**
     - Dedicated "Pending Orders" inbox showing all `service_orders` with `status='pending'`
@@ -69,11 +70,10 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
     - Status update workflow: pending → confirmed → in_progress → completed
     - Notifications when new orders arrive from Estimator
   - **Impact:** Proper order management workflow, prevents missed orders, enables scheduling conflicts detection
-  - **Dependencies:** Existing `service_orders` table
-  - **Priority:** High (critical workflow gap)
-  - **Estimated Effort:** 1-2 days
+  - **Documentation:** See `PENDING_ORDERS_FEATURE.md`
 
-- [ ] **"Needs Scheduling" Queue & Quick Add**
+- [x] **"Needs Scheduling" Queue & Quick Add** ✅
+  - **Completed:** 2025-10-30
   - **Rationale:** Ad-hoc service requests (customer calls, emails, in-person requests) need quick capture without immediately committing to a schedule. Owner needs to collect all boats needing service, then batch-schedule by reviewing personal calendar and workload together.
   - **User Story:** Customer requests pressure washing (or diving, maintenance, etc.) via phone/email. Need to quickly mark boat as "needs service" with service type, then later review all pending boats and schedule them together while checking personal appointments and capacity.
   - **Features:**
@@ -110,14 +110,8 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
     - Nothing falls through the cracks (visible queue of all pending boats)
     - Faster response to customers (quick acknowledgment: "Got it, I'll schedule you soon")
     - Better capacity planning (see full workload before committing to dates)
-  - **Dependencies:** None (standalone feature)
-  - **Priority:** High (Q4 2025 - critical workflow gap for daily operations)
-  - **Estimated Effort:** 2-3 days
-    - Database schema & API: 0.5 day
-    - Quick add modal: 0.5 day
-    - Queue view with filtering/sorting: 1 day
-    - Scheduling integration: 0.5 day
-    - Testing & polish: 0.5 day
+  - **Database:** `scheduling_queue` table with RLS policies
+  - **Documentation:** See `NEEDS_SCHEDULING_FEATURE.md`
 
 - [ ] **Import Notion service log data to Supabase**
   - **Rationale:** Migrate historical service data (Boat Conditions Log + Admin Log) from Notion child databases into service_logs table
