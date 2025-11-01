@@ -201,10 +201,11 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
     - 100% of invoices linked to technician for revenue attribution
     - Role-based permissions working correctly for all user types
 
-### Dashboard & Analytics
-- [ ] **Strategic Business Intelligence Dashboard Transformation**
-  - **Rationale:** Transform Dashboard from simple metrics viewer into comprehensive business intelligence & planning hub. Enable data-driven decisions about pricing, capacity, customer focus, and growth through adaptive perspectives and interactive what-if scenario modeling.
-  - **Full Design:** See `/docs/plans/2025-11-01-strategic-dashboard-transformation.md`
+### Insight & Analytics (renamed from Dashboard)
+- [ ] **Strategic Business Intelligence: Insight Service**
+  - **Service Rename:** `sailorskills-dashboard` → `sailorskills-insight`
+  - **Rationale:** Create strategic business intelligence & planning hub. "Insight" avoids confusion with operational "dashboards" in Operations, Inventory, Billing services. Enable data-driven decisions about pricing, capacity, customer focus, and growth through adaptive perspectives and interactive what-if scenario modeling.
+  - **Full Design:** See `/docs/plans/2025-11-01-strategic-insight-transformation.md`
   - **Architecture:** Adaptive dashboard with 4 perspectives (Executive, Financial, Operations, Customer), materialized database views for performance, interactive what-if scenarios
   - **Key Capabilities:**
     - **Four Adaptive Perspectives:**
