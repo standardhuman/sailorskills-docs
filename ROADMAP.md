@@ -1,6 +1,6 @@
 # Sailorskills Suite - Roadmap
 
-Last updated: 2025-10-29
+Last updated: 2025-11-01
 
 ## Overview
 This roadmap tracks major cross-service initiatives, architectural changes, and strategic priorities for the Sailorskills suite.
@@ -45,6 +45,19 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
     - Write feature-specific integration tests as features are implemented
 
 ### Service Architecture & Naming
+- [ ] **Rename sailorskills-dashboard → sailorskills-insight**
+  - **Rationale:** "Insight" differentiates strategic BI service from operational dashboards in other services (Operations, Inventory, Billing). Avoids confusion when referring to "dashboard."
+  - **Tasks:**
+    - Rename GitHub repository: `sailorskills-dashboard` → `sailorskills-insight`
+    - Update Vercel project name and deployment URL
+    - Update navigation links in all services (shared package navigation)
+    - Update documentation references
+    - Update environment variable names if needed
+  - **Impact:** Repository, Vercel deployment, navigation across all services, documentation
+  - **Dependencies:** None (design already complete in `/docs/plans/2025-11-01-strategic-insight-transformation.md`)
+  - **Priority:** High (clean slate before Q1 2026 implementation)
+  - **Estimated Effort:** 2-3 hours
+
 - [ ] **Rename sailorskills-billing → sailorskills-completion**
   - **Rationale:** Current name undersells the service - it's 60% service documentation/condition tracking and 40% payment processing. "Completion" better reflects its role as the final step in the service workflow where technicians document work performed AND process payment.
   - **Impact:** Repository rename, Vercel project, documentation updates, edge function references, hardcoded URLs
@@ -128,6 +141,110 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
 ---
 
 ## Q1 2026
+
+### Mobile-First Platform Strategy
+- [ ] **Complete Video Native Mobile App & Begin Billing Mobile Conversion**
+  - **Rationale:** Field operations require native mobile apps for reliability, session persistence, and background processing. Current web apps have critical limitations: browser sessions reload during long dives (losing Billing form state), and video uploads cannot run reliably in background. Native apps provide persistent sessions, background upload/download capabilities, offline-first architecture, and better battery/network management. Video mobile app (React Native/Expo) is 87% complete (Phases 1-7 done), needs final testing and deployment. Billing has immediate need for session persistence during dives.
+  - **Current State - Video Mobile (sailorskills-video/BOATY-Mobile):**
+    - **Status:** 87.5% complete (7 of 8 phases done)
+    - **Completed Phases:**
+      - Phase 1: Core setup, navigation, database (SQLite)
+      - Phase 2: GoPro WiFi integration, download manager
+      - Phase 3: Video library, rename workflow, storage management
+      - Phase 4: YouTube OAuth, upload manager, playlist management
+      - Phase 5: Cellular optimization, network detection, data usage tracking
+      - Phase 6: Background processing, notifications (upload/download progress)
+      - Phase 7: Dark mode, theme system, loading states
+    - **Remaining:** Phase 8 (testing & deployment - 5-7 days)
+    - **Tech Stack:** React Native 0.81.4, Expo 52.x, React Navigation 6.x
+    - **Documentation:** `/sailorskills-video/docs/mobile/` (PROGRESS.md, MOBILE_ROADMAP.md)
+  - **Current State - Billing Web App:**
+    - **Problem:** Mobile browser reloads page during long dives (30-60+ minutes), losing all form state when technician returns to surface. Need to re-select boat, re-enter conditions, restart workflow.
+    - **Impact:** Frustrating user experience, lost data, extra time per service
+    - **Current Architecture:** Vite web app, no PWA features, no session persistence
+  - **Implementation Plan:**
+    - **Phase 1 (Week 1-2): Video Mobile Final Push**
+      - Complete Phase 8: Device testing (iOS/Android), field testing with GoPro, performance optimization
+      - App Store preparation: Icons, screenshots, descriptions, privacy policy
+      - Deploy to TestFlight (iOS) and Internal Testing (Android)
+      - Field testing: Real GoPro cameras, cellular uploads, background processing, battery drain
+      - Production release to App Store and Play Store
+      - **Deliverables:** Video mobile app published and in production use
+    - **Phase 2 (Week 2-3): Billing PWA Quick Fix (Short-term Solution)**
+      - Add PWA capabilities: Service workers, offline support, session persistence
+      - Implement wake locks to prevent browser sleep during dives
+      - Add local storage persistence for form state (auto-save every 30s)
+      - Restore form state on page reload (boat selection, conditions, notes)
+      - Add "Resume Last Session" prompt on app launch
+      - Test: Start service entry, lock phone for 30 min, unlock and verify state restored
+      - **Deliverables:** Billing web app reliably maintains session during dives
+      - **Estimated Effort:** 3-5 days
+      - **Why PWA First:** Buys time while Video native proves the React Native stack, solves immediate problem with minimal risk
+    - **Phase 3 (Week 4-7): Billing Native Mobile App (Long-term Solution)**
+      - Convert Billing to React Native app (leverage Video mobile codebase)
+      - Reuse components: Upload manager, network detection, notification service, theme system, database patterns
+      - Core features: Service completion workflow, condition tracking (sliders), anode documentation, photo capture/upload, payment processing (Stripe), offline queue
+      - Background processing: Save service logs offline, sync when connected
+      - Notifications: Service saved, payment processed, sync complete
+      - Testing: Field testing during actual service calls, verify no data loss, test offline → online transitions
+      - Deploy: TestFlight → Production release
+      - **Deliverables:** Billing native app in production, PWA deprecated
+      - **Estimated Effort:** 3-4 weeks
+      - **Leverage from Video Mobile:**
+        - 60% of Video mobile code is reusable (upload manager, network service, notifications, database, theme)
+        - Authentication patterns already proven
+        - Background processing proven reliable
+        - Cellular optimization strategies validated
+  - **Technical Architecture:**
+    - **Video Mobile:** React Native + Expo + SQLite + YouTube API + GoPro HTTP API
+    - **Billing PWA (interim):** Vite + Service Workers + IndexedDB + Wake Lock API
+    - **Billing Mobile:** React Native + Expo + SQLite + Supabase + Stripe SDK
+    - **Shared:** React Native components library (create after Video & Billing mobile both working)
+  - **Why This Sequence:**
+    1. **Video mobile first** - 87% done, finish it to prove React Native stack works in field
+    2. **Billing PWA second** - Quick 3-5 day fix solves immediate session problem with low risk
+    3. **Billing native third** - After Video mobile field-tested, confident in React Native approach, reuse 60% of code
+    4. **Shared library after** - Extract common patterns once both apps working (don't prematurely optimize)
+  - **Services Requiring Native Apps (Priority Order):**
+    1. **Video (Q1 2026 - Week 1-2)** - Background uploads critical, 87% done ✅
+    2. **Billing/Completion (Q1 2026 - Week 2-7)** - Session persistence critical, PWA → Native
+    3. **Operations (Q2 2026)** - Field service logs, offline support, GPS, camera, signature capture
+    4. **Inventory (Q2-Q3 2026)** - Barcode scanning, stock checks in warehouse
+    5. **Dashboard (Q3 2026)** - Analytics on-the-go (lower priority, web works fine)
+    6. **Portal (Future)** - Customer-facing, web is acceptable (mobile-responsive sufficient)
+    7. **Estimator (Excluded)** - Customer acquisition tool, web-only by design
+  - **Services Staying Web-Only:**
+    - **Estimator:** Customer-facing quote builder, intentionally web-only for accessibility
+    - **Site:** Marketing site, no native app needed
+    - **Booking:** Training scheduling, web sufficient (calendar integration works in browser)
+  - **Success Metrics:**
+    - **Video Mobile:** 80%+ adoption, 50%+ uploads happen in field (not at desk), 99%+ upload success rate
+    - **Billing PWA:** Zero session loss during dives, 100% form state recovery
+    - **Billing Mobile:** 90%+ field adoption, <1% data loss, 95%+ offline-to-online sync success
+    - **Cross-Platform:** All native apps maintain feature parity with web versions
+  - **Impact:**
+    - ✅ **Video:** Reliable background uploads over cellular, no laptop required in field
+    - ✅ **Billing:** No more lost sessions during dives, confident data entry workflow
+    - ✅ **Operations:** Offline service log entry at boat (no internet required), sync when back online
+    - ✅ **Inventory:** Fast barcode scanning, real-time stock checks in warehouse
+    - ✅ **Platform:** Native mobile-first experience across all field-facing services
+  - **Dependencies:**
+    - Video mobile Phase 8 completion (testing infrastructure, deployment process)
+    - App Store developer account (✅ assumed exists)
+    - Play Store developer account (✅ assumed exists)
+    - Stripe mobile SDK setup for Billing native app
+  - **Blocks:** Q2 2026 Operations native app (needs Video mobile lessons learned)
+  - **Priority:** Critical (Q1 2026 - foundational for field operations)
+  - **Estimated Effort:**
+    - Video Phase 8: 5-7 days
+    - Billing PWA: 3-5 days
+    - Billing Native: 3-4 weeks
+    - **Total: 5-6 weeks**
+  - **Documentation:**
+    - `/sailorskills-video/docs/mobile/MOBILE_ROADMAP.md` - Complete Video mobile development plan
+    - `/sailorskills-video/docs/mobile/PROGRESS.md` - Current status and phase completion
+    - `/sailorskills-video/docs/mobile/MOBILE_SETUP.md` - Dev environment setup
+    - `/sailorskills-video/docs/mobile/GOPRO_INTEGRATION.md` - GoPro WiFi API reference
 
 ### User Accounts & Multi-User Infrastructure
 - [ ] **User Accounts & Comprehensive Audit Logging System**
@@ -585,14 +702,50 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
 
 ## Q2 2026
 
+### Mobile Platform Expansion
+- [ ] **Operations Native Mobile App**
+  - **Rationale:** After Video and Billing mobile apps prove the React Native stack, expand to Operations for field service log entry with offline support. Technicians need to document service conditions, capture photos, and record details at the boat without internet connectivity, then sync when back online. Current web app requires constant internet connection.
+  - **Prerequisites:** Q1 2026 Video & Billing mobile apps completed and field-tested
+  - **Core Features:**
+    - Offline service log entry (no internet required at boat)
+    - Photo capture and local storage
+    - Condition tracking (paint, anodes, growth, propeller)
+    - Time tracking (time in, time out, auto-calculate total hours)
+    - Customer/boat search (cached for offline)
+    - Background sync when connectivity restored
+    - GPS location tagging (optional)
+    - Signature capture for service completion
+  - **Technical Architecture:**
+    - React Native + Expo + SQLite (local database)
+    - Supabase sync when online
+    - Camera integration (React Native Camera)
+    - GPS integration (Expo Location)
+    - Signature pad component
+    - Reuse: Upload manager, network detection, notification service, theme system from Video/Billing mobile
+  - **Implementation:**
+    - Week 1-2: Core screens (service log entry, customer/boat lookup, photo capture)
+    - Week 3: Offline mode (SQLite queue, background sync)
+    - Week 4: GPS, signature capture, polish
+    - Week 5: Field testing and deployment
+  - **Impact:** Reliable service documentation in field with zero internet dependency, faster service completion workflow, no more lost data from connectivity issues
+  - **Estimated Effort:** 4-5 weeks
+  - **Dependencies:** Video & Billing mobile apps (lessons learned, reusable components)
+  - **Priority:** High (Q2 2026 - major field operations improvement)
+
+- [ ] **Inventory Native Mobile App** (Optional - Q2/Q3 2026)
+  - **Rationale:** Warehouse stock checks and barcode scanning require native camera access. Web app barcode scanning is unreliable on mobile browsers.
+  - **Core Features:** Barcode scanning, stock checks, order placement, low stock alerts
+  - **Estimated Effort:** 3-4 weeks
+  - **Priority:** Medium (nice-to-have, web app is functional)
+
 ### Booking & Scheduling
 - [ ] Complete remaining phases of sailorskills-booking (50% → 100%)
 - [ ] Google Calendar sync enhancements
 - [ ] Automated reminder system
 
 ### Video Management
-- [ ] Complete mobile app development (React Native/Expo)
-- [ ] GoPro WiFi integration for direct uploads
+- [x] Complete mobile app development (React Native/Expo) - **Completed in Q1 2026**
+- [x] GoPro WiFi integration for direct uploads - **Completed in Q1 2026**
 - [ ] Enhanced YouTube playlist automation
 
 ### Business Operations & Multi-Owner Management
