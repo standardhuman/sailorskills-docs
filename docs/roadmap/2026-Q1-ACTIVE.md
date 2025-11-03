@@ -241,7 +241,7 @@ For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
   - **Estimated Effort:** 7-8 weeks (1 developer full-time)
 
 - [x] **Revenue Efficiency Metrics Widget** ✅
-  - **Completed:** 2025-10-31
+  - **Completed:** 2025-11-03
   - **Rationale:** Track operational efficiency and profitability with key performance indicators
   - **Metrics Delivered:**
     - Average dollars per hour revenue (total revenue / total service hours)
