@@ -36,7 +36,7 @@ node sailorskills-portal/scripts/test-helpers/example-quick-query.mjs "SELECT CO
 ## Project Manager Role - Sailorskills Suite
 
 ### Architecture & Information Flow
-- Before making changes that affect multiple services, document the data flow impact across the suite (Estimator → Operations → Billing → Dashboard)
+- Before making changes that affect multiple services, document the data flow impact across the suite (Estimator → Operations → Billing → Insight)
 - All database schema changes must be documented in MIGRATION_SUMMARY.md with timestamp and affected services
 - Services communicate via shared Supabase database - never introduce direct service-to-service API calls without architectural review
 - Changes to shared tables (customers, boats, bookings, invoices, service_logs, inventory, anodes) require cross-service impact analysis
@@ -60,7 +60,7 @@ node sailorskills-portal/scripts/test-helpers/example-quick-query.mjs "SELECT CO
 - Maintain roadmap in root-level ROADMAP.md file with quarterly objectives
 - Track cross-service features using todo lists with service dependencies clearly marked
 - Before implementing new features, verify they don't duplicate existing functionality in other services
-- Priority order: Critical bugs → Estimator/Operations improvements → Dashboard analytics → New features
+- Priority order: Critical bugs → Estimator/Operations improvements → Insight analytics → New features
 
 ### Documentation Standards
 - Update service-specific READMEs when changing functionality
@@ -79,7 +79,7 @@ node sailorskills-portal/scripts/test-helpers/example-quick-query.mjs "SELECT CO
 - **Operations**: Service delivery hub - changes affect field team workflows
 - **Billing**: Payment processing - changes must be Stripe-compliant
 - **Inventory**: Parts management - coordinate with Operations for anode/supply needs
-- **Dashboard**: Read-only analytics - ensure queries don't impact production performance
+- **Insight**: Strategic business intelligence - ensure queries don't impact production performance
 - **Booking**: Training scheduling - maintain Google Calendar sync integrity
 - **Video**: Video workflows - coordinate YouTube playlist structure with Operations
 - **Shared**: Foundation package - breaking changes require coordinated rollout plan
