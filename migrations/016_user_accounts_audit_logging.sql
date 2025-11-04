@@ -256,5 +256,43 @@ CREATE POLICY "audit_logs_no_manual_changes" ON audit_logs
   FOR ALL USING (false);
 
 -- ============================================================
+-- SERVICE LOGS TABLE RLS
+-- ============================================================
+
+ALTER TABLE service_logs ENABLE ROW LEVEL SECURITY;
+
+-- Owners/admins/viewers see all, techs/contractors see only their own
+CREATE POLICY "service_logs_select" ON service_logs
+  FOR SELECT USING (
+    get_user_metadata() ->> 'user_type' = 'staff'
+    AND (
+      get_user_role(auth.uid()) IN ('owner', 'admin', 'viewer')
+      OR technician_id = auth.uid()
+    )
+  );
+
+-- Techs/contractors can create service logs
+CREATE POLICY "service_logs_insert" ON service_logs
+  FOR INSERT WITH CHECK (
+    get_user_role(auth.uid()) IN ('owner', 'admin', 'technician', 'contractor')
+  );
+
+-- Owners/admins can update any, techs can update their own
+CREATE POLICY "service_logs_update" ON service_logs
+  FOR UPDATE USING (
+    get_user_role(auth.uid()) IN ('owner', 'admin')
+    OR (
+      get_user_role(auth.uid()) IN ('technician', 'contractor')
+      AND technician_id = auth.uid()
+    )
+  );
+
+-- Only owners/admins can delete
+CREATE POLICY "service_logs_delete" ON service_logs
+  FOR DELETE USING (
+    get_user_role(auth.uid()) IN ('owner', 'admin')
+  );
+
+-- ============================================================
 -- AUTH TRIGGERS
 -- ============================================================
