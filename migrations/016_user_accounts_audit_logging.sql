@@ -62,6 +62,57 @@ COMMENT ON COLUMN audit_logs.changes IS 'JSONB with before/after values: {before
 -- TRACKING COLUMNS
 -- ============================================================
 
+-- Service logs
+ALTER TABLE service_logs ADD COLUMN IF NOT EXISTS technician_id uuid REFERENCES users(id);
+ALTER TABLE service_logs ADD COLUMN IF NOT EXISTS created_by uuid REFERENCES users(id);
+ALTER TABLE service_logs ADD COLUMN IF NOT EXISTS updated_by uuid REFERENCES users(id);
+ALTER TABLE service_logs ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT NOW();
+ALTER TABLE service_logs ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT NOW();
+
+-- Invoices
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS service_technician_id uuid REFERENCES users(id);
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS created_by uuid REFERENCES users(id);
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS updated_by uuid REFERENCES users(id);
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT NOW();
+
+-- Boats
+ALTER TABLE boats ADD COLUMN IF NOT EXISTS created_by uuid REFERENCES users(id);
+ALTER TABLE boats ADD COLUMN IF NOT EXISTS updated_by uuid REFERENCES users(id);
+ALTER TABLE boats ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT NOW();
+ALTER TABLE boats ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT NOW();
+
+-- Payments
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS created_by uuid REFERENCES users(id);
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS updated_by uuid REFERENCES users(id);
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT NOW();
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT NOW();
+
+-- Customers
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS created_by uuid REFERENCES users(id);
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS updated_by uuid REFERENCES users(id);
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT NOW();
+
+-- Inventory
+ALTER TABLE inventory ADD COLUMN IF NOT EXISTS created_by uuid REFERENCES users(id);
+ALTER TABLE inventory ADD COLUMN IF NOT EXISTS updated_by uuid REFERENCES users(id);
+ALTER TABLE inventory ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT NOW();
+ALTER TABLE inventory ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT NOW();
+
+-- Service orders
+ALTER TABLE service_orders ADD COLUMN IF NOT EXISTS created_by uuid REFERENCES users(id);
+ALTER TABLE service_orders ADD COLUMN IF NOT EXISTS updated_by uuid REFERENCES users(id);
+ALTER TABLE service_orders ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT NOW();
+ALTER TABLE service_orders ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT NOW();
+
+-- Boat anodes
+ALTER TABLE boat_anodes ADD COLUMN IF NOT EXISTS created_by uuid REFERENCES users(id);
+ALTER TABLE boat_anodes ADD COLUMN IF NOT EXISTS updated_by uuid REFERENCES users(id);
+ALTER TABLE boat_anodes ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT NOW();
+ALTER TABLE boat_anodes ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT NOW();
+
+COMMENT ON COLUMN service_logs.technician_id IS 'Who performed the service (for revenue attribution)';
+COMMENT ON COLUMN invoices.service_technician_id IS 'Technician who performed service (copied from service_logs)';
+
 -- ============================================================
 -- HELPER FUNCTIONS
 -- ============================================================
