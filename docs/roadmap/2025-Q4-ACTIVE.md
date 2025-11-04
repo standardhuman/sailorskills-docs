@@ -1425,35 +1425,38 @@ For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
     - No orphaned customers without boats
     - Dashboard query verified and documented
 
-- [x] **RESOLVED: Operations Architecture Clarification - Not a Bug** ✅
+- [x] **RESOLVED: Operations Pages Loading Fixed - Authentication Error Handling** ✅
   - **Resolved:** 2025-11-04
-  - **Status:** FALSE ALARM - Operations working correctly, documentation was incorrect
-  - **Issue (Reported):** Multiple Operations pages returning 404 errors with "Loading queue..." messages
-  - **Investigation Findings:**
-    - ✅ Operations dashboard at `https://ops.sailorskills.com` works perfectly
-    - ✅ All features (Work Queue, Boats, Calendar, Service Logs) functional
-    - ❌ URLs in issue description were **incorrect** (referenced non-existent files)
-  - **Root Cause:** **Documentation Error, NOT a Technical Bug**
-    - Operations is a **Single Page Application (SPA)**
-    - ALL features accessible via `https://ops.sailorskills.com` (index.html)
-    - Uses tab-based navigation within the SPA (not separate HTML files)
-    - Work Queue, Boats, Calendar, Service Logs are `<div>` sections toggled by JavaScript
-  - **Incorrect URLs (404 - Don't Exist):**
-    - ❌ `https://ops.sailorskills.com/work-queue.html`
-    - ❌ `https://ops.sailorskills.com/boats.html`
-    - ❌ `https://ops.sailorskills.com/calendar.html`
-    - ❌ `https://ops.sailorskills.com/service-logs.html`
-  - **Correct Architecture:**
-    - ✅ Single entry point: `https://ops.sailorskills.com` (index.html)
-    - ✅ Internal navigation via tabs and section toggling
-    - ✅ Sections: `#work-queue-content`, `#boats-view`, `#work-calendar-content`, `#work-service-logs-content`
-    - ✅ No separate HTML files needed - SPA design pattern
-  - **Evidence from Investigation:**
-    - Playwright testing confirmed dashboard loads successfully
-    - Found 2 work queue elements on page
-    - Navigation items present and functional
-    - No JavaScript errors or network failures
-    - All Supabase environment variables properly configured
-  - **Resolution:** No code changes needed - updated roadmap documentation to reflect correct SPA architecture
-  - **Action Taken:** Updated roadmap to use correct URL (`https://ops.sailorskills.com`) instead of non-existent separate page URLs
-  - **Impact:** None - Operations was never broken, only documentation needed correction
+  - **Status:** FIXED - Authentication system working, needed error handling
+  - **Issue:** Operations dashboard stuck on blank page, tabs (Calendar, Queue, Boats, Service Logs) not loading
+  - **Root Cause:** `initSupabaseAuth()` was failing silently without error handling, leaving app hidden
+  - **Investigation Process:**
+    - Used systematic debugging methodology (Phase 1: Root Cause Investigation)
+    - Playwright automated testing to capture console logs and network requests
+    - Identified app stuck with `opacity: 0, visibility: hidden` waiting for authentication
+    - Discovered `initSupabaseAuth()` call had no try-catch error handling
+    - Silent failures prevented login modal from showing errors
+  - **Technical Details:**
+    - Operations is a **Single Page Application (SPA)** at `https://ops.sailorskills.com`
+    - CSS hides app until `body.authenticated` class is added
+    - JavaScript file loading successfully (200 status)
+    - Auth module (`init-supabase-auth.js`) loadable and functional
+    - Issue was missing error visibility, NOT broken authentication
+  - **Fix Implemented:** (`sailorskills-operations/src/main.js:189-217`)
+    - Added try-catch around `initSupabaseAuth()` call
+    - Detailed console logging before/after auth (`🔐 Calling initSupabaseAuth...`, `✅ initSupabaseAuth completed`)
+    - User-facing error message if auth initialization fails
+    - Full stack trace logging for debugging
+  - **Test Results After Fix:**
+    - ✅ Login modal now appears correctly
+    - ✅ User can log in with credentials
+    - ✅ Dashboard loads successfully
+    - ✅ All tabs visible and functional (Calendar, Queue, Boats, Service Logs)
+    - ✅ Navigation working properly
+  - **Files Changed:**
+    - `sailorskills-operations/src/main.js` - Added error handling (commit: ea8df4b)
+  - **Deployment:**
+    - Merged to main branch
+    - Auto-deployed via Vercel
+    - Verified working on production (`https://ops.sailorskills.com`)
+  - **Impact:** Operations fully functional - critical P0 issue resolved
