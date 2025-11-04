@@ -117,6 +117,20 @@ COMMENT ON COLUMN invoices.service_technician_id IS 'Technician who performed se
 -- HELPER FUNCTIONS
 -- ============================================================
 
+-- Get user role for RLS policies
+CREATE OR REPLACE FUNCTION get_user_role(user_uuid uuid) RETURNS text AS $$
+  SELECT role FROM users WHERE id = user_uuid AND active = true;
+$$ LANGUAGE sql STABLE;
+
+COMMENT ON FUNCTION get_user_role IS 'Get active user role for RLS policies';
+
+-- Get current user metadata
+CREATE OR REPLACE FUNCTION get_user_metadata() RETURNS jsonb AS $$
+  SELECT (auth.jwt() -> 'user_metadata')::jsonb;
+$$ LANGUAGE sql STABLE;
+
+COMMENT ON FUNCTION get_user_metadata IS 'Get current user metadata from JWT';
+
 -- ============================================================
 -- AUDIT TRIGGERS
 -- ============================================================
