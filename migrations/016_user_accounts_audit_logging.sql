@@ -92,11 +92,8 @@ ALTER TABLE customers ADD COLUMN IF NOT EXISTS created_by uuid REFERENCES users(
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS updated_by uuid REFERENCES users(id);
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT NOW();
 
--- Inventory
-ALTER TABLE inventory ADD COLUMN IF NOT EXISTS created_by uuid REFERENCES users(id);
-ALTER TABLE inventory ADD COLUMN IF NOT EXISTS updated_by uuid REFERENCES users(id);
-ALTER TABLE inventory ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT NOW();
-ALTER TABLE inventory ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT NOW();
+-- Note: Inventory table does not exist in this database
+-- (Database uses anode_inventory, inventory_items, inventory_suppliers, inventory_transactions instead)
 
 -- Service orders
 ALTER TABLE service_orders ADD COLUMN IF NOT EXISTS created_by uuid REFERENCES users(id);
@@ -188,9 +185,7 @@ CREATE TRIGGER audit_customers
   AFTER INSERT OR UPDATE OR DELETE ON customers
   FOR EACH ROW EXECUTE FUNCTION log_audit_trail();
 
-CREATE TRIGGER audit_inventory
-  AFTER INSERT OR UPDATE OR DELETE ON inventory
-  FOR EACH ROW EXECUTE FUNCTION log_audit_trail();
+-- Note: No audit trigger for inventory (table does not exist)
 
 CREATE TRIGGER audit_users
   AFTER INSERT OR UPDATE OR DELETE ON users
