@@ -209,5 +209,36 @@ CREATE TRIGGER audit_service_orders
 -- ============================================================
 
 -- ============================================================
+-- USERS TABLE RLS
+-- ============================================================
+
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+
+-- Staff can view all users
+CREATE POLICY "users_select_staff" ON users
+  FOR SELECT USING (
+    get_user_metadata() ->> 'user_type' = 'staff'
+  );
+
+-- Only owners/admins can insert users
+CREATE POLICY "users_insert_admin" ON users
+  FOR INSERT WITH CHECK (
+    get_user_role(auth.uid()) IN ('owner', 'admin')
+  );
+
+-- Owners/admins can update any user, users can update own profile
+CREATE POLICY "users_update" ON users
+  FOR UPDATE USING (
+    get_user_role(auth.uid()) IN ('owner', 'admin')
+    OR id = auth.uid()
+  );
+
+-- Only owners can delete users
+CREATE POLICY "users_delete_owner" ON users
+  FOR DELETE USING (
+    get_user_role(auth.uid()) = 'owner'
+  );
+
+-- ============================================================
 -- AUTH TRIGGERS
 -- ============================================================
