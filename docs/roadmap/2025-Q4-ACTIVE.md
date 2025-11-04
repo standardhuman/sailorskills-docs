@@ -525,35 +525,42 @@ For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
   - **Completed:** 2025-11-04
   - **Status:** INVESTIGATION COMPLETE - Data verified and documented
   - **Original Issue:** Operations Admin Dashboard "Customers" widget showing 861 customers - needed verification
-  - **Verified Customer Data (as of 2025-11-04):**
-    - **885 total customers** in database (↑24 since original 861 note)
-      - 159 customers with boats (18% - active service customers)
-      - 726 customers without boats (82% - leads/prospects from Notion import)
-      - All 885 created in 2024-2025 (Notion migration data)
-    - **Revenue Statistics:**
-      - 1,617 total invoices processed
-      - **$186,439.03 total revenue** (all invoices)
-      - **$171,823.83 paid revenue** (92% collection rate)
-      - **$10,517.90 pending revenue**
-      - $4,097.30 other statuses (refunded, cancelled, etc.)
-      - **157 unique customers with invoices** (89% of customers with boats have paid)
-    - **Data Quality:**
-      - No duplicates found
-      - No deleted/archived customers (no soft delete in schema)
-      - No test customers flagged
-      - Data imported from Notion includes leads, not just active customers
-  - **Recommendations for Dashboard Widget:**
-    1. **Update customer count to 885** (or make it dynamic from database)
-    2. **Add clarity labels:**
-       - "885 Total Customers (159 with active boats)"
-       - "Revenue (All Time): $186,439.03"
-       - "Paid Revenue: $171,823.83 (92% collection rate)"
-    3. **Consider separate metrics:**
-       - "Active Customers" (159 with boats)
-       - "Leads/Prospects" (726 without boats)
-       - "YTD Revenue" vs "All-Time Revenue"
-    4. **Add tooltips** explaining calculation methodology
-  - **Conclusion:** Numbers are accurate - 861 was outdated count from earlier. Current count is 885 with detailed breakdown documented above.
+  - **⚠️ CORRECTED Customer Data (as of 2025-11-04) - DATABASE HAS 732 TEST CUSTOMERS!**
+    - **REAL CUSTOMER COUNT: 177** (not 885!)
+      - **177 real customers** (actual business customers)
+      - **176 real boats** (matches user's report of ~178 boats)
+      - Some customers own multiple boats (176 boats / 177 customers)
+    - **REAL REVENUE STATISTICS:**
+      - **1,599 real invoices** (not 1,617)
+      - **$182,979.03 total revenue** (real business revenue)
+      - **$170,123.83 paid revenue** (93% collection rate)
+    - **⚠️ TEST DATA POLLUTION:**
+      - **732 test customers** with pattern "Test Customer [timestamp]"
+      - **2 test boats**
+      - **18 test invoices** (~$3,460 in fake amounts)
+      - All created Oct-Nov 2025, emails use @example.com
+      - **ACTION REQUIRED:** Clean up test data before production use
+    - **Why Original Investigation Was Wrong:**
+      - Counted all 909 customers (177 real + 732 test)
+      - Test customers have no boats, skewing "customers without boats" metric
+      - No is_test flag in schema to filter test data
+  - **URGENT RECOMMENDATIONS:**
+    1. **🚨 CLEAN UP TEST DATA IMMEDIATELY** (732 test customers polluting database)
+       - DELETE FROM customers WHERE name LIKE 'Test Customer%' OR email LIKE '%@example.com'
+       - DELETE FROM boats WHERE customer_id IN (test customers)
+       - DELETE FROM invoices WHERE customer_id IN (test customers)
+    2. **Add is_test flag to schema** for future test data isolation
+       - ALTER TABLE customers ADD COLUMN is_test BOOLEAN DEFAULT FALSE
+       - All queries should add WHERE is_test = FALSE
+    3. **Dashboard Widget Updates:**
+       - Display: "177 Customers (176 boats)"
+       - Revenue: "$182,979 Total | $170,124 Paid (93%)"
+       - Add filter to exclude test data from all metrics
+    4. **Data Governance:**
+       - Create separate test database/schema for testing
+       - Never create test data in production database
+       - Document cleanup procedures
+  - **Conclusion:** Real customer count is **177, not 861 or 885**. Database polluted with 732 test customers created during October-November 2025 testing.
   - **Investigation Steps:**
     - **Step 1: Database Query Audit (10 minutes)**
       ```sql
