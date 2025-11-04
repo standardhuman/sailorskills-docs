@@ -294,5 +294,37 @@ CREATE POLICY "service_logs_delete" ON service_logs
   );
 
 -- ============================================================
+-- INVOICES TABLE RLS
+-- ============================================================
+
+ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
+
+-- Owners/admins/viewers see all, techs/contractors see only their own
+CREATE POLICY "invoices_select" ON invoices
+  FOR SELECT USING (
+    get_user_metadata() ->> 'user_type' = 'staff'
+    AND (
+      get_user_role(auth.uid()) IN ('owner', 'admin', 'viewer')
+      OR service_technician_id = auth.uid()
+    )
+  );
+
+-- Only owners/admins can modify invoices
+CREATE POLICY "invoices_insert" ON invoices
+  FOR INSERT WITH CHECK (
+    get_user_role(auth.uid()) IN ('owner', 'admin')
+  );
+
+CREATE POLICY "invoices_update" ON invoices
+  FOR UPDATE USING (
+    get_user_role(auth.uid()) IN ('owner', 'admin')
+  );
+
+CREATE POLICY "invoices_delete" ON invoices
+  FOR DELETE USING (
+    get_user_role(auth.uid()) IN ('owner', 'admin')
+  );
+
+-- ============================================================
 -- AUTH TRIGGERS
 -- ============================================================
