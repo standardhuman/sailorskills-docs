@@ -240,5 +240,21 @@ CREATE POLICY "users_delete_owner" ON users
   );
 
 -- ============================================================
+-- AUDIT LOGS TABLE RLS
+-- ============================================================
+
+ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
+
+-- Only owners/admins can view audit logs
+CREATE POLICY "audit_logs_select_admin" ON audit_logs
+  FOR SELECT USING (
+    get_user_role(auth.uid()) IN ('owner', 'admin')
+  );
+
+-- No one can manually insert/update/delete audit logs (only via triggers)
+CREATE POLICY "audit_logs_no_manual_changes" ON audit_logs
+  FOR ALL USING (false);
+
+-- ============================================================
 -- AUTH TRIGGERS
 -- ============================================================
