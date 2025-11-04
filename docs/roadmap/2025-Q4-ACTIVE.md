@@ -544,16 +544,20 @@ For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
       - Counted all 909 customers (177 real + 732 test)
       - Test customers have no boats, skewing "customers without boats" metric
       - No is_test flag in schema to filter test data
-  - **RECOMMENDATIONS (Post-Cleanup):**
-    1. **✅ CLEANUP COMPLETE** - 756 test customers removed from production
-    2. **🔜 Add is_test flag to schema** for future test data isolation
-       - ALTER TABLE customers ADD COLUMN is_test BOOLEAN DEFAULT FALSE
-       - All queries should add WHERE is_test = FALSE
-    3. **Dashboard Widget Updates:**
-       - Display: "177 Customers (176 boats)"
-       - Revenue: "$182,979 Total | $170,124 Paid (93%)"
-       - Add filter to exclude test data from all metrics
-    4. **Data Governance:**
+  - **✅ QUICK IMPROVEMENTS COMPLETE (2025-11-04):**
+    1. **✅ DATABASE CLEANUP** - 756 test customers removed from production
+    2. **✅ is_test FLAG ADDED** - Future test data isolation in place
+       - Added is_test BOOLEAN DEFAULT FALSE to: customers, boats, invoices, service_orders
+       - All dashboard queries now filter: WHERE is_test = FALSE
+       - Prevents future test data pollution
+    3. **✅ DASHBOARD BUSINESS SUMMARY CARD** - Real-time stats display
+       - Shows: "177 Customers (176 boats)" (dynamically loaded)
+       - Shows: "$182,979 Total Revenue" | "$170,124 Paid (93% collection rate)"
+       - Shows: "1,599 Total Invoices"
+       - Tooltips explain each metric
+       - Real-time queries exclude test data
+       - Responsive grid layout with hover effects
+    4. **🔜 DATA GOVERNANCE** (Future):
        - Create separate test database/schema for testing
        - Never create test data in production database
        - Document cleanup procedures
