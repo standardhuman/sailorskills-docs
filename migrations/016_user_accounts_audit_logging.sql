@@ -135,6 +135,75 @@ COMMENT ON FUNCTION get_user_metadata IS 'Get current user metadata from JWT';
 -- AUDIT TRIGGERS
 -- ============================================================
 
+CREATE OR REPLACE FUNCTION log_audit_trail() RETURNS trigger AS $$
+BEGIN
+  INSERT INTO audit_logs (
+    user_id,
+    entity_type,
+    entity_id,
+    action,
+    changes,
+    ip_address,
+    service_name,
+    timestamp
+  ) VALUES (
+    auth.uid(),
+    TG_TABLE_NAME,
+    COALESCE(NEW.id, OLD.id),
+    TG_OP,
+    CASE
+      WHEN TG_OP = 'DELETE' THEN jsonb_build_object('before', row_to_json(OLD))
+      WHEN TG_OP = 'INSERT' THEN jsonb_build_object('after', row_to_json(NEW))
+      WHEN TG_OP = 'UPDATE' THEN jsonb_build_object('before', row_to_json(OLD), 'after', row_to_json(NEW))
+    END,
+    current_setting('request.headers', true)::json->>'x-real-ip',
+    current_setting('app.service_name', true),
+    NOW()
+  );
+
+  RETURN COALESCE(NEW, OLD);
+END;
+$$ LANGUAGE plpgsql;
+
+COMMENT ON FUNCTION log_audit_trail IS 'Automatically log all table changes to audit_logs';
+
+-- Apply audit triggers to all core tables
+CREATE TRIGGER audit_service_logs
+  AFTER INSERT OR UPDATE OR DELETE ON service_logs
+  FOR EACH ROW EXECUTE FUNCTION log_audit_trail();
+
+CREATE TRIGGER audit_boats
+  AFTER INSERT OR UPDATE OR DELETE ON boats
+  FOR EACH ROW EXECUTE FUNCTION log_audit_trail();
+
+CREATE TRIGGER audit_invoices
+  AFTER INSERT OR UPDATE OR DELETE ON invoices
+  FOR EACH ROW EXECUTE FUNCTION log_audit_trail();
+
+CREATE TRIGGER audit_payments
+  AFTER INSERT OR UPDATE OR DELETE ON payments
+  FOR EACH ROW EXECUTE FUNCTION log_audit_trail();
+
+CREATE TRIGGER audit_customers
+  AFTER INSERT OR UPDATE OR DELETE ON customers
+  FOR EACH ROW EXECUTE FUNCTION log_audit_trail();
+
+CREATE TRIGGER audit_inventory
+  AFTER INSERT OR UPDATE OR DELETE ON inventory
+  FOR EACH ROW EXECUTE FUNCTION log_audit_trail();
+
+CREATE TRIGGER audit_users
+  AFTER INSERT OR UPDATE OR DELETE ON users
+  FOR EACH ROW EXECUTE FUNCTION log_audit_trail();
+
+CREATE TRIGGER audit_boat_anodes
+  AFTER INSERT OR UPDATE OR DELETE ON boat_anodes
+  FOR EACH ROW EXECUTE FUNCTION log_audit_trail();
+
+CREATE TRIGGER audit_service_orders
+  AFTER INSERT OR UPDATE OR DELETE ON service_orders
+  FOR EACH ROW EXECUTE FUNCTION log_audit_trail();
+
 -- ============================================================
 -- RLS POLICIES
 -- ============================================================
