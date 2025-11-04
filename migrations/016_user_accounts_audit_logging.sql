@@ -357,3 +357,17 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE FUNCTION handle_new_staff_user();
 
 COMMENT ON FUNCTION handle_new_staff_user IS 'Auto-create users table record when staff user signs up via Supabase Auth';
+
+-- ============================================================
+-- GRANTS
+-- ============================================================
+
+GRANT SELECT, INSERT, UPDATE ON users TO authenticated;
+GRANT SELECT ON audit_logs TO authenticated;
+GRANT USAGE ON SCHEMA public TO authenticated;
+
+-- ============================================================
+-- COMPLETION
+-- ============================================================
+
+COMMENT ON DATABASE postgres IS 'Sailor Skills multi-user database with comprehensive audit logging';
