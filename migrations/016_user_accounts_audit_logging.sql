@@ -37,6 +37,27 @@ COMMENT ON COLUMN users.hourly_rate IS 'Reference only, not used for job-based c
 -- AUDIT LOGS TABLE
 -- ============================================================
 
+CREATE TABLE audit_logs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES users(id) ON DELETE SET NULL,
+  entity_type text NOT NULL,
+  entity_id uuid NOT NULL,
+  action text NOT NULL CHECK (action IN ('INSERT', 'UPDATE', 'DELETE')),
+  changes jsonb,
+  ip_address text,
+  service_name text,
+  timestamp timestamptz DEFAULT NOW()
+);
+
+CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id);
+CREATE INDEX idx_audit_logs_entity_type ON audit_logs(entity_type);
+CREATE INDEX idx_audit_logs_entity_id ON audit_logs(entity_id);
+CREATE INDEX idx_audit_logs_timestamp ON audit_logs(timestamp DESC);
+CREATE INDEX idx_audit_logs_service_name ON audit_logs(service_name);
+
+COMMENT ON TABLE audit_logs IS 'Comprehensive audit trail of all data changes';
+COMMENT ON COLUMN audit_logs.changes IS 'JSONB with before/after values: {before: {...}, after: {...}}';
+
 -- ============================================================
 -- TRACKING COLUMNS
 -- ============================================================
