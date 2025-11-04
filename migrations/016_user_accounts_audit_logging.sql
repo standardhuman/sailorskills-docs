@@ -328,3 +328,32 @@ CREATE POLICY "invoices_delete" ON invoices
 -- ============================================================
 -- AUTH TRIGGERS
 -- ============================================================
+
+CREATE OR REPLACE FUNCTION handle_new_staff_user() RETURNS trigger AS $$
+BEGIN
+  IF (NEW.raw_user_meta_data->>'user_type') = 'staff' THEN
+    INSERT INTO public.users (
+      id,
+      email,
+      full_name,
+      role,
+      user_type,
+      active
+    ) VALUES (
+      NEW.id,
+      NEW.email,
+      NEW.raw_user_meta_data->>'full_name',
+      NEW.raw_user_meta_data->>'role',
+      COALESCE(NEW.raw_user_meta_data->>'user_type_detail', 'employee'),
+      true
+    );
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_new_staff_user();
+
+COMMENT ON FUNCTION handle_new_staff_user IS 'Auto-create users table record when staff user signs up via Supabase Auth';
