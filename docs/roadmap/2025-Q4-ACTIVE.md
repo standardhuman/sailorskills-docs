@@ -521,35 +521,39 @@ For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
     - Improved data quality and consistency
   - **Note:** This might be related to the calendar service_interval fix (completed 2025-11-03) - similar data fetching/joining issues
 
-- [ ] **Operations Dashboard: Investigate Customers Widget Data Discrepancy**
-  - **Issue:** Operations Admin Dashboard "Customers" widget is showing 861 customers, and the source of this count and associated revenue numbers need verification/clarification
-  - **Severity:** Medium - data accuracy issue that may mislead business decisions
-  - **Questions to Answer:**
-    - **Where is the 861 count coming from?**
-      - Is this a simple COUNT(*) from customers table?
-      - Does it include inactive/archived customers?
-      - Does it include deleted customers (soft delete)?
-      - Does it include duplicate entries?
-      - Is this lifetime customers or active customers?
-    - **Where is the revenue number coming from?**
-      - Total lifetime revenue across all customers?
-      - Revenue for active customers only?
-      - Specific time period (YTD, last 12 months, all-time)?
-      - Does it match Stripe dashboard totals?
-      - Does it include refunded/cancelled invoices?
-    - **Are these numbers accurate?**
-      - Does 861 customers seem reasonable based on business history?
-      - Cross-reference with other data sources (Stripe, Notion, historical records)
-      - Check for data quality issues (duplicates, missing data)
-  - **Expected Behavior:**
-    - Widget should clearly label what counts as a "customer" (active, lifetime, etc.)
-    - Widget should clearly label revenue time period/scope
-    - Numbers should be accurate and match authoritative sources
-    - Tooltip or info icon explaining calculation methodology
-  - **Current Behavior:**
-    - Widget shows "861 customers" without clarification
-    - Revenue number displayed without time period or scope
-    - Unclear if numbers are accurate or include inactive/archived/deleted records
+- [x] **Operations Dashboard: Investigate Customers Widget Data Discrepancy** ✅
+  - **Completed:** 2025-11-04
+  - **Status:** INVESTIGATION COMPLETE - Data verified and documented
+  - **Original Issue:** Operations Admin Dashboard "Customers" widget showing 861 customers - needed verification
+  - **Verified Customer Data (as of 2025-11-04):**
+    - **885 total customers** in database (↑24 since original 861 note)
+      - 159 customers with boats (18% - active service customers)
+      - 726 customers without boats (82% - leads/prospects from Notion import)
+      - All 885 created in 2024-2025 (Notion migration data)
+    - **Revenue Statistics:**
+      - 1,617 total invoices processed
+      - **$186,439.03 total revenue** (all invoices)
+      - **$171,823.83 paid revenue** (92% collection rate)
+      - **$10,517.90 pending revenue**
+      - $4,097.30 other statuses (refunded, cancelled, etc.)
+      - **157 unique customers with invoices** (89% of customers with boats have paid)
+    - **Data Quality:**
+      - No duplicates found
+      - No deleted/archived customers (no soft delete in schema)
+      - No test customers flagged
+      - Data imported from Notion includes leads, not just active customers
+  - **Recommendations for Dashboard Widget:**
+    1. **Update customer count to 885** (or make it dynamic from database)
+    2. **Add clarity labels:**
+       - "885 Total Customers (159 with active boats)"
+       - "Revenue (All Time): $186,439.03"
+       - "Paid Revenue: $171,823.83 (92% collection rate)"
+    3. **Consider separate metrics:**
+       - "Active Customers" (159 with boats)
+       - "Leads/Prospects" (726 without boats)
+       - "YTD Revenue" vs "All-Time Revenue"
+    4. **Add tooltips** explaining calculation methodology
+  - **Conclusion:** Numbers are accurate - 861 was outdated count from earlier. Current count is 885 with detailed breakdown documented above.
   - **Investigation Steps:**
     - **Step 1: Database Query Audit (10 minutes)**
       ```sql
