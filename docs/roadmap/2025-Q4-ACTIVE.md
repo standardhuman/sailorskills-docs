@@ -1101,3 +1101,362 @@ For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
   - **Priority:** Medium (valuable planning tool, not urgent)
   - **Estimated Effort:** 8 hours
   - **Impact:** Proactive scheduling, better capacity planning, improved customer communication
+
+- [ ] **Operations Forecast: Inactive Boats Showing in Predictions**
+  - **Issue:** Operations > Forecast page is showing boats that should not appear because they have "Subbed" or "One-time" service intervals (not active recurring orders)
+  - **Examples of boats incorrectly appearing:** Shirley Jean, Blue Heeler, Delta Cloud, Impulse, Millennium Falcon
+  - **Severity:** Medium - causes confusion in forecast planning, shows boats that won't actually need service
+  - **Expected Behavior:**
+    - Forecast should ONLY show boats with active recurring orders (1-mo, 2-mo, 3-mo intervals)
+    - Boats with "Subbed" status should be excluded (customer is using competitor)
+    - Boats with "One-time" intervals should be excluded (no recurring prediction possible)
+    - Forecast should filter to active boats only
+  - **Current Broken Behavior:**
+    - Forecast showing boats with "Subbed" status (e.g., Shirley Jean, Blue Heeler)
+    - Forecast showing boats with "One-time" service intervals (e.g., Delta Cloud, Impulse, Millennium Falcon)
+    - Inactive boats appearing in monthly predictions
+    - Forecast count inflated by boats that won't actually be serviced
+  - **Root Cause Investigation:**
+    - **Hypothesis 1: Missing service_interval filter**
+      - Forecast query might not filter by service_interval type
+      - Check: Does query have `WHERE service_interval IN ('1-mo', '2-mo', '3-mo')`?
+    - **Hypothesis 2: Missing boat status filter**
+      - Boats might have an `is_active` or `status` field that's not being checked
+      - Check: Is there a boats.is_active or service_orders.status column?
+      - Check: Are "Subbed" boats marked as inactive somewhere?
+    - **Hypothesis 3: Service order status not checked**
+      - service_orders might have a status field ('active', 'cancelled', 'paused')
+      - Check: Does service_orders have status column indicating active vs inactive orders?
+    - **Hypothesis 4: Data quality issue**
+      - Boats might have both "Subbed" AND a recurring interval set
+      - Check: Can a boat have multiple conflicting service_orders?
+  - **Debug Steps:**
+    - **Step 1: Inspect Problem Boats (10 minutes)**
+      ```sql
+      -- Check the status of boats incorrectly appearing in forecast
+      SELECT
+        b.id, b.name,
+        b.is_active,
+        so.service_interval,
+        so.status as order_status,
+        so.scheduled_date
+      FROM boats b
+      LEFT JOIN service_orders so ON b.id = so.boat_id
+      WHERE b.name IN ('Shirley Jean', 'Blue Heeler', 'Delta Cloud', 'Impulse', 'Millennium Falcon')
+      ORDER BY b.name;
+      ```
+    - **Step 2: Check Forecast Query Logic (10 minutes)**
+      - Inspect forecast page component code
+      - Find the SQL query or API call that generates forecast
+      - Document: What filters are applied?
+      - Check: Is service_interval being filtered?
+      - Check: Is boat/order status being filtered?
+    - **Step 3: Check for "Subbed" Status (10 minutes)**
+      ```sql
+      -- Find how "Subbed" status is stored
+      SELECT DISTINCT service_interval FROM service_orders;
+      SELECT DISTINCT status FROM service_orders;
+      SELECT DISTINCT is_active FROM boats;
+
+      -- Find all "Subbed" boats
+      SELECT b.name, so.service_interval, so.status
+      FROM boats b
+      JOIN service_orders so ON b.id = so.boat_id
+      WHERE so.service_interval = 'Subbed' OR so.status LIKE '%sub%';
+      ```
+    - **Step 4: Count Active vs Inactive Boats (5 minutes)**
+      ```sql
+      -- How many boats by service interval?
+      SELECT
+        service_interval,
+        COUNT(*) as count
+      FROM service_orders
+      GROUP BY service_interval
+      ORDER BY count DESC;
+
+      -- How many boats should be in forecast vs. excluded?
+      SELECT
+        CASE
+          WHEN service_interval IN ('1-mo', '2-mo', '3-mo') THEN 'Include in Forecast'
+          ELSE 'Exclude from Forecast'
+        END as forecast_status,
+        COUNT(*) as count
+      FROM service_orders
+      GROUP BY forecast_status;
+      ```
+  - **Likely Fixes:**
+    - **Fix 1: Add service_interval filter to forecast query**
+      ```sql
+      -- Update forecast query
+      WHERE service_interval IN ('1-mo', '2-mo', '3-mo')
+        AND service_interval NOT IN ('Subbed', 'One-time', 'one-time')
+      ```
+    - **Fix 2: Add boat/order status filter**
+      ```sql
+      -- If status column exists
+      WHERE so.status = 'active'
+        AND b.is_active = true
+      ```
+    - **Fix 3: Update prediction logic to exclude inactive intervals**
+      ```javascript
+      // In service-predictor.js
+      const ACTIVE_INTERVALS = ['1-mo', '2-mo', '3-mo'];
+      const INACTIVE_INTERVALS = ['Subbed', 'One-time', 'one-time'];
+
+      function shouldIncludeInForecast(serviceInterval) {
+        return ACTIVE_INTERVALS.includes(serviceInterval);
+      }
+      ```
+    - **Fix 4: Clean up data - mark "Subbed" boats as inactive**
+      ```sql
+      -- If boats have is_active column
+      UPDATE boats b
+      SET is_active = false
+      FROM service_orders so
+      WHERE b.id = so.boat_id
+        AND so.service_interval = 'Subbed';
+      ```
+  - **Testing After Fix:**
+    - Reload forecast page
+    - Verify Shirley Jean, Blue Heeler, Delta Cloud, Impulse, Millennium Falcon no longer appear
+    - Count boats in forecast and verify against expected count
+    - Test each interval: 1-mo boats, 2-mo boats, 3-mo boats
+    - Verify "Subbed" and "One-time" boats are excluded
+    - Check forecast counts match dashboard counts
+  - **Database Schema Verification:**
+    - Table: service_orders (columns: boat_id, service_interval, status?)
+    - Table: boats (columns: id, name, is_active?)
+    - Check: Is service_interval stored as 'Subbed', 'One-time', etc.?
+    - Check: Is there a separate status column or is status stored in service_interval?
+  - **Dependencies:**
+    - Service Prediction & Forecast feature (✅ completed 2025-11-04)
+    - Operations Forecast page (✅ exists)
+  - **Priority:** Medium-High (forecast accuracy important for planning)
+  - **Estimated Effort:** 1-2 hours
+    - Investigation: 0.5 hour
+    - Fix query/logic: 0.5 hour
+    - Testing: 0.25 hour
+    - Data cleanup (if needed): 0.5 hour
+  - **Impact:**
+    - Accurate forecast showing only active boats
+    - Correct capacity planning (not overestimating workload)
+    - Clear distinction between active and inactive customers
+    - Better monthly predictions
+  - **Success Criteria:**
+    - Zero "Subbed" boats appear in forecast
+    - Zero "One-time" boats appear in forecast
+    - Only active recurring intervals (1-mo, 2-mo, 3-mo) shown
+    - Forecast count matches expected active boat count
+
+- [ ] **Operations Dashboard: Customer Count Showing 226 (Should Be Less Than 179 Boats)**
+  - **Issue:** Operations > Dashboard is displaying "226 customers" when there are only 179 boats total, which doesn't make sense since some customers own multiple boats (customer count should be ≤ boat count)
+  - **Severity:** Medium - data accuracy issue that suggests database problems or incorrect query logic
+  - **Expected Behavior:**
+    - Customer count should be less than or equal to boat count (one customer can own multiple boats)
+    - If there are 179 boats, expect roughly 150-170 unique customers (accounting for multi-boat owners)
+    - Widget should clearly indicate what's being counted (all-time customers? active customers?)
+  - **Current Broken Behavior:**
+    - Dashboard showing "226 customers" when only 179 boats exist
+    - Mathematically impossible if data is clean (unless counting historical/deleted customers)
+  - **Possible Causes:**
+    - **Hypothesis 1: Counting deleted/inactive customers**
+      - Query might include soft-deleted customers (deleted_at IS NOT NULL)
+      - Query might include inactive customers (is_active = false)
+    - **Hypothesis 2: Test data not cleaned up**
+      - Despite 2025-11-04 cleanup, more test data might exist
+      - New test customers created after cleanup
+    - **Hypothesis 3: Duplicate customers in database**
+      - Same customer entered multiple times with slight variations
+      - Import process created duplicates
+    - **Hypothesis 4: Counting customers without boats**
+      - Query might include customers who never got boats added
+      - Orphaned customer records from incomplete signups/quotes
+    - **Hypothesis 5: Query logic error**
+      - Dashboard using wrong query or table
+      - Not properly filtering by is_test flag (added 2025-11-04)
+  - **Debug Steps:**
+    - **Step 1: Verify Real Customer Count (5 minutes)**
+      ```sql
+      -- Count active, real customers with proper filters
+      SELECT COUNT(*) as total_customers
+      FROM customers
+      WHERE is_test = FALSE
+        AND (deleted_at IS NULL OR deleted_at IS NULL);  -- Assuming soft delete
+
+      -- Count customers with boats (should be ≤ 179)
+      SELECT COUNT(DISTINCT c.id) as customers_with_boats
+      FROM customers c
+      INNER JOIN boats b ON c.id = b.customer_id
+      WHERE c.is_test = FALSE;
+
+      -- Count customers without boats (orphaned records)
+      SELECT COUNT(*) as customers_without_boats
+      FROM customers c
+      WHERE c.is_test = FALSE
+        AND NOT EXISTS (SELECT 1 FROM boats b WHERE b.customer_id = c.id);
+
+      -- Show breakdown by boat count per customer
+      SELECT
+        COUNT(b.id) as boats_per_customer,
+        COUNT(*) as customer_count
+      FROM customers c
+      LEFT JOIN boats b ON c.id = b.customer_id
+      WHERE c.is_test = FALSE
+      GROUP BY COUNT(b.id)
+      ORDER BY boats_per_customer;
+      ```
+    - **Step 2: Check Dashboard Query (10 minutes)**
+      - Inspect Operations dashboard component code
+      - Find the exact query used for customer count widget
+      - Document: What table/query is being used?
+      - Check: Is is_test = FALSE filter applied?
+      - Check: Is deleted_at filter applied?
+      - Check: Is there caching that might show stale count?
+    - **Step 3: Look for Duplicates (10 minutes)**
+      ```sql
+      -- Find potential duplicate customers by name
+      SELECT name, COUNT(*) as count
+      FROM customers
+      WHERE is_test = FALSE
+      GROUP BY name
+      HAVING COUNT(*) > 1
+      ORDER BY count DESC;
+
+      -- Find potential duplicates by phone
+      SELECT phone, COUNT(*) as count, STRING_AGG(name, ', ') as customer_names
+      FROM customers
+      WHERE is_test = FALSE AND phone IS NOT NULL
+      GROUP BY phone
+      HAVING COUNT(*) > 1;
+
+      -- Find potential duplicates by email
+      SELECT email, COUNT(*) as count, STRING_AGG(name, ', ') as customer_names
+      FROM customers
+      WHERE is_test = FALSE AND email IS NOT NULL
+      GROUP BY email
+      HAVING COUNT(*) > 1;
+      ```
+    - **Step 4: Check for Orphaned/Incomplete Records (10 minutes)**
+      ```sql
+      -- Customers with no boats, no invoices, no service logs (might be incomplete signups)
+      SELECT
+        c.id, c.name, c.email, c.created_at,
+        COUNT(b.id) as boat_count,
+        COUNT(i.id) as invoice_count,
+        COUNT(sl.id) as service_log_count
+      FROM customers c
+      LEFT JOIN boats b ON c.id = b.customer_id
+      LEFT JOIN invoices i ON c.id = i.customer_id
+      LEFT JOIN service_logs sl ON c.id = sl.customer_id
+      WHERE c.is_test = FALSE
+      GROUP BY c.id, c.name, c.email, c.created_at
+      HAVING COUNT(b.id) = 0
+        AND COUNT(i.id) = 0
+        AND COUNT(sl.id) = 0
+      ORDER BY c.created_at DESC;
+      ```
+    - **Step 5: Verify Boat Count (5 minutes)**
+      ```sql
+      -- Confirm actual boat count
+      SELECT COUNT(*) as total_boats
+      FROM boats
+      WHERE is_test = FALSE;
+
+      -- Verify customer-to-boat ratio
+      SELECT
+        (SELECT COUNT(*) FROM customers WHERE is_test = FALSE) as customers,
+        (SELECT COUNT(*) FROM boats WHERE is_test = FALSE) as boats,
+        ROUND((SELECT COUNT(*) FROM boats WHERE is_test = FALSE)::NUMERIC / (SELECT COUNT(*) FROM customers WHERE is_test = FALSE), 2) as boats_per_customer;
+      ```
+  - **Likely Fixes:**
+    - **Fix 1: Update dashboard query to filter properly**
+      ```sql
+      -- Correct query for customer count
+      SELECT COUNT(DISTINCT c.id)
+      FROM customers c
+      INNER JOIN boats b ON c.id = b.customer_id
+      WHERE c.is_test = FALSE
+        AND b.is_test = FALSE;
+      ```
+    - **Fix 2: Clean up orphaned customer records**
+      ```sql
+      -- Mark customers without boats as test data or delete
+      UPDATE customers
+      SET is_test = TRUE
+      WHERE id NOT IN (SELECT DISTINCT customer_id FROM boats)
+        AND created_at > '2025-11-01'; -- Recent orphans might be test data
+      ```
+    - **Fix 3: Merge duplicate customers**
+      - Identify duplicates via queries above
+      - Manually review and merge (update foreign keys to point to canonical customer)
+      - Document merge process for future reference
+    - **Fix 4: Update widget label for clarity**
+      ```javascript
+      // Change from "226 Customers" to "177 Customers (179 boats)"
+      // Show both counts to verify relationship makes sense
+      ```
+  - **Testing After Fix:**
+    - Reload dashboard and verify customer count
+    - Verify count is less than or equal to boat count (179)
+    - Manually count a few customers with multiple boats to spot-check
+    - Compare with previous cleanup (should be close to 177 from 2025-11-04)
+    - Cross-reference with Stripe customer count
+  - **Expected Outcome:**
+    - Customer count should be approximately 170-177 (based on 179 boats)
+    - Count should make logical sense (≤ boat count)
+    - No orphaned or test data inflating count
+  - **Dependencies:**
+    - Operations Dashboard (✅ exists)
+    - Previous customer data cleanup (✅ completed 2025-11-04)
+  - **Priority:** Medium (data accuracy important for business understanding)
+  - **Estimated Effort:** 1-2 hours
+    - Investigation: 0.5 hour
+    - Query fix: 0.25 hour
+    - Data cleanup: 0.5 hour
+    - Testing: 0.25 hour
+  - **Impact:**
+    - Accurate customer count for business metrics
+    - Confidence in dashboard data
+    - Cleaner database with no orphaned records
+    - Better understanding of customer-to-boat ratio
+  - **Success Criteria:**
+    - Customer count ≤ 179 (boat count)
+    - Customer count close to expected ~170-177 range
+    - No orphaned customers without boats
+    - Dashboard query verified and documented
+
+- [x] **RESOLVED: Operations Pages Loading Fixed - Authentication Error Handling** ✅
+  - **Resolved:** 2025-11-04
+  - **Status:** FIXED - Authentication system working, needed error handling
+  - **Issue:** Operations dashboard stuck on blank page, tabs (Calendar, Queue, Boats, Service Logs) not loading
+  - **Root Cause:** `initSupabaseAuth()` was failing silently without error handling, leaving app hidden
+  - **Investigation Process:**
+    - Used systematic debugging methodology (Phase 1: Root Cause Investigation)
+    - Playwright automated testing to capture console logs and network requests
+    - Identified app stuck with `opacity: 0, visibility: hidden` waiting for authentication
+    - Discovered `initSupabaseAuth()` call had no try-catch error handling
+    - Silent failures prevented login modal from showing errors
+  - **Technical Details:**
+    - Operations is a **Single Page Application (SPA)** at `https://ops.sailorskills.com`
+    - CSS hides app until `body.authenticated` class is added
+    - JavaScript file loading successfully (200 status)
+    - Auth module (`init-supabase-auth.js`) loadable and functional
+    - Issue was missing error visibility, NOT broken authentication
+  - **Fix Implemented:** (`sailorskills-operations/src/main.js:189-217`)
+    - Added try-catch around `initSupabaseAuth()` call
+    - Detailed console logging before/after auth (`🔐 Calling initSupabaseAuth...`, `✅ initSupabaseAuth completed`)
+    - User-facing error message if auth initialization fails
+    - Full stack trace logging for debugging
+  - **Test Results After Fix:**
+    - ✅ Login modal now appears correctly
+    - ✅ User can log in with credentials
+    - ✅ Dashboard loads successfully
+    - ✅ All tabs visible and functional (Calendar, Queue, Boats, Service Logs)
+    - ✅ Navigation working properly
+  - **Files Changed:**
+    - `sailorskills-operations/src/main.js` - Added error handling (commit: ea8df4b)
+  - **Deployment:**
+    - Merged to main branch
+    - Auto-deployed via Vercel
+    - Verified working on production (`https://ops.sailorskills.com`)
+  - **Impact:** Operations fully functional - critical P0 issue resolved
