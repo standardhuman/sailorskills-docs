@@ -776,6 +776,151 @@ For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
   - **Impact:** ✅ Complete separation achieved, independent deployments, improved security
   - **Next Steps:** Enhance portal features (notifications, better mobile UX, dashboard widgets)
 
+- [ ] **Sailor Skills Community Forum & Knowledge Base**
+  - **Dependencies:** Customer Portal (completed Q4 2025 - for authentication integration)
+  - **Blocks:** None
+  - **Rationale:** Build engaged community of boat owners to share knowledge, reduce support burden through peer-to-peer help, increase customer retention through community engagement, gather product feedback, and establish Sailor Skills as thought leader in marine maintenance. Forums create "stickiness" - customers engaged in community are less likely to churn and more likely to refer others.
+  - **Scope:** Customer community platform with discussion forums, knowledge base, and member profiles
+    - **Core Forum Features:**
+      - Discussion categories: Boat Maintenance, Diving Tips, Product Recommendations, Bottom Paint, Anodes, Marina Recommendations, DIY Projects, Ask the Experts
+      - Thread creation, replies, nested comments
+      - Upvoting/downvoting for quality content
+      - Best answer selection for Q&A threads
+      - Rich text editor with image uploads
+      - Search across all discussions (keywords, tags, categories)
+      - Notifications for replies, mentions, followed threads
+      - Private messaging between members (optional)
+    - **Knowledge Base Integration:**
+      - Curated articles from best forum discussions
+      - Staff-authored guides (hull cleaning best practices, anode replacement, seasonal maintenance)
+      - Video tutorials embedded from Video service
+      - Searchable documentation library
+      - "Related Discussions" links from articles to forum threads
+    - **Member Profiles & Reputation:**
+      - User profiles linked to Portal accounts (seamless authentication)
+      - Display boats owned (opt-in visibility)
+      - Reputation points system (earned through helpful posts, best answers)
+      - Badges: Active Member, Expert Contributor, Helpful, etc.
+      - Activity feed: recent posts, comments, likes
+      - Optional bio and profile photo
+    - **Moderation & Safety:**
+      - Staff moderation tools (approve/delete posts, ban users, pin announcements)
+      - Community guidelines and code of conduct
+      - Report/flag system for inappropriate content
+      - Auto-moderation: spam detection, profanity filter
+      - Moderator roles (staff can designate trusted community members)
+    - **Technical Implementation Options:**
+      - **Option A: Third-Party Platform (Faster Launch)**
+        - Use Discourse (open-source, self-hosted or cloud)
+        - SSO integration with Portal authentication
+        - Custom branding to match Sailor Skills design
+        - Lower development effort (2-3 weeks setup)
+        - Proven features, active community, regular updates
+        - Cost: Free (self-hosted) or ~$50-100/month (cloud hosting)
+      - **Option B: Custom Build (Full Control)**
+        - Build from scratch with React + Supabase
+        - Full integration with existing services
+        - Custom features tailored to marine industry
+        - Higher development effort (6-8 weeks)
+        - Complete design and feature control
+        - No ongoing platform costs (only hosting)
+      - **Recommendation:** Start with Discourse (Option A) for fast launch, migrate to custom if needed after validating community engagement
+  - **Database Schema (if custom build):**
+    - New tables: `forum_categories`, `forum_threads`, `forum_posts`, `forum_reactions`, `forum_subscriptions`, `knowledge_base_articles`, `user_reputation`
+    - Link to existing `customers` table for authentication
+    - Full-text search indexes on posts and articles
+  - **UI/UX Locations:**
+    - **Standalone Service:** `community.sailorskills.com` (new subdomain)
+    - **Portal Integration:** "Community" navigation link from Portal
+    - **Marketing Site:** Link from main site footer + "Community" page showcasing benefits
+    - **Email Digests:** Weekly digest of popular discussions (opt-in)
+  - **Implementation Phases:**
+    - **Phase 1 (Week 1-2):** Platform selection, Discourse setup (or custom database schema), SSO integration with Portal
+    - **Phase 2 (Week 2-3):** Category structure, initial content seeding, moderation tools configuration
+    - **Phase 3 (Week 3-4):** Knowledge base setup, article migration from existing docs, video embedding
+    - **Phase 4 (Week 4):** Member profiles, reputation system, notification preferences
+    - **Phase 5 (Week 4-5):** Beta launch to 20-30 engaged customers, gather feedback, iterate
+    - **Phase 6 (Week 5-6):** Public launch, marketing campaign, email invitations to all customers
+  - **Content Strategy:**
+    - **Seed Content (Launch Week):**
+      - Create 10-15 initial threads covering common questions (hull cleaning frequency, best bottom paint, anode lifespan)
+      - Invite beta users to share their boat maintenance stories
+      - Staff post weekly "Ask Me Anything" threads
+    - **Ongoing Content:**
+      - Weekly discussion prompts from staff ("What's your pre-hurricane checklist?")
+      - Highlight customer success stories (before/after photos)
+      - Seasonal topics (spring commissioning, winter layup)
+      - Product spotlight threads (new anode types, eco-friendly paint)
+    - **Knowledge Base Articles:**
+      - Convert existing documentation to articles (12-15 guides)
+      - Create "Getting Started" series for new boat owners
+      - Embed video tutorials from Video service
+      - Update articles quarterly based on forum discussions
+  - **Community Management:**
+    - **Moderation Strategy:**
+      - Owner + 1-2 staff members as initial moderators
+      - Establish community guidelines (respectful, helpful, no spam/sales)
+      - Response time goal: 24 hours for flagged content, 48 hours for questions
+      - Identify and invite active/helpful members as volunteer moderators (after 3 months)
+    - **Engagement Tactics:**
+      - Weekly featured thread (highlight best discussion in email digest)
+      - Monthly "Member Spotlight" showcasing active contributor
+      - Contests/giveaways (best maintenance tip, photo contest)
+      - Seasonal events (spring cleaning tips, hurricane prep)
+  - **Impact:**
+    - **Customer Retention:** Engaged community members have 30-50% lower churn (industry benchmarks)
+    - **Support Efficiency:** Reduce support tickets by 20-30% as customers help each other
+    - **Brand Loyalty:** Build emotional connection beyond transactional service relationship
+    - **Organic Marketing:** Active forum ranks in Google search, drives new customer discovery
+    - **Product Feedback:** Direct pipeline for feature requests and improvement ideas
+    - **Referrals:** Community members become brand advocates, refer friends in their marina
+    - **Content Marketing:** User-generated content for social media, newsletters, marketing site
+  - **Success Metrics:**
+    - **Launch Targets (3 months):**
+      - 100+ registered members (20%+ of customer base)
+      - 200+ threads created
+      - 500+ posts/comments
+      - 30+ active weekly users
+    - **6-Month Targets:**
+      - 200+ registered members (40%+ of customer base)
+      - 50+ new threads per month
+      - 200+ posts per month
+      - 100+ active weekly users
+      - 20+ knowledge base articles published
+    - **Engagement Metrics:**
+      - Average session duration: 5+ minutes
+      - Return visit rate: 40%+ within 30 days
+      - Post reply rate: 60%+ of threads get at least 1 reply
+      - Staff response time: <24 hours for questions
+  - **Dependencies:**
+    - Customer Portal authentication (✅ completed Q4 2025)
+    - Email notification system via Resend (✅ exists)
+    - Video service (for embedding tutorials - ✅ exists)
+  - **Blocks:** None (independent feature, can run in parallel with other initiatives)
+  - **Priority:** Medium (Q1 2026 - valuable for retention but not critical infrastructure)
+  - **Estimated Effort:** 5-6 weeks (40-48 hours)
+    - **Discourse Setup (Option A):** 2-3 weeks
+      - Platform setup & hosting: 0.5 week
+      - SSO integration: 0.5 week
+      - Custom branding & configuration: 0.5 week
+      - Content seeding & moderation setup: 0.5 week
+      - Beta testing & launch: 0.5 week
+    - **Custom Build (Option B):** 6-8 weeks
+      - Database schema & backend: 2 weeks
+      - Forum UI (threads, posts, comments): 2 weeks
+      - Knowledge base & search: 1 week
+      - Profiles & reputation system: 1 week
+      - Moderation tools: 1 week
+      - Testing & launch: 1 week
+  - **Questions for Decision:**
+    - Discourse vs. custom build? (Proposed: Discourse for faster launch, proven platform)
+    - Allow public (non-customer) read access or members-only? (Proposed: members-only for exclusivity, can open later)
+    - Integrate private messaging between members? (Proposed: yes, builds community connections)
+    - Gamification elements (reputation points, badges)? (Proposed: yes, drives engagement)
+    - Staff time commitment for moderation? (Proposed: 5-10 hours/week initially, scale as needed)
+    - Beta group size? (Proposed: 20-30 most engaged customers, invite in phases)
+    - Offer incentives for early adopters? (Proposed: yes - beta testers get exclusive "Founding Member" badge)
+
 - [ ] **Scheduling Enhancements - Time-Slot Based Scheduling & Drag-and-Drop**
   - **Dependencies:** None
   - **Blocks:** None
