@@ -768,6 +768,32 @@ For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
   - **Location:** Operations service → Boats tab → Boat detail panel → Service History Timeline
   - **Documentation:** SESSION_HANDOFF_2025-11-05_DEBUGGING.md
 
+- [x] **Service Forecast Bulk Scheduling Modal** ✅
+  - **Completed:** 2025-11-05
+  - **Rationale:** Enable bulk scheduling of multiple boats from forecast view with single modal form, replacing navigation-based workflow
+  - **Problem:** Bulk schedule button ("Schedule X Boats") navigated to dashboard instead of opening scheduling modal
+  - **Root Cause:** `scheduleSelectedBoats()` function used old `window.location.href` navigation pattern while single boat Schedule button had been updated to modal approach
+  - **Features Implemented:**
+    - Modal-based bulk scheduling for multiple boats simultaneously
+    - Shows list of all selected boats in modal for confirmation
+    - Single date/service type/amount applied to all boats
+    - Real-time total amount calculation (per boat amount × boat count)
+    - Creates service orders for all boats in parallel
+    - Updates `service_schedules.scheduled_date` for all boats to keep forecast in sync
+    - Success toast with boat count confirmation
+    - Auto-unchecks all checkboxes after successful scheduling
+    - Refreshes forecast to show updated scheduled dates
+  - **Technical Implementation:**
+    - Replaced navigation with `openFormModal()` consistent with single boat pattern
+    - Uses `Promise.all()` to create service orders in parallel for performance
+    - Generates unique order numbers per boat: `ORD-{timestamp}-{boat_id}`
+    - Handles errors gracefully without losing partial progress
+    - Maintains form state until successful completion
+  - **Impact:** ✅ Streamlined workflow for scheduling multiple boats - team can now schedule 5-10 boats to same date in one operation instead of individual modals. Matches single boat schedule modal pattern from 2025-11-05 session.
+  - **Location:** Operations service → Forecast view → Select boats → "Schedule X Boats" button
+  - **Commit:** e7fd666 (fix(forecast): open bulk schedule modal instead of navigation)
+  - **Documentation:** This roadmap entry
+
 - [x] **Customer Portal - Separated into Independent Service**
   - **Completed:** 2025-10-25 (portal separation complete)
   - **Status:** Portal is now a separate service at https://portal.sailorskills.com
