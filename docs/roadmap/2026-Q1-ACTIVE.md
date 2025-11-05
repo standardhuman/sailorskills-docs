@@ -360,6 +360,120 @@ For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
     - Unique referral links for all customers or opt-in? (Proposed: all customers get link, feature in Portal)
 
 ### Billing & Payment Operations
+- [ ] **Email Template Editor & Management System**
+  - **Dependencies:** None
+  - **Blocks:** None
+  - **Rationale:** Currently all email templates are hardcoded in edge functions and application code, requiring developer intervention to update email content, styling, or messaging. Need user-friendly interface for non-technical team members to edit email templates for invoices, receipts, service notifications, and customer communications without code deployments.
+  - **Scope:** All customer-facing emails across all services
+    - **Billing/Completion:** Invoice emails, payment receipts, payment reminders, failed payment notifications
+    - **Operations:** Service completion notifications, order confirmations, scheduling confirmations
+    - **Portal:** Welcome emails, password reset, account notifications
+    - **Booking:** Booking confirmations, reminders, cancellations
+    - **Estimator:** Quote emails, follow-up reminders
+  - **Core Features:**
+    - **Template Library:**
+      - Visual template editor (WYSIWYG or structured form-based)
+      - List all email templates with preview thumbnails
+      - Categorize by service and email type
+      - Version history for templates (track changes, rollback capability)
+    - **Template Variables:**
+      - Support dynamic variables: `{{customer_name}}`, `{{invoice_number}}`, `{{amount}}`, `{{service_date}}`, etc.
+      - Variable reference documentation (what variables are available per template)
+      - Auto-suggest variables while editing
+      - Preview with sample data to see rendered output
+    - **Template Editor:**
+      - Rich text editor for email body content
+      - Subject line editor with variable support
+      - From name and reply-to configuration
+      - HTML email support with fallback plain text
+      - Image upload and embedding
+      - Company logo and branding integration
+    - **Testing & Preview:**
+      - Send test email to specified address
+      - Preview template with sample data before saving
+      - Mobile/desktop preview modes
+      - Test different variable combinations
+    - **Template Management:**
+      - Duplicate templates for creating variations
+      - Activate/deactivate templates (use default if deactivated)
+      - Schedule template changes (e.g., holiday messaging)
+      - A/B testing support (optional future enhancement)
+  - **Database Schema:**
+    - New `email_templates` table: `{ id: uuid, service: text, template_type: text, subject: text, body_html: text, body_plaintext: text, from_name: text, reply_to: text, variables: jsonb, active: boolean, version: int, created_at: timestamp, updated_at: timestamp, updated_by: uuid }`
+    - New `email_template_history` table: `{ template_id: uuid, version: int, subject: text, body_html: text, changed_at: timestamp, changed_by: uuid, change_notes: text }`
+    - Update edge functions to fetch templates from database instead of hardcoded strings
+  - **UI Locations:**
+    - **New Admin Service or Settings Tab:** Email Templates management interface
+      - Template library grid/list view
+      - Template editor modal or dedicated page
+      - Preview and test controls
+      - Version history viewer
+    - **Alternatively:** Add to Settings Dashboard (Q1 2026 planned feature)
+      - Email Templates section with all management capabilities
+  - **Technical Implementation:**
+    - **Template Storage:** Database-backed templates (Supabase `email_templates` table)
+    - **Template Engine:** Handlebars or Mustache for variable substitution
+    - **Editor:** Rich text editor like TinyMCE, Quill, or form-based structured editor
+    - **Email Service:** Continue using Resend API, fetch template from database before sending
+    - **Variable Injection:** Replace `{{variable_name}}` with actual values before sending
+    - **Fallback:** Always maintain default templates in code for critical emails (if DB unavailable)
+  - **Implementation Phases:**
+    - **Phase 1 (Week 1):** Database schema, template storage infrastructure
+      - Create `email_templates` and `email_template_history` tables
+      - Migrate existing hardcoded email templates to database
+      - Build template fetching logic in edge functions
+    - **Phase 2 (Week 1-2):** Template editor UI
+      - Build template library view (list/grid of all templates)
+      - Implement template editor (rich text or structured form)
+      - Add variable reference documentation
+      - Preview and test email functionality
+    - **Phase 3 (Week 2):** Integration with services
+      - Update Billing edge functions to use database templates
+      - Update Operations notification emails to use templates
+      - Update Portal emails (welcome, password reset) to use templates
+      - Update Booking/Estimator emails to use templates
+    - **Phase 4 (Week 3):** Polish and documentation
+      - Version history viewer
+      - Template duplication and management features
+      - Testing with various scenarios
+      - Documentation for team on how to edit templates
+  - **Example Template Variables by Email Type:**
+    - **Invoice Email:** `{{customer_name}}`, `{{invoice_number}}`, `{{invoice_date}}`, `{{due_date}}`, `{{amount}}`, `{{service_type}}`, `{{boat_name}}`, `{{payment_url}}`
+    - **Payment Receipt:** `{{customer_name}}`, `{{payment_amount}}`, `{{payment_date}}`, `{{payment_method}}`, `{{invoice_number}}`, `{{receipt_url}}`
+    - **Service Completion:** `{{customer_name}}`, `{{service_type}}`, `{{boat_name}}`, `{{completion_date}}`, `{{technician_name}}`, `{{next_service_date}}`
+    - **Booking Confirmation:** `{{customer_name}}`, `{{booking_date}}`, `{{booking_time}}`, `{{service_type}}`, `{{location}}`, `{{cancellation_url}}`
+  - **Impact:**
+    - ✅ Non-technical team can update email messaging without developer
+    - ✅ Faster iteration on email content (no code deployment required)
+    - ✅ Consistent branding across all emails
+    - ✅ Easy A/B testing of email messaging
+    - ✅ Version control for email changes (rollback if needed)
+    - ✅ Seasonal/promotional messaging changes without code changes
+    - ✅ Improved customer communication with tailored messaging
+  - **Dependencies:**
+    - Email service (Resend API) ✅ exists
+    - Edge functions for sending emails ✅ exist
+    - User Accounts for tracking who changed templates (optional, use IP if accounts not ready)
+  - **Blocks:** None
+  - **Priority:** Medium-High (Q1 2026 - operational efficiency, customer communication)
+  - **Estimated Effort:** 2-3 weeks (16-24 hours)
+    - Database schema & migration: 0.5 week
+    - Template editor UI: 1 week
+    - Service integration: 0.5 week
+    - Testing & documentation: 0.5 week
+  - **Success Criteria:**
+    - All email templates managed through UI (zero hardcoded templates in code)
+    - Team successfully edits email template without developer assistance
+    - Version history tracks all template changes
+    - Preview and test features work correctly
+    - All services use database templates for email sending
+    - Fallback to default templates if database unavailable
+  - **Questions for Decision:**
+    - WYSIWYG editor or structured form-based editor? (Proposed: form-based for consistency, WYSIWYG for flexibility)
+    - Allow HTML editing or restrict to safe subset? (Proposed: safe subset to prevent broken emails)
+    - Require approval workflow for template changes? (Proposed: no for MVP, add later if needed)
+    - Include SMS templates in same system? (Proposed: yes if time permits, email-only MVP otherwise)
+
 - [ ] **Service Start Notifications & Safety Check-In System**
   - **Dependencies:** User Accounts & Comprehensive Audit Logging System (needs user roles for technician identification)
   - **Blocks:** None
@@ -531,6 +645,104 @@ For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
   - **Impact:** ✅ Complete separation achieved, independent deployments, improved security
   - **Next Steps:** Enhance portal features (notifications, better mobile UX, dashboard widgets)
 
+- [x] **Billing Navigation: Dashboard→Insight Rename & Invoices Link**
+  - **Completed:** 2025-11-05
+  - **Issue:** Billing service displayed "DASHBOARD" instead of "INSIGHT" in global navigation due to outdated shared package submodule
+  - **Resolution:** Updated sailorskills-billing shared submodule from c12b129 → a1105f3, fixed Vite build error preventing submodule deployment
+  - **Changes Delivered:**
+    - Global navigation now correctly shows "INSIGHT" (not "DASHBOARD")
+    - Invoices navigation link moved from Operations to Billing
+    - Fixed EEXIST build error by removing existing dist/shared before copying
+  - **Commits:** da02470 (submodule update), d983121 & f86480e (build fixes)
+  - **Impact:** ✅ Navigation consistency across all services, correct service naming
+  - **Verification:** Playwright tests confirm INSIGHT navigation and Invoices link now live in production
+
+- [ ] **Operations: Migrate to Shared Navigation System**
+  - **Dependencies:** None
+  - **Blocks:** None
+  - **Rationale:** Operations currently uses legacy local navigation system instead of the shared navigation package. Missing global navigation (Tier 2) entirely, sub-navigation items showing empty text. All other services (Billing, Inventory, Insight, Portal) successfully use shared navigation for consistency and maintainability.
+  - **Current Issues (Verified via Playwright 2025-11-05):**
+    - ❌ No `.global-nav` element - missing INSIGHT | BILLING | OPERATIONS | etc. navigation
+    - ❌ Sub-navigation links have empty text content
+    - ❌ Using local `src/navigation.js` instead of `shared/src/ui/navigation.js`
+    - ❌ Not following three-tier navigation architecture
+  - **Implementation Plan:**
+    - **Phase 1:** Import shared navigation package, update index.html to include navigation initialization
+    - **Phase 2:** Configure `initNavigation()` with `currentPage: 'operations'` and appropriate sub-pages
+    - **Phase 3:** Remove legacy local `src/navigation.js` file
+    - **Phase 4:** Update all view navigation to use shared sub-navigation patterns
+    - **Phase 5:** Test all navigation flows, verify breadcrumbs, verify active states
+  - **Sub-Pages for Operations:**
+    - Dashboard (overview)
+    - Work (service management)
+    - Customers (customer list)
+    - Users (user management - requires User Accounts feature)
+    - Additional views as discovered during migration
+  - **Impact:**
+    - ✅ Consistent navigation experience across all services
+    - ✅ Access to global navigation for switching between services
+    - ✅ Proper three-tier navigation hierarchy
+    - ✅ Easier maintenance (changes to shared package propagate automatically)
+    - ✅ Improved UX for team members using multiple services
+  - **Priority:** High (Q1 2026 - critical UX consistency issue)
+  - **Estimated Effort:** 1-2 days (8-16 hours)
+    - Investigation & planning: 2-3 hours
+    - Implementation: 4-8 hours
+    - Testing & fixes: 2-5 hours
+  - **Success Criteria:**
+    - Global navigation visible and functional in Operations
+    - Sub-navigation shows correct labels for all views
+    - Active states work correctly
+    - Playwright tests pass (navigation compliance)
+    - No regressions in existing functionality
+
+- [ ] **Billing: Fix Design System Color Violations**
+  - **Dependencies:** None
+  - **Blocks:** None
+  - **Rationale:** Billing service has 50+ instances of hardcoded hex color values instead of using CSS design tokens from shared package. This creates visual inconsistency with other services and makes theme updates difficult. All other services (Inventory, Insight, Operations) correctly use CSS variables.
+  - **Current Issues (Identified 2025-11-05):**
+    - Hardcoded colors in `sailorskills-billing/styles/main.css`:
+      - `background: #f8f9fa` (should use `var(--ss-bg-light)`)
+      - `background: #e3f2fd` (should use design tokens)
+      - `color: #856404` (should use design tokens)
+      - `background: #7b1fa2` (should use design tokens)
+      - 50+ total violations found
+  - **Impact of Violations:**
+    - Visual inconsistency between Billing and other services
+    - Cannot update theme globally (Billing colors don't change)
+    - Harder to maintain (color changes require editing multiple files)
+    - Violates design system directive
+  - **Implementation Plan:**
+    - **Phase 1:** Audit all color usage in Billing styles
+      - Generate complete list of hardcoded hex values
+      - Map each hex value to appropriate design token
+      - Identify any colors not covered by current token system
+    - **Phase 2:** Update CSS files
+      - Replace hex values with `var(--ss-*)` CSS variables
+      - Add any missing tokens to shared design-tokens.css
+      - Test visual appearance matches before/after
+    - **Phase 3:** Verify compliance
+      - Run automated check for remaining hex values
+      - Visual regression testing (screenshots before/after)
+      - Test in light/dark modes if applicable
+  - **Color Token Mapping Examples:**
+    - `#f8f9fa` → `var(--ss-bg-light)`
+    - `#e3f2fd` → `var(--ss-info-bg)` or custom token
+    - `#856404` → `var(--ss-warning-text)` or custom token
+    - `#7b1fa2` → `var(--ss-accent)` or custom token
+  - **Priority:** Medium (Q1 2026 - design system compliance)
+  - **Estimated Effort:** 1-2 days (8-16 hours)
+    - Audit: 2-3 hours
+    - CSS updates: 4-8 hours
+    - Testing: 2-5 hours
+  - **Success Criteria:**
+    - Zero hardcoded hex color values in Billing styles
+    - All colors use CSS variables from design tokens
+    - Visual appearance unchanged (regression test passes)
+    - Design system compliance tests pass
+  - **Dependencies:** Shared design tokens system (✅ exists)
+  - **Blocks:** None
+
 - [ ] **Scheduling Enhancements - Time-Slot Based Scheduling & Drag-and-Drop**
   - **Dependencies:** None
   - **Blocks:** None
@@ -542,7 +754,13 @@ For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
       - Display time slots (e.g., "9:00 AM - 11:30 AM") instead of just dates
       - Configurable business hours (default: 8 AM - 6 PM)
       - Show remaining capacity per time slot
-      - Handle boats with no service history (configurable default duration)
+      - **Handle boats with no service history:**
+        - **Manual duration entry required for new boats** - when scheduling a boat with no prior service logs, user must manually specify estimated service duration
+        - UI prompt: "This is a new boat with no service history. Please enter estimated service duration:"
+        - Duration input field with suggested default (e.g., 2.5 hours for diving, 1.5 hours for hull cleaning)
+        - Saved duration becomes the baseline until actual service history accumulates
+        - After first completed service, system begins calculating averages from actual `service_logs.total_hours` data
+        - Manual override always available: user can adjust estimated duration even for boats with history (e.g., if boat is exceptionally large/dirty)
     - **Drag & Drop Rescheduling:**
       - Drag scheduled services between dates and time slots
       - Visual feedback during drag (ghost element, valid/invalid drop zones)
@@ -585,10 +803,109 @@ For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
     - 30%+ drag & drop operations from mobile devices
   - **Questions for Review:**
     - Should we support multi-day service windows?
-    - Default service duration for boats with no history? (proposed: 2.5 hours)
+    - Default suggested duration for boats with no history? (proposed: 2.5 hours for diving, 1.5 hours for hull cleaning, user must manually confirm/adjust)
     - Allow overlapping time slots for multiple technicians?
     - Team/technician assignment in Phase 1 or defer?
     - Include Google Calendar sync in this initiative?
+    - Should manual duration override be stored per-service or per-boat? (proposed: per-boat baseline, with per-service override option)
+
+- [ ] **Schedule Calendar: Custom View Settings & Navigation**
+  - **Dependencies:** Schedule Calendar component (✅ exists)
+  - **Blocks:** None
+  - **Rationale:** Enable users to customize their calendar view preferences for personalized workflow optimization. Different users and use cases require different planning horizons - field technicians may prefer day/today views for immediate dispatch, while planners need week/month views for capacity management. User-configurable default view with persistence eliminates repetitive view switching and adapts the tool to individual work styles.
+  - **Core Features:**
+    - **Multiple View Modes:**
+      - **Today View:** Current day only with hourly timeline (8 AM - 6 PM, 30-min increments) - best for "what's happening right now"
+      - **Day View:** Single day hourly timeline (any date) - best for daily dispatch and route planning
+      - **Week View:** 7-column grid with time slots - best for weekly capacity planning
+      - **2-Week View:** 14-column grid with condensed time blocks - best for medium-term planning and availability visualization
+      - **Month View:** Enhanced calendar grid with date-based entries - best for long-term scheduling and customer communication
+      - **Year View:** 12-month overview with service count indicators - best for seasonal patterns and annual planning
+    - **User-Configurable Default View:**
+      - Save user's preferred default view (persists across sessions)
+      - Automatically open to saved default view on calendar load
+      - Storage options: localStorage (simple) or user preferences table (if user accounts implemented)
+      - Per-user preferences if User Accounts system exists (Q1 2026)
+    - **Quick Navigation:**
+      - View switcher UI: `[Today] [Day] [Week] [2-Week] [Month] [Year]` button group
+      - Persistent view selection across page reloads
+      - Smooth transitions between views with visual feedback
+      - "Jump to Today" quick action button (visible in all views)
+      - Date picker for navigation to specific dates
+      - Keyboard shortcuts: T (today), D (day), W (week), M (month), Y (year)
+    - **View-Specific Behaviors:**
+      - Today/Day/Week/2-Week views show hourly time slots (when time-based scheduling implemented)
+      - Month/Year views show date-based entries (simpler display for long-term planning)
+      - Adjust information density per view (more detail in day view, less in year view)
+      - Responsive breakpoints: mobile defaults to Today/Day, tablet to Week, desktop allows all views
+  - **Technical Implementation:**
+    - **View State Management:**
+      - React state for current view mode
+      - LocalStorage persistence: `calendar_default_view` key
+      - Fallback to "Week" if no preference saved
+      - If User Accounts implemented: save to `user_preferences.calendar_default_view`
+    - **View Components:**
+      - Refactor existing calendar to support multiple view modes
+      - Shared components: date navigation, time slot rendering, service entry cards
+      - View-specific layouts: TodayView, DayView, WeekView, TwoWeekView, MonthView, YearView
+      - Conditional rendering based on selected view
+    - **Date Calculations:**
+      - Use `date-fns` for date range calculations (current week, month, year boundaries)
+      - Handle edge cases: week spanning months, leap years, DST transitions
+      - Calculate visible date range based on view mode
+    - **Performance Considerations:**
+      - Only fetch service orders for visible date range (don't load entire year at once)
+      - Lazy load year view data (fetch month-by-month on demand)
+      - Memoize expensive date calculations
+  - **Database Schema:**
+    - No schema changes required for MVP (localStorage sufficient)
+    - Optional (if User Accounts exists): Add `calendar_default_view` to `user_preferences` table
+  - **UI Design:**
+    - View switcher placed prominently in calendar header (next to date navigation)
+    - Active view highlighted with primary color
+    - Smooth transitions with fade/slide animations (< 200ms)
+    - Mobile: Dropdown select for view switching (saves space)
+    - Desktop: Button group with tooltips
+    - "Jump to Today" button always visible, highlighted if not currently viewing today
+  - **Integration with Time-Based Scheduling:**
+    - Today/Day/Week/2-Week views leverage time-slot scheduling (once implemented)
+    - Display service duration blocks with start/end times
+    - Month/Year views show simplified entries (count-based, not time-based)
+    - Graceful degradation: works with date-only scheduling (current state) and time-based scheduling (future)
+  - **Implementation Phases:**
+    - **Phase 1 (Week 1):** View switcher UI, basic view mode state management, localStorage persistence
+    - **Phase 2 (Week 1):** Implement Today, Day, Week views with date navigation
+    - **Phase 3 (Week 2):** Implement 2-Week, Month, Year views
+    - **Phase 4 (Week 2):** Polish - animations, keyboard shortcuts, responsive behavior, testing
+  - **Impact:**
+    - Personalized workflow - users work in their preferred view mode
+    - Faster navigation - eliminate repetitive view switching
+    - Better mobile UX - default to appropriate view for screen size
+    - Improved planning - choose view that matches planning horizon (today vs. next month)
+    - Professional UX - matches modern calendar apps (Notion, Google Calendar)
+    - Flexibility - scales from immediate dispatch (today view) to annual planning (year view)
+  - **Dependencies:**
+    - Schedule Calendar component (✅ exists)
+    - Date library: date-fns (✅ likely already used)
+    - Optional: User Accounts for per-user preferences (in development Q1 2026)
+  - **Blocks:** None (independent feature, enhances existing calendar)
+  - **Priority:** High (Q1 2026 - important UX improvement, complements time-based scheduling)
+  - **Estimated Effort:** 3-4 hours
+    - View switcher UI & state: 1 hour
+    - Today/Day/Week views: 1 hour
+    - 2-Week/Month/Year views: 1 hour
+    - Polish & testing: 0.5-1 hour
+  - **Success Metrics:**
+    - 90%+ users set a default view preference within first week
+    - View switching happens 3x less frequently (users stay in preferred view)
+    - Mobile users primarily use Today/Day views (appropriate for smaller screens)
+    - Desktop users distribute across Week/2-Week/Month views (varied use cases)
+    - Zero performance degradation in year view with 500+ scheduled services
+  - **Questions for Decision:**
+    - Should view preference be per-user (if User Accounts exists) or per-device (localStorage)? (Proposed: localStorage MVP, migrate to user preferences if accounts implemented)
+    - Default view for new users? (Proposed: Week view - best balance of detail and overview)
+    - Include "Custom" view where user sets exact date range? (Proposed: no, predefined views sufficient)
+    - Auto-switch to Today view at start of each day? (Proposed: no, respect user's saved preference)
 
 - [ ] **Internal Admin Design System Modernization**
   - **Dependencies:** None
