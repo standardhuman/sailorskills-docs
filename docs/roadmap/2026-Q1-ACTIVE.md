@@ -1194,6 +1194,69 @@ For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
 - [ ] Improve service history visualization
 - [ ] Mobile optimization for field use
 
+- [ ] **Service Forecast Widget Layout Optimization**
+  - **Dependencies:** None
+  - **Blocks:** None
+  - **Rationale:** Current Service Forecast widgets are stretched full-width across the screen, creating poor visual hierarchy and wasted whitespace. Large numbers and metrics lose impact when spread too wide. Need to implement responsive grid layout with appropriately-sized widgets for better information density and visual appeal.
+  - **Current Issues:**
+    - Summary widgets (85 boats, 44 due this month, 0 overdue, 44 due soon) stretch full screen width
+    - Monthly forecast cards are too wide, making information harder to scan
+    - Excessive horizontal whitespace reduces information density
+    - Poor visual hierarchy - all widgets same size regardless of importance
+    - Not optimized for common screen sizes (looks stretched on large monitors)
+  - **Proposed Layout:**
+    - **Top Summary Row:** Grid layout (2x2 or 4 columns) for key metrics
+      - "Boats with Predictions" + "Due This Month" in top row
+      - "Overdue" + "Due Soon (Next 2 Weeks)" in bottom row
+      - Each widget: max-width 300-400px, responsive grid
+    - **Monthly Forecast Cards:** 3-4 column grid instead of full-width stretching
+      - Cards: max-width 280-320px each
+      - Responsive: 4 cols desktop (>1400px), 3 cols tablet (768-1400px), 2 cols mobile (<768px)
+      - Maintain current card content (month name, boat count, boat list)
+    - **Visual Improvements:**
+      - Add subtle shadows/borders to define widget boundaries
+      - Use container max-width (e.g., 1600px) to prevent excessive stretching
+      - Better spacing between widgets (16-24px gaps)
+      - Maintain current "Current" badge and highlight styling
+  - **Technical Implementation:**
+    - Update CSS Grid layout in Service Forecast component
+    - Add responsive breakpoints (mobile, tablet, desktop, wide)
+    - Set max-width constraints on widget containers
+    - Maintain existing functionality (Refresh Predictions, Export CSV)
+    - Test on various screen sizes (1920px, 1440px, 1280px, 768px, 375px)
+  - **Design Reference:**
+    - Similar to Insight service dashboard widgets (compact, grid-based)
+    - Follow internal admin design system (rounded corners, modern spacing)
+    - Maintain consistency with Operations dashboard layouts
+  - **Impact:**
+    - Improved visual hierarchy - easier to scan and understand
+    - Better information density - more content visible without scrolling
+    - Professional appearance - appropriate sizing for business analytics
+    - Responsive across screen sizes - works well on tablets and small laptops
+    - Reduced eye strain - less horizontal scanning required
+  - **Implementation Phases:**
+    - **Phase 1 (Day 1):** Update summary widget grid layout (2x2 grid for top metrics)
+    - **Phase 2 (Day 1):** Implement responsive monthly forecast card grid (3-4 columns)
+    - **Phase 3 (Day 2):** Add container max-width, spacing adjustments, visual polish
+    - **Phase 4 (Day 2):** Test across screen sizes, adjust breakpoints, verify responsiveness
+    - **Phase 5 (Day 2):** Deploy to preview, gather feedback, final adjustments
+  - **Dependencies:** None (self-contained CSS/layout changes)
+  - **Priority:** Medium-High (Q1 2026 - quick win, improves daily UX)
+  - **Estimated Effort:** 2-3 days (16-24 hours)
+    - Layout restructure: 0.5 day
+    - Responsive grid implementation: 0.5 day
+    - Visual polish & spacing: 0.5 day
+    - Testing across devices: 0.5 day
+    - Deployment & verification: 0.5 day
+  - **Success Metrics:**
+    - Widgets fit within 1600px max-width container
+    - Monthly forecast cards: 3-4 visible on standard laptop (1440px screen)
+    - No horizontal scrolling required on 1280px screens
+    - Maintains readability and visual hierarchy across all breakpoints
+    - Positive feedback from daily users (cleaner, more professional appearance)
+  - **Service Location:** Operations service (Service Forecast page) or Insight service (if forecast moved there)
+  - **Related Work:** Can apply similar layout improvements to other dashboard pages if successful
+
 ### Development Workflow & Infrastructure
 - [ ] **Implement Development Branch Strategy for All Services**
   - **Dependencies:** None
