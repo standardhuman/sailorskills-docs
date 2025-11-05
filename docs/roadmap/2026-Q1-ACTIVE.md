@@ -256,6 +256,83 @@ For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
   - **Location:** Insight service widget (https://sailorskills-insight.vercel.app)
   - **Documentation:** See `/docs/plans/2025-10-31-revenue-efficiency-metrics-widget.md`
 
+- [ ] **Service Log Analytics & Predictive Insights** 🆕
+  - **Status:** Data Ready (1,196 service logs imported 2025-11-04)
+  - **Dependencies:** Service logs imported ✅ (completed during database rebuild)
+  - **Blocks:** Strategic BI Insight service (provides data for perspectives)
+  - **Rationale:** Leverage 2.8 years of service history (1,196 records across 137 boats) to enable predictive maintenance, optimize scheduling, improve pricing accuracy, and proactively alert customers before problems occur.
+  - **Data Foundation:**
+    - **Paint condition:** 1,085 records (90.7% coverage) - tracks degradation over time
+    - **Growth level:** 1,134 records (94.8% coverage) - identifies seasonal patterns
+    - **Time tracking:** 926 duration records (77.4% coverage) - actual service times
+    - **Anode conditions:** Historical overall ratings ("Good", "Fair", "Poor")
+    - **Date range:** January 2023 → October 2025 (2.8 years)
+  - **Capabilities Enabled:**
+    1. **Paint Repaint Urgency Analysis**
+       - Calculate paint degradation trends per boat (improving/stable/declining)
+       - Predict when each boat will need repainting (populate `estimated_repaint_date`)
+       - Generate repaint priority list based on urgency
+       - Proactively alert customers before paint fails
+       - **Value:** Increase repaint revenue, reduce emergency work
+    2. **Growth Pattern & Seasonality Analysis**
+       - Identify seasonal growth patterns (spring/summer peak vs. winter)
+       - Determine optimal service intervals by marina/location
+       - Predict heavy growth periods for resource planning
+       - Adjust service schedules based on actual growth rates
+       - **Value:** Optimize scheduling, improve service quality
+    3. **Service Frequency Analytics**
+       - Compare actual vs. scheduled service intervals
+       - Identify boats that skip scheduled services (churn risk)
+       - Calculate service adherence rates per plan type
+       - **Value:** Reduce churn, improve retention
+    4. **Time Estimation & Pricing Models**
+       - Calculate average service time by boat size/type
+       - Identify factors that extend duration (growth level, paint condition)
+       - Improve pricing accuracy based on actual time data
+       - Optimize technician scheduling with realistic estimates
+       - **Value:** Better pricing, more accurate scheduling
+    5. **Historical Anode Tracking**
+       - Track anode consumption rates per boat
+       - Predict when anodes need replacement
+       - Calculate anode lifespan by boat type/location
+       - Generate anode purchase forecasts
+       - **Value:** Inventory optimization, proactive maintenance
+  - **Implementation Phases:**
+    - **Phase 1 (Week 1):** Paint repaint urgency analysis script
+      - Linear regression on paint condition over time
+      - Calculate `estimated_repaint_date` for each boat
+      - Populate `paint_condition_trend` field
+      - **Deliverable:** `/scripts/analyze-paint-repaint-urgency.mjs`
+    - **Phase 2 (Week 2):** Growth seasonality analysis
+      - Aggregate growth observations by month/marina
+      - Identify seasonal patterns
+      - Generate optimal interval recommendations
+      - **Deliverable:** Growth insights dashboard widget
+    - **Phase 3 (Week 3):** Service frequency & churn analytics
+      - Calculate actual vs. scheduled interval deltas
+      - Flag boats with service gaps (potential churn)
+      - Service adherence metrics per plan type
+      - **Deliverable:** Retention risk dashboard widget
+    - **Phase 4 (Week 4):** Time estimation & pricing model
+      - Average duration by boat size/type
+      - Factor analysis (growth, paint condition effects)
+      - Pricing recommendation engine
+      - **Deliverable:** Pricing insights dashboard widget
+    - **Phase 5 (Week 5):** Anode lifecycle analytics
+      - Anode consumption rate calculation
+      - Replacement prediction model
+      - Inventory purchase forecasting
+      - **Deliverable:** Anode analytics dashboard widget
+  - **Integration Points:**
+    - **Insight Service:** Dashboard widgets for each analysis type
+    - **Operations:** Repaint urgency alerts, churn risk warnings
+    - **Inventory:** Anode purchase forecasts
+    - **Billing:** Pricing recommendations based on actual time data
+  - **Timeline:** Q1 2026 (5 weeks total, can run in parallel with Insight service development)
+  - **Priority:** High (unlocks predictive maintenance, improves revenue/retention)
+  - **Estimated Effort:** 5 weeks (1 developer)
+  - **Documentation:** `/DATABASE_REBUILD_SUMMARY_2025-11-04.md` (What's Now Possible section)
+
 ### Customer Acquisition & Referral Tracking
 - [ ] **Comprehensive Referral Tracking System**
   - **Dependencies:** User Accounts & Comprehensive Audit Logging System (needs staff referral attribution)
@@ -522,7 +599,175 @@ For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
     - Validation frequency? (Proposed: monthly, can adjust based on findings)
     - Customer communication tone? (Proposed: friendly reminder, not punitive)
 
+- [ ] **Customer Payment Method Migration Campaign**
+  - **Dependencies:** Customer Portal (completed Q4 2025), Monthly Payment Method Validation (optional - can run independently)
+  - **Blocks:** None
+  - **Rationale:** Many existing customers with active service plans (monthly/quarterly schedules) may not have payment methods on file in the new Stripe system. Need to identify these customers and proactively reach out with a streamlined workflow to capture payment information before their next service. Improves cash flow, reduces failed payment scenarios, and migrates customers to the modern payment system with minimal friction.
+  - **Scope:** Identify, communicate with, and convert customers with active services but missing payment methods
+    - **Phase 1: Identification & Analysis**
+      - Query database to find customers with active service plans (recurring schedules) but no Stripe payment method
+      - Segment by service type, plan frequency, customer lifetime value
+      - Generate prioritized outreach list (high-value customers first)
+      - Calculate potential revenue at risk from missing payment methods
+    - **Phase 2: Technical Implementation (Choose One or Both Approaches)**
+      - **Option A: Estimator Checkout with Pre-filled Data**
+        - Create unique checkout links per customer/boat with pre-populated data
+        - Auto-fill: customer name, email, phone, boat details, current service plan
+        - Streamlined flow: customer just needs to add payment method and confirm
+        - Track conversion rate per link (who completed payment setup)
+      - **Option B: Portal Payment Management Page**
+        - Build "Payment Methods" section in Portal account settings
+        - Allow customers to add/update/remove payment methods
+        - Show current payment method status (missing, valid, expired)
+        - Display upcoming service schedule requiring payment
+        - Send customers directly to Portal payment page via link
+      - **Recommendation:** Implement both - Estimator checkout for quick setup, Portal for ongoing management
+    - **Phase 3: Communication Strategy & Email Campaign**
+      - **Email Content:**
+        - Friendly tone: "We've upgraded our payment system..."
+        - Highlight benefits of new system: Portal access, online invoices, service history, instant receipts
+        - Emphasize new features: View service history, request additional services, track upcoming appointments
+        - Include direct link to payment setup (Estimator checkout OR Portal payment page)
+        - Provide clear call-to-action: "Update Your Payment Method"
+        - Offer support: "Need help? Reply to this email or call [phone]"
+      - **Email Sequence:**
+        - Email 1: Initial request with feature highlights (send to all identified customers)
+        - Email 2: Follow-up reminder after 7 days (if not completed)
+        - Email 3: Final reminder after 14 days (with urgency: "Update before your next service on [date]")
+        - Optional: Phone call for high-value customers who don't respond
+      - **Tracking & Metrics:**
+        - Track email open rates, click-through rates, conversion rates
+        - Monitor payment method additions via unique links
+        - Measure response time (how quickly customers update after email)
+        - Flag customers who don't respond for manual outreach
+  - **Database Queries:**
+    - **Identify Customers Missing Payment Methods:**
+      ```sql
+      SELECT c.id, c.customer_name, c.email, c.phone,
+             b.boat_name, so.service_type, so.plan_interval
+      FROM customers c
+      JOIN boats b ON c.id = b.customer_id
+      JOIN service_orders so ON b.id = so.boat_id
+      WHERE so.status = 'active'
+        AND so.plan_interval IN ('monthly', 'quarterly')
+        AND (c.stripe_customer_id IS NULL
+             OR NOT EXISTS (
+               SELECT 1 FROM payment_methods pm
+               WHERE pm.customer_id = c.id AND pm.status = 'active'
+             ))
+      ORDER BY c.customer_lifetime_value DESC;
+      ```
+    - **Calculate Revenue at Risk:**
+      ```sql
+      SELECT COUNT(*) as customer_count,
+             SUM(so.plan_price) as monthly_revenue_at_risk
+      FROM customers c
+      JOIN boats b ON c.id = b.customer_id
+      JOIN service_orders so ON b.id = so.boat_id
+      WHERE so.status = 'active'
+        AND (c.stripe_customer_id IS NULL OR ...);
+      ```
+  - **Email Template (Draft):**
+    ```
+    Subject: Action Required: Update Your Payment Method for [Service Type]
+
+    Hi [Customer Name],
+
+    We've recently upgraded our payment system to provide you with better service and new features!
+
+    **What's New:**
+    - Customer Portal: View your service history, invoices, and upcoming appointments anytime
+    - Instant Receipts: Get email receipts immediately after each service
+    - Service Requests: Request additional services or schedule changes online
+    - Secure Payments: Industry-standard encryption with Stripe
+
+    **Action Needed:**
+    To continue your [monthly/quarterly] [service type] service, please update your payment method:
+
+    👉 [Update Payment Method - Direct Link]
+
+    We've pre-filled your boat and service details to make this quick and easy (2 minutes max).
+
+    **Your Current Service Plan:**
+    - Boat: [Boat Name]
+    - Service: [Service Type]
+    - Schedule: [Plan Interval]
+    - Next Service: [Next Scheduled Date]
+
+    **Questions?** Reply to this email or call us at [phone number]. We're here to help!
+
+    Thank you for being a valued customer!
+
+    [Your Name]
+    [Company Name]
+    ```
+  - **Implementation Phases:**
+    - **Phase 1 (Day 1):** Run database query, generate customer list with missing payment methods, analyze segments
+    - **Phase 2 (Day 2):** Build Estimator pre-filled checkout link generator OR Portal payment management page (choose approach)
+    - **Phase 3 (Day 3):** Draft email template, configure email campaign in Resend, set up tracking links
+    - **Phase 4 (Day 4):** Send initial email batch (test with 10-20 customers first), monitor results
+    - **Phase 5 (Week 2):** Send follow-up emails (7-day and 14-day reminders), track conversion rates
+    - **Phase 6 (Week 3):** Manual outreach for high-value non-responders, document lessons learned
+  - **UI Locations:**
+    - **Estimator:** Pre-filled checkout link (accessible via unique URL per customer)
+    - **Portal:** New "Payment Methods" page in account settings (if building Portal approach)
+    - **Dashboard:** Campaign tracking widget (emails sent, opened, converted)
+    - **Operations:** Flag customers with missing payment methods in customer profile view
+  - **Impact:**
+    - Migrate existing customers to new payment system proactively
+    - Reduce failed payment scenarios (customer already has method on file)
+    - Improve cash flow (fewer declined charges, faster collections)
+    - Enhance customer experience (introduce Portal and new features)
+    - Build foundation for automated recurring billing
+    - Reduce manual payment collection effort
+  - **Dependencies:**
+    - Customer Portal (✅ completed Q4 2025 - if using Portal approach)
+    - Stripe integration (✅ exists)
+    - Email system via Resend (✅ exists)
+    - Database query access (✅ available)
+  - **Blocks:** None (independent campaign)
+  - **Priority:** Medium-High (Q1 2026 - important for cash flow and system migration)
+  - **Estimated Effort:** 3-4 days (24-32 hours) spread over 3 weeks
+    - Database analysis & customer segmentation: 0.5 day
+    - Technical implementation (Estimator links OR Portal page): 1-1.5 days
+    - Email template & campaign setup: 0.5 day
+    - Campaign execution & monitoring: 1 day
+    - Follow-up emails & manual outreach: 0.5-1 day
+  - **Success Metrics:**
+    - 80%+ of identified customers contacted within first week
+    - 60%+ email open rate
+    - 30%+ click-through rate (customers clicking payment link)
+    - 50%+ conversion rate (customers adding payment method)
+    - $X monthly revenue secured from payment method additions
+    - 90%+ of high-value customers converted within 3 weeks
+  - **Questions for Decision:**
+    - Which technical approach to prioritize? (Proposed: Start with Estimator pre-filled checkout for speed, add Portal payment page in Phase 2)
+    - Should we offer incentive for updating? (Proposed: highlight new features as "reward", no financial discount)
+    - Hard deadline for payment method or flexible? (Proposed: soft deadline - "before your next service", not blocking)
+    - Automatically pause service for customers who don't update? (Proposed: no - manual review and phone call first)
+    - Include link to video tutorial on using Portal? (Proposed: yes, 2-minute walkthrough video)
+
 ### Operations Improvements
+- [x] **Historical Service Log Display with Dual Data Source** ✅
+  - **Completed:** 2025-11-05
+  - **Rationale:** Display 1,191 historical Notion service logs alongside new app-created logs with visual distinction to preserve data integrity
+  - **Features Implemented:**
+    - Visual styling for historical Notion data (gray background, gray border, monospace font)
+    - "(Historical)" badge on Notion service logs
+    - Edit/delete buttons hidden for historical data (read-only)
+    - Customer name display from joined customers table
+    - JSON string parsing for Notion propeller and anode data
+    - Handles dual data structures: Notion format (overall_condition) vs app format (location-based)
+  - **Technical Implementation:**
+    - Added `data_source` column to service_logs table (notion | sailorskills | manual)
+    - Updated BoatDetailPanel.js query to include `data_source` field
+    - Joined customers table for proper name display
+    - Parse JSONB strings for Notion propellers/anodes before rendering
+    - Conditional rendering based on data_source value
+  - **Impact:** ✅ 2.8 years of service history (1,191 records) now visible in Operations UI alongside new logs, maintaining clear distinction between historical import and app-created data
+  - **Location:** Operations service → Boats tab → Boat detail panel → Service History Timeline
+  - **Documentation:** SESSION_HANDOFF_2025-11-05_DEBUGGING.md
+
 - [x] **Customer Portal - Separated into Independent Service**
   - **Completed:** 2025-10-25 (portal separation complete)
   - **Status:** Portal is now a separate service at https://portal.sailorskills.com
