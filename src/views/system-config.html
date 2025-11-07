@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Configuration - Settings</title>
+  <link rel="stylesheet" href="../styles/system-config.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="system-config">
+    <header class="config-header">
+      <h1>Business Pricing Configuration</h1>
+      <div class="header-actions">
+        <button id="preview-impact-btn" class="btn btn-secondary">📊 Preview Impact</button>
+        <button id="save-all-btn" class="btn btn-primary">💾 Save All Changes</button>
+      </div>
+    </header>
+
+    <main class="config-main">
+      <!-- Service Base Rates -->
+      <section class="pricing-section">
+        <h2>Service Base Rates</h2>
+        <div class="pricing-grid">
+          <div class="pricing-field">
+            <label>Recurring Cleaning Rate ($/ft)</label>
+            <input type="number" step="0.01" data-key="recurring_cleaning_rate" />
+            <span class="field-description">Base rate for recurring cleaning services</span>
+          </div>
+          <div class="pricing-field">
+            <label>One-Time Cleaning Rate ($/ft)</label>
+            <input type="number" step="0.01" data-key="onetime_cleaning_rate" />
+            <span class="field-description">Base rate for one-time cleaning services</span>
+          </div>
+          <div class="pricing-field">
+            <label>Underwater Inspection Rate ($/ft)</label>
+            <input type="number" step="0.01" data-key="underwater_inspection_rate" />
+            <span class="field-description">Base rate for underwater inspection</span>
+          </div>
+          <div class="pricing-field">
+            <label>Item Recovery Rate ($)</label>
+            <input type="number" step="0.01" data-key="item_recovery_rate" />
+            <span class="field-description">Flat rate for item recovery service</span>
+          </div>
+          <div class="pricing-field">
+            <label>Propeller Service Rate ($)</label>
+            <input type="number" step="0.01" data-key="propeller_service_rate" />
+            <span class="field-description">Flat rate for propeller removal/installation</span>
+          </div>
+          <div class="pricing-field">
+            <label>Anodes Only Rate ($)</label>
+            <input type="number" step="0.01" data-key="anodes_only_rate" />
+            <span class="field-description">Minimum charge for anode-only service</span>
+          </div>
+          <div class="pricing-field">
+            <label>Minimum Service Charge ($)</label>
+            <input type="number" step="0.01" data-key="minimum_service_charge" />
+            <span class="field-description">Minimum charge for any service</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Anode Pricing -->
+      <section class="pricing-section">
+        <h2>Anode Pricing</h2>
+        <div class="pricing-grid">
+          <div class="pricing-field">
+            <label>Anode Installation Labor ($/unit)</label>
+            <input type="number" step="0.01" data-key="anode_installation_rate" />
+            <span class="field-description">Labor charge per anode installed</span>
+          </div>
+          <div class="pricing-field">
+            <label>Anode Markup Percentage (%)</label>
+            <input type="number" step="0.01" data-key="anode_markup_percentage" />
+            <span class="field-description">Markup percentage on anode cost</span>
+          </div>
+          <div class="pricing-field">
+            <label>Anode Minimum Markup ($/unit)</label>
+            <input type="number" step="0.01" data-key="anode_minimum_markup" />
+            <span class="field-description">Minimum profit per anode</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Hull Type Surcharges -->
+      <section class="pricing-section">
+        <h2>Hull Type Surcharges</h2>
+        <div class="pricing-grid">
+          <div class="pricing-field">
+            <label>Powerboat Surcharge (%)</label>
+            <input type="number" step="0.01" data-key="surcharge_powerboat" />
+            <span class="field-description">Additional charge for powerboat vs sailboat</span>
+          </div>
+          <div class="pricing-field">
+            <label>Catamaran Surcharge (%)</label>
+            <input type="number" step="0.01" data-key="surcharge_catamaran" />
+            <span class="field-description">Additional charge for catamaran hull</span>
+          </div>
+          <div class="pricing-field">
+            <label>Trimaran Surcharge (%)</label>
+            <input type="number" step="0.01" data-key="surcharge_trimaran" />
+            <span class="field-description">Additional charge for trimaran hull</span>
+          </div>
+          <div class="pricing-field">
+            <label>Additional Propeller (%)</label>
+            <input type="number" step="0.01" data-key="surcharge_additional_propeller" />
+            <span class="field-description">Charge per propeller beyond first</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Paint Condition Surcharges -->
+      <section class="pricing-section">
+        <h2>Paint Condition Surcharges</h2>
+        <div class="pricing-grid">
+          <div class="pricing-field">
+            <label>Poor Paint Surcharge (%)</label>
+            <input type="number" step="0.01" data-key="surcharge_paint_poor" />
+            <span class="field-description">Surcharge when paint is in poor condition</span>
+          </div>
+          <div class="pricing-field">
+            <label>Missing Paint Surcharge (%)</label>
+            <input type="number" step="0.01" data-key="surcharge_paint_missing" />
+            <span class="field-description">Surcharge when paint is missing</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Growth/Fouling Surcharges -->
+      <section class="pricing-section">
+        <h2>Growth/Fouling Surcharges</h2>
+        <div class="pricing-grid">
+          <div class="pricing-field">
+            <label>Moderate-Heavy Growth (%)</label>
+            <input type="number" step="0.01" data-key="surcharge_moderate_heavy_growth" />
+            <span class="field-description">Surcharge for moderate to heavy growth</span>
+          </div>
+          <div class="pricing-field">
+            <label>Heavy Growth (%)</label>
+            <input type="number" step="0.01" data-key="surcharge_heavy_growth" />
+            <span class="field-description">Surcharge for heavy growth/fouling</span>
+          </div>
+          <div class="pricing-field">
+            <label>Heavy-Severe Growth (%)</label>
+            <input type="number" step="0.01" data-key="surcharge_heavy_severe_growth" />
+            <span class="field-description">Surcharge for heavy to severe growth</span>
+          </div>
+          <div class="pricing-field">
+            <label>Severe Growth (%)</label>
+            <input type="number" step="0.01" data-key="surcharge_severe_growth" />
+            <span class="field-description">Surcharge for severe growth/fouling</span>
+          </div>
+          <div class="pricing-field">
+            <label>Extreme Growth (%)</label>
+            <input type="number" step="0.01" data-key="surcharge_extreme_growth" />
+            <span class="field-description">Surcharge for extreme growth/fouling</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Change History -->
+      <section class="pricing-section">
+        <h2>Recent Changes</h2>
+        <div id="change-history" class="change-history"></div>
+      </section>
+    </main>
+
+    <!-- Impact Preview Modal -->
+    <div id="impact-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Pricing Impact Analysis</h2>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="impact-summary" class="impact-summary"></div>
+          <div id="impact-samples" class="impact-samples"></div>
+        </div>
+        <div class="modal-footer">
+          <button id="confirm-changes-btn" class="btn btn-primary">Confirm & Save</button>
+          <button id="cancel-changes-btn" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./system-config.js"></script>
+</body>
+</html>
