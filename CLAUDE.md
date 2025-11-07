@@ -1,5 +1,19 @@
 - use login standardhuman@gmail.com and pw KLRss!650 for any authentication needs
 
+## Development Workflow - Read This First!
+
+**⚠️ IMPORTANT: This is a two-repo system. Read DEVELOPMENT_WORKFLOW.md before making changes.**
+
+**Quick Summary:**
+- **sailorskills-docs** (this repo): Documentation, planning, handoffs
+- **sailorskills-settings** (separate repo): Settings service code
+- **Develop Settings here:** `/Users/brian/app-development/sailorskills-repos/sailorskills-settings/`
+- **DO NOT use worktrees** for service development (deprecated)
+
+**Full guide:** See `DEVELOPMENT_WORKFLOW.md` in this directory.
+
+---
+
 ## Database Access - Use This First!
 
 **IMPORTANT: You can now run SQL queries directly from Claude Code!**
