@@ -6,6 +6,7 @@ import {
   getEngagementFunnel,
   getPerformanceByType,
 } from '../lib/email-logs-service.js';
+import { initNavigation } from '../../shared/src/ui/navigation.js';
 
 let currentPage = 1;
 let currentFilters = {};
@@ -13,6 +14,12 @@ let allLogs = [];
 
 // Initialize
 async function init() {
+  // Initialize global navigation with Settings sub-pages
+  initNavigation({
+    currentPage: 'settings',
+    currentSubPage: 'src/views/email-logs'
+  });
+
   await loadStats();
   await loadAnalytics();
   await loadLogs();

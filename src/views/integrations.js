@@ -5,11 +5,18 @@ import {
   testIntegration,
   maskApiKey,
 } from '../lib/integration-service.js';
+import { initNavigation } from '../../shared/src/ui/navigation.js';
 
 let currentIntegration = null;
 let savedIntegrations = {};
 
 async function init() {
+  // Initialize global navigation with Settings sub-pages
+  initNavigation({
+    currentPage: 'settings',
+    currentSubPage: 'src/views/integrations'
+  });
+
   await loadIntegrations();
   setupEventListeners();
 }

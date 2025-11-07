@@ -5,6 +5,7 @@ import {
   getPricingHistory,
 } from '../lib/pricing-service.js';
 import { supabase } from '../lib/supabase-client.js';
+import { initNavigation } from '../../shared/src/ui/navigation.js';
 
 let currentPricing = {};
 let originalPricing = {};
@@ -12,6 +13,12 @@ let changedFields = new Set();
 
 // Initialize
 async function init() {
+  // Initialize global navigation with Settings sub-pages
+  initNavigation({
+    currentPage: 'settings',
+    currentSubPage: 'src/views/system-config'
+  });
+
   try {
     currentPricing = await getPricingConfig();
     originalPricing = { ...currentPricing };

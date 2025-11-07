@@ -1,6 +1,13 @@
 import { supabase } from '../lib/supabase-client.js';
+import { initNavigation } from '../../shared/src/ui/navigation.js';
 
 async function init() {
+  // Initialize global navigation with Settings sub-pages
+  initNavigation({
+    currentPage: 'settings',
+    currentSubPage: 'src/views/dashboard'
+  });
+
   await loadQuickStats();
   await loadRecentActivity();
 }

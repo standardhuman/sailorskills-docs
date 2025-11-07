@@ -4,12 +4,19 @@ import {
   inviteUser,
   deleteUser,
 } from '../lib/user-service.js';
+import { initNavigation } from '../../shared/src/ui/navigation.js';
 
 let users = [];
 let currentEditUserId = null;
 
 // Initialize
 async function init() {
+  // Initialize global navigation with Settings sub-pages
+  initNavigation({
+    currentPage: 'settings',
+    currentSubPage: 'src/views/users'
+  });
+
   await loadUsers();
   setupEventListeners();
 }

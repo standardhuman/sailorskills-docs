@@ -4,6 +4,7 @@ import {
   updateEmailTemplate,
   renderTemplate,
 } from '../lib/email-service.js';
+import { initNavigation } from '../../shared/src/ui/navigation.js';
 
 let templates = [];
 let currentTemplate = null;
@@ -11,6 +12,12 @@ let originalTemplate = null;
 
 // Initialize
 async function init() {
+  // Initialize global navigation with Settings sub-pages
+  initNavigation({
+    currentPage: 'settings',
+    currentSubPage: 'src/views/email-manager'
+  });
+
   try {
     templates = await getEmailTemplates();
     renderTemplateList();
