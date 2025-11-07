@@ -1,6 +1,6 @@
 # Sailorskills Suite - Roadmap
 
-Last updated: 2025-11-02
+Last updated: 2025-11-06
 
 ## Overview
 This roadmap tracks major cross-service initiatives, architectural changes, and strategic priorities for the Sailorskills suite.
@@ -22,6 +22,8 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
 - ✅ **Testing Platform:** Complete
 - ✅ **Notion Roadmap Integration:** Complete
 - ✅ **Dashboard → Insight Rename:** Complete (2025-11-02)
+- ✅ **Settings Service Design:** Complete (2025-11-06) - Design doc + 30-task implementation plan
+- 🚧 **Settings Service Implementation:** In Progress (2025-11-06) - Executing in parallel session
 - ⏳ **Billing → Completion Rename:** Pending (Medium Priority)
 - ⏳ **Dashboard Navigation Fix:** Pending (Medium Priority)
 - ⏳ **Operations Navigation Optimization:** Pending (Medium Priority)
@@ -60,6 +62,18 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
 #### 4. React Roadmap Visualization (4-6 hours)
 - **Build:** Interactive Gantt chart using SVAR library
 - **Features:** Timeline + Kanban views, filter by quarter/service/priority
+
+#### 5. Settings Service (4 weeks) 🚧 IN PROGRESS
+- **Goal:** Centralized configuration management for entire suite
+- **Completed:** Design document (747 lines), Implementation plan (30 tasks), Git worktree setup
+- **In Progress:** Foundation tasks (service structure, database migrations, email management)
+- **Features:**
+  - Email template management with engagement tracking (opens, clicks, replies)
+  - Business pricing configuration (21 variables from Estimator/Billing)
+  - User/team management with role-based access
+  - Integration/API key management (Resend, Stripe, YouTube, etc.)
+- **Impact:** Eliminates 21 hardcoded pricing duplicates, enables email content updates without deployments
+- **Timeline:** Started 2025-11-06, targeting completion 2025-12-06
 
 ### Recently Completed ✅
 - **Portal Separation** (2025-10-25): Customer portal now separate service
@@ -132,8 +146,8 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
 - Operations Native Mobile App (after Video/Billing proven)
 - Ownership & Attribution Tracking System
 - Inventory Management System
-- Settings Dashboard (business configuration)
 - Advanced Payment Features (recurring, autopay)
+- Customer Portal Enhancements (notifications, preferences)
 
 ---
 
@@ -141,6 +155,8 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
 
 ### Q4 2025 Goals
 - [x] Complete all service renames (Dashboard → Insight, Billing → Completion) - Dashboard complete 2025-11-02
+- [x] Design Settings service for centralized configuration - Complete 2025-11-06
+- [ ] Complete Settings service implementation (4 weeks, targeting 2025-12-06)
 - [ ] Fix navigation inconsistencies across services
 - [ ] Deploy React roadmap visualization
 
@@ -152,11 +168,11 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
 - [ ] 90%+ new customers with referral source tracked
 
 ### Overall Suite Metrics
-- **Services:** 9 active (Estimator, Operations, Portal, Billing, Inventory, Insight, Video, Booking, Site)
-- **Database Tables:** 20+ core tables (customers, boats, service_logs, invoices, etc.)
+- **Services:** 10 active (Estimator, Operations, Portal, Billing, Inventory, Insight, Video, Booking, Site, Settings)
+- **Database Tables:** 24+ core tables (customers, boats, service_logs, invoices, business_pricing_config, email_templates, etc.)
 - **Deployment:** All on Vercel with auto-deploy from main
 - **Testing:** Playwright + GitHub Actions CI/CD
-- **Integration APIs:** Stripe, YouTube, Google Calendar, Gemini AI, Notion
+- **Integration APIs:** Stripe, YouTube, Google Calendar, Gemini AI, Notion, Resend
 
 ---
 
@@ -188,6 +204,7 @@ Billing/Completion → Invoice generation → Insight analytics
 - **Video:** https://sailorskills-video.vercel.app
 - **Booking:** https://booking.sailorskills.com
 - **Site:** https://sailorskills.com
+- **Settings:** https://sailorskills-settings.vercel.app (pending deployment)
 
 ---
 
