@@ -791,9 +791,9 @@ For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
     - Document navigation design decisions for future reference
 
 ## Portal - Customer Experience & Admin Tools
-- [ ] **Admin Customer Impersonation** ⚙️ IN PROGRESS
-  - **Status:** Design complete, implementation plan ready, worktree created
-  - **Completed:** 2025-11-06 (design and planning phase)
+- [x] **Admin Customer Impersonation** ✅ COMPLETE
+  - **Status:** Fully implemented and deployed to production
+  - **Completed:** 2025-11-07 (design 2025-11-06, implementation 2025-11-07)
   - **Rationale:** Enable administrators to view the customer portal as any customer for support, debugging, and testing purposes without requiring actual customer credentials
   - **Features:**
     - Searchable customer selector in portal header (admin-only)
