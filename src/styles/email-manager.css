@@ -1,0 +1,289 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  background: #f5f5f5;
+}
+
+.email-manager {
+  display: grid;
+  grid-template-columns: 250px 1fr 400px;
+  height: 100vh;
+  gap: 0;
+}
+
+/* Left Sidebar */
+.template-list {
+  background: #1a237e;
+  color: white;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.template-list h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.template-group {
+  margin-bottom: 30px;
+}
+
+.template-group h3 {
+  font-size: 14px;
+  margin-bottom: 10px;
+  opacity: 0.8;
+}
+
+.template-items {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.template-item {
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 14px;
+}
+
+.template-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.template-item.active {
+  background: rgba(255, 255, 255, 0.3);
+  font-weight: 600;
+}
+
+/* Center Panel */
+.template-editor {
+  background: white;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #999;
+  font-size: 18px;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.editor-header h1 {
+  font-size: 28px;
+  color: #1a237e;
+}
+
+.template-status {
+  background: #4caf50;
+  color: white;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.editor-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.editor-form label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.subject-input {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.body-input {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: 'Montserrat', sans-serif;
+  resize: vertical;
+}
+
+.available-variables {
+  padding: 15px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.available-variables strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #1a237e;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #0d1447;
+}
+
+.btn-secondary {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background: #d0d0d0;
+}
+
+.btn-small {
+  padding: 8px 16px;
+  font-size: 12px;
+}
+
+/* Right Panel */
+.preview-panel {
+  background: #fafafa;
+  padding: 20px;
+  overflow-y: auto;
+  border-left: 1px solid #ddd;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.preview-header h3 {
+  font-size: 18px;
+}
+
+.preview-toggle {
+  display: flex;
+  gap: 5px;
+}
+
+.preview-btn {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.preview-btn.active {
+  background: #1a237e;
+  color: white;
+  border-color: #1a237e;
+}
+
+.test-data-form {
+  margin-bottom: 20px;
+}
+
+.test-data-form h4 {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+#test-data-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+#test-data-inputs input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.preview-container {
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+  background: white;
+}
+
+.preview-frame {
+  width: 100%;
+  border: none;
+  background: white;
+}
+
+.preview-frame.desktop {
+  height: 400px;
+}
+
+.preview-frame.mobile {
+  width: 375px;
+  height: 600px;
+  margin: 0 auto;
+}
+
+.test-email-form {
+  padding: 15px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.test-email-form h4 {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.test-email-form input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.test-email-form button {
+  width: 100%;
+}
