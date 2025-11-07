@@ -3,6 +3,8 @@ import {
   getEmailLog,
   getEmailStats,
   exportToCSV,
+  getEngagementFunnel,
+  getPerformanceByType,
 } from '../lib/email-logs-service.js';
 
 let currentPage = 1;
@@ -12,8 +14,154 @@ let allLogs = [];
 // Initialize
 async function init() {
   await loadStats();
+  await loadAnalytics();
   await loadLogs();
   setupEventListeners();
+}
+
+// Load analytics
+async function loadAnalytics() {
+  await Promise.all([
+    loadEngagementFunnel(),
+    loadPerformanceByType(),
+    generateInsights(),
+  ]);
+}
+
+// Load engagement funnel
+async function loadEngagementFunnel() {
+  try {
+    const funnel = await getEngagementFunnel(currentFilters);
+
+    document.getElementById('funnel-sent').textContent = funnel.sent;
+    document.getElementById('funnel-delivered').textContent = funnel.delivered;
+    document.getElementById('funnel-opened').textContent = funnel.opened;
+    document.getElementById('funnel-clicked').textContent = funnel.clicked;
+    document.getElementById('funnel-replied').textContent = funnel.replied;
+
+    // Calculate percentages for bar widths
+    if (funnel.sent > 0) {
+      const deliveredPct = (funnel.delivered / funnel.sent) * 100;
+      const openedPct = (funnel.opened / funnel.sent) * 100;
+      const clickedPct = (funnel.clicked / funnel.sent) * 100;
+      const repliedPct = (funnel.replied / funnel.sent) * 100;
+
+      document.getElementById('funnel-delivered-bar').style.width = `${deliveredPct}%`;
+      document.getElementById('funnel-opened-bar').style.width = `${openedPct}%`;
+      document.getElementById('funnel-clicked-bar').style.width = `${clickedPct}%`;
+      document.getElementById('funnel-replied-bar').style.width = `${repliedPct}%`;
+    }
+  } catch (error) {
+    console.error('Failed to load engagement funnel:', error);
+  }
+}
+
+// Load performance by type
+async function loadPerformanceByType() {
+  try {
+    const performance = await getPerformanceByType(currentFilters);
+    const tbody = document.getElementById('performance-table-body');
+
+    if (performance.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #666;">No data available</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = performance.map(item => {
+      const openRateClass = parseFloat(item.openRate) >= 30 ? 'rate-good' : parseFloat(item.openRate) >= 15 ? 'rate-average' : 'rate-poor';
+      const clickRateClass = parseFloat(item.clickRate) >= 20 ? 'rate-good' : parseFloat(item.clickRate) >= 10 ? 'rate-average' : 'rate-poor';
+
+      return `
+        <tr>
+          <td>${item.type}</td>
+          <td>${item.total}</td>
+          <td class="${openRateClass}">${item.openRate}%</td>
+          <td class="${clickRateClass}">${item.clickRate}%</td>
+        </tr>
+      `;
+    }).join('');
+  } catch (error) {
+    console.error('Failed to load performance by type:', error);
+  }
+}
+
+// Generate insights
+async function generateInsights() {
+  try {
+    const stats = await getEmailStats(currentFilters);
+    const performance = await getPerformanceByType(currentFilters);
+    const container = document.getElementById('insights-container');
+    const insights = [];
+
+    // Open rate analysis
+    const openRate = parseFloat(stats.openRate);
+    if (openRate < 15) {
+      insights.push({
+        type: 'warning',
+        text: `Open rate is ${openRate}% (below industry average of 20%). Consider improving subject lines or sending at different times.`,
+      });
+    } else if (openRate > 30) {
+      insights.push({
+        type: 'success',
+        text: `Excellent open rate of ${openRate}%! Your subject lines are resonating with recipients.`,
+      });
+    }
+
+    // Click rate analysis
+    const clickRate = parseFloat(stats.clickRate);
+    if (clickRate < 10 && stats.opened > 0) {
+      insights.push({
+        type: 'warning',
+        text: `Click rate is ${clickRate}%. Try adding clearer CTAs or more engaging content.`,
+      });
+    } else if (clickRate > 20) {
+      insights.push({
+        type: 'success',
+        text: `Strong click rate of ${clickRate}%! Your email content is driving engagement.`,
+      });
+    }
+
+    // Bounce rate analysis
+    const bounceRate = parseFloat(stats.bounceRate);
+    if (bounceRate > 5) {
+      insights.push({
+        type: 'warning',
+        text: `Bounce rate is ${bounceRate}% (high). Clean your email list to improve deliverability.`,
+      });
+    }
+
+    // Best performing email type
+    if (performance.length > 0) {
+      const best = performance.reduce((max, item) =>
+        parseFloat(item.openRate) > parseFloat(max.openRate) ? item : max
+      );
+      insights.push({
+        type: 'info',
+        text: `Best performing email: "${best.type}" with ${best.openRate}% open rate.`,
+      });
+    }
+
+    // Total volume insight
+    if (stats.total < 10) {
+      insights.push({
+        type: 'info',
+        text: `Limited data available (${stats.total} emails). Insights will improve as more emails are sent.`,
+      });
+    }
+
+    // Render insights
+    if (insights.length === 0) {
+      container.innerHTML = '<p style="color: #666;">No insights available yet. Send more emails to see recommendations.</p>';
+    } else {
+      container.innerHTML = insights.map(insight => `
+        <div class="insight-item ${insight.type}">
+          ${insight.text}
+        </div>
+      `).join('');
+    }
+  } catch (error) {
+    console.error('Failed to generate insights:', error);
+  }
 }
 
 // Load statistics
@@ -147,6 +295,7 @@ function applyFilters() {
 
   currentPage = 1;
   loadStats();
+  loadAnalytics();
   loadLogs();
 }
 
@@ -161,6 +310,7 @@ function clearFilters() {
   currentFilters = {};
   currentPage = 1;
   loadStats();
+  loadAnalytics();
   loadLogs();
 }
 
