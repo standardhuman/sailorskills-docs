@@ -23,7 +23,9 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
 - ✅ **Notion Roadmap Integration:** Complete
 - ✅ **Dashboard → Insight Rename:** Complete (2025-11-02)
 - ✅ **Settings Service Design:** Complete (2025-11-06) - Design doc + 30-task implementation plan
+- ✅ **Admin Customer Impersonation Design:** Complete (2025-11-06) - Design doc + 10-task implementation plan
 - 🚧 **Settings Service Implementation:** In Progress (2025-11-06) - Executing in parallel session
+- 🚧 **Admin Customer Impersonation:** Ready for Implementation (2025-11-06) - Worktree created
 - ⏳ **Billing → Completion Rename:** Pending (Medium Priority)
 - ⏳ **Dashboard Navigation Fix:** Pending (Medium Priority)
 - ⏳ **Operations Navigation Optimization:** Pending (Medium Priority)

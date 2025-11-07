@@ -790,6 +790,38 @@ For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
     - Consider creating shared navigation patterns in `sailorskills-shared` after Operations proves successful
     - Document navigation design decisions for future reference
 
+## Portal - Customer Experience & Admin Tools
+- [ ] **Admin Customer Impersonation** ⚙️ IN PROGRESS
+  - **Status:** Design complete, implementation plan ready, worktree created
+  - **Completed:** 2025-11-06 (design and planning phase)
+  - **Rationale:** Enable administrators to view the customer portal as any customer for support, debugging, and testing purposes without requiring actual customer credentials
+  - **Features:**
+    - Searchable customer selector in portal header (admin-only)
+    - Session-based impersonation with prominent warning banner
+    - All portal pages show impersonated customer's data (boats, services, invoices, messages)
+    - "Exit Customer View" button to return to admin account
+    - Security: Admin status verification, session storage isolation, no audit logging (initial phase)
+  - **Implementation Approach:**
+    - Auth layer with `getEffectiveUser()` function that returns impersonated customer when session storage is set
+    - All portal pages updated to use `getEffectiveUser()` instead of `getCurrentUser()`
+    - Customer selector component with datalist for search/filter
+    - Impersonation banner component with customer display and exit button
+    - No RLS policy changes needed (existing security model handles impersonation naturally)
+  - **Database:** New `getAllCustomers()` API function, uses existing customers/boats tables
+  - **Design:** See `/sailorskills-portal/docs/plans/2025-11-06-admin-customer-impersonation-design.md`
+  - **Implementation Plan:** See `/sailorskills-portal/docs/plans/2025-11-06-admin-customer-impersonation.md`
+  - **Worktree:** `~/.config/superpowers/worktrees/sailorskills-portal/feature/admin-customer-impersonation`
+  - **Branch:** `feature/admin-customer-impersonation`
+  - **Next Steps:** Execute implementation plan (10 tasks, estimated 12-15 hours)
+  - **Impact:**
+    - Customer support: View portal exactly as customer sees it
+    - Debugging: Reproduce customer-reported issues
+    - Testing: Verify features work correctly for different customer scenarios
+    - No security vulnerabilities (admin verification on every effective user call)
+  - **Priority:** High (critical support tool)
+  - **Estimated Effort:** 12-15 hours implementation + 2 hours testing
+  - **Dependencies:** None (uses existing auth and database infrastructure)
+
 ## Operations - Workflow & Data
 - [x] **Pending Orders Queue & Confirmation Workflow** ✅
   - **Completed:** 2025-10-30
