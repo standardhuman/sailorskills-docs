@@ -216,6 +216,15 @@ For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
       - Hiring: "What if I hire technician at $X/hour?" → break-even analysis
       - Retention: "What if I reduce churn by 5%?" → LTV impact
       - **Integration with Settings Dashboard:** What-if scenarios should include "Implement This Change" button that opens Settings Dashboard (Q2 2026) with the modeled values pre-filled, enabling one-click transition from projection to implementation
+    - **Enhanced Revenue Forecasting & Hiring Impact Analysis:**
+      - Comprehensive employee vs. contractor financial modeling
+      - Multi-scenario comparison (hire 1, 2, or 3 people simultaneously)
+      - Break-even analysis with detailed cost breakdown (wages, benefits, taxes, equipment, insurance, training)
+      - Revenue capacity modeling (how much additional revenue can X employees generate?)
+      - Profit margin impact visualization (gross margin before/after hiring)
+      - Time-to-profitability calculator (how long until new hire pays for themselves?)
+      - Utilization rate sensitivity analysis (profitability at 50%, 75%, 90% utilization)
+      - Configuration sourced from Settings Service (employee/contractor rates, overhead costs, benefits)
     - **Materialized Database Views:**
       - `mv_service_profitability`: Revenue, hours, $/hour by service type
       - `mv_customer_lifetime_value`: LTV segmentation, churn risk indicators

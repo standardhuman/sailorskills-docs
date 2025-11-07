@@ -73,7 +73,8 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
   - Business pricing configuration (21 variables from Estimator/Billing)
   - User/team management with role-based access
   - Integration/API key management (Resend, Stripe, YouTube, etc.)
-- **Impact:** Eliminates 21 hardcoded pricing duplicates, enables email content updates without deployments
+  - Revenue forecasting configuration (employee/contractor rates, overhead, benefits) - *feeds Q1 2026 Insight forecasting*
+- **Impact:** Eliminates 21 hardcoded pricing duplicates, enables email content updates without deployments, provides configuration foundation for revenue forecasting
 - **Timeline:** Started 2025-11-06, targeting completion 2025-12-06
 
 ### Recently Completed ✅
