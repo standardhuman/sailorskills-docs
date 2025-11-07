@@ -24,7 +24,9 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
 - ✅ **Dashboard → Insight Rename:** Complete (2025-11-02)
 - ✅ **Settings Service Design:** Complete (2025-11-06) - Design doc + 30-task implementation plan
 - ✅ **Admin Customer Impersonation:** Complete (2025-11-07) - Fully implemented and deployed
+- ✅ **Universal SSO Design:** Complete (2025-11-07) - Design doc + 18-task implementation plan
 - 🚧 **Settings Service Implementation:** In Progress (2025-11-06) - Executing in parallel session
+- ⚡ **Universal SSO Implementation:** Ready for Immediate Execution (2025-11-07) - Worktree set up
 - ⏳ **Billing → Completion Rename:** Pending (Medium Priority)
 - ⏳ **Dashboard Navigation Fix:** Pending (Medium Priority)
 - ⏳ **Operations Navigation Optimization:** Pending (Medium Priority)
@@ -75,6 +77,34 @@ This roadmap tracks major cross-service initiatives, architectural changes, and 
   - Integration/API key management (Resend, Stripe, YouTube, etc.)
 - **Impact:** Eliminates 21 hardcoded pricing duplicates, enables email content updates without deployments
 - **Timeline:** Started 2025-11-06, targeting completion 2025-12-06
+
+#### 6. Universal SSO Authentication (2-4 weeks) ⚡ IMMEDIATE PRIORITY
+- **Goal:** Single sign-on across all Sailorskills services with role-based access control
+- **Status:** Ready for implementation - Design complete, plan written, worktree set up
+- **Implementation Plan:** `docs/plans/2025-11-07-universal-sso-implementation.md` (18 tasks)
+- **Design Document:** `docs/plans/2025-11-07-universal-sso-design.md`
+- **Worktree:** `.worktrees/feature/universal-sso`
+- **Architecture:**
+  - New login service at `login.sailorskills.com`
+  - Shared auth module in `sailorskills-shared/src/auth/`
+  - Supabase Auth with `.sailorskills.com` cookie domain
+  - Role-based guards: customer/staff/admin
+  - Migrate all services from SimpleAuth to Supabase Auth
+- **Features:**
+  - Login once, access all authorized services
+  - Centralized session management (7-day cookie)
+  - Role-based access enforcement
+  - Logout propagates across all services
+  - Unified user_profiles table
+- **Services Affected:** 7 services (Login, Portal, Operations, Billing, Inventory, Settings, Booking)
+- **Impact:**
+  - Eliminates login friction for staff accessing multiple internal tools
+  - Seamless customer experience between Portal and Booking
+  - Centralized security and session management
+  - Foundation for advanced auth features (OAuth, 2FA)
+- **Timeline:** Ready to start 2025-11-07, targeting completion 2025-12-05
+- **Execution:** Use `superpowers:executing-plans` skill in parallel session
+- **Blockers:** None - fully designed and planned
 
 ### Recently Completed ✅
 - **Portal Separation** (2025-10-25): Customer portal now separate service
