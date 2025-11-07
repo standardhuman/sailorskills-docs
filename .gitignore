@@ -1,27 +1,5 @@
-# Exclude all service subdirectories (each has its own git repo)
-sailorskills-billing/
-sailorskills-booking/
-sailorskills-dashboard/
-sailorskills-estimator/
-sailorskills-inventory/
-sailorskills-operations/
-sailorskills-shared/
-sailorskills-site/
-sailorskills-video/
-
-# Environment variables (contains database password)
+node_modules/
+dist/
 .env
-
-# macOS
+.env.local
 .DS_Store
-
-# IDE
-.vscode/
-.idea/
-.vercel
-
-# Archive
-docs/archive/
-
-# Development worktrees
-.worktrees/
