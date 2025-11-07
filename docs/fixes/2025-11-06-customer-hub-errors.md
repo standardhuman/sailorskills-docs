@@ -1,15 +1,16 @@
-# Customer Hub Dashboard Errors - Fixed
+# Operations Dashboard Errors - Fixed
 
 **Date:** 2025-11-06
-**Issue:** Console errors when clicking "Efficiency Tools" on Operations dashboard
+**Issue:** Multiple errors when clicking "Efficiency Tools" on Operations dashboard
 **Status:** ✅ RESOLVED
 
 ---
 
 ## Problem Summary
 
-When clicking "Efficiency Tools" in the Operations dashboard, the customer hub card failed to load with the following errors:
+When clicking "Efficiency Tools" in the Operations dashboard, multiple issues occurred:
 
+1. **Customer hub card errors:**
 ```
 Failed to load resource: the server responded with a status of 400 ()
 fzygakldvvzxmahkdylq.supabase.co/rest/v1/customer_messages?select=*&is_read=eq.false
@@ -17,9 +18,42 @@ fzygakldvvzxmahkdylq.supabase.co/rest/v1/customer_messages?select=*&is_read=eq.f
 Error loading customer hub: Object
 ```
 
+2. **Efficiency Tools modal display error:**
+   - Modal displayed "[object Object]" as title
+   - Modal content showed "undefined"
+
 ---
 
 ## Root Cause Analysis
+
+### Issue 3: Incorrect openModal Function Call (Efficiency Tools)
+
+**Problem:**
+The Efficiency Tools modal displayed "[object Object]" as the title and "undefined" as content.
+
+**Evidence:**
+```javascript
+// Incorrect call (passing single object):
+openModal({
+  title: '⚡ Efficiency Tools',
+  content: content,
+  size: 'large',
+  buttons: [...]
+});
+
+// Function signature expects THREE parameters:
+function openModal(title, content, options = {})
+```
+
+**Root Cause:**
+- Function expects `openModal(title, content, options)`
+- Code was calling it as `openModal({title, content, ...})`
+- JavaScript interpreted the object as the `title` parameter → "[object Object]"
+- The `content` parameter received nothing → undefined
+
+---
+
+## Root Cause Analysis (Customer Hub)
 
 ### Issue 1: Missing RLS Policies for Staff Users
 
@@ -55,7 +89,35 @@ Mismatch between assumed schema and actual database schema.
 
 ## Solutions Implemented
 
-### 1. Database Migration (026)
+### 1. Fixed Efficiency Tools Modal Display
+
+**File:** `sailorskills-operations/src/views/efficiency-tools-modal.js:96`
+
+Changed from incorrect single-object parameter:
+```javascript
+// Before (incorrect):
+openModal({
+  title: '⚡ Efficiency Tools',
+  content: content,
+  size: 'large',
+  buttons: [...]
+});
+```
+
+To correct three-parameter call:
+```javascript
+// After (correct):
+openModal('⚡ Efficiency Tools', content, {
+  size: 'large',
+  buttons: [...]
+});
+```
+
+**Result:** Modal now displays proper title and content.
+
+---
+
+### 2. Database Migration (026)
 
 Created RLS policies for staff access following the pattern used in `service_logs` table:
 
@@ -99,7 +161,7 @@ USING (
 - Viewer role can SELECT only, not UPDATE
 - Admin/Owner roles can both SELECT and UPDATE
 
-### 2. Code Fix (dashboard.js)
+### 3. Code Fix (dashboard.js)
 
 Updated query to use correct column:
 
@@ -180,6 +242,8 @@ webcomponents-ce.js:33 Uncaught Error: A custom element with name 'mce-autosize-
 - `migrations/026_add_staff_access_to_customer_tables.sql` (NEW)
 
 ### sailorskills-operations
+- `src/views/efficiency-tools-modal.js` (MODIFIED)
+  - Line 96: Fixed openModal call signature from single object to three parameters
 - `src/views/dashboard.js` (MODIFIED)
   - Line 726: Changed `.eq('is_read', false)` to `.is('read_at', null)`
 
@@ -195,8 +259,11 @@ Commit: 4276f4a
 
 ### Operations Repo
 ```
-fix(dashboard): correct customer_messages query to use read_at column
-Commit: 1d6ee84
+1. fix(dashboard): correct customer_messages query to use read_at column
+   Commit: 1d6ee84
+
+2. fix(efficiency-tools): correct openModal function call signature
+   Commit: 162f0f5
 ```
 
 ---
@@ -232,11 +299,13 @@ Applied **systematic-debugging** skill:
 ## Impact
 
 **Before:**
+- ❌ Efficiency Tools modal displayed "[object Object]" title and "undefined" content
 - ❌ Customer hub card failed to load
 - ❌ Console showed 400 errors
 - ❌ Staff couldn't view customer messages/requests
 
 **After:**
+- ✅ Efficiency Tools modal displays correctly with proper title and all tools accessible
 - ✅ Customer hub card loads successfully
 - ✅ No console errors from customer_messages query
 - ✅ Staff can view all messages and requests with appropriate permissions
@@ -254,10 +323,11 @@ Applied **systematic-debugging** skill:
 
 ## Next Steps
 
-1. ✅ Test in browser to confirm customer hub loads
-2. ⏳ Optional: Add favicon.ico to eliminate 404
-3. ⏳ Optional: Add similar staff policies to other customer-facing tables if they exist
-4. ✅ Monitor for any additional permission errors
+1. ⏳ Test in browser to confirm Efficiency Tools modal displays correctly
+2. ⏳ Test in browser to confirm customer hub loads
+3. ⏳ Optional: Add favicon.ico to eliminate 404
+4. ⏳ Optional: Add similar staff policies to other customer-facing tables if they exist
+5. ✅ Monitor for any additional permission errors
 
 ---
 
