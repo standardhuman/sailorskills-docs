@@ -43,7 +43,12 @@ function getRoleBasedRedirect(role) {
       return 'https://sailorskills-operations.vercel.app'
     case 'admin':
       return 'https://sailorskills-operations.vercel.app' // Admin goes to Operations by default
+    case 'unknown':
+      // If role detection failed, default to Operations (safer for staff/admin)
+      return 'https://sailorskills-operations.vercel.app'
     default:
+      // Fallback to Portal for unrecognized roles
+      console.warn(`Unrecognized role: ${role}, redirecting to Portal`)
       return 'https://sailorskills-portal.vercel.app/portal.html'
   }
 }
@@ -79,14 +84,23 @@ document.getElementById('password-login-form')?.addEventListener('submit', async
 
   try {
     const result = await login(email, password)
+    console.log('Login result:', result) // Debug: full result
 
     if (result.success) {
       // Get the session from Supabase
       const { data: { session } } = await supabase.auth.getSession()
 
       // Login successful - redirect based on role with session in URL
-      const redirectUrl = getRoleBasedRedirect(result.role)
-      console.log(`Login successful. Redirecting ${result.role} to:`, redirectUrl)
+      const role = result.role || 'unknown'
+      console.log(`Login successful. User role: "${role}"`)
+
+      // Temporary debug alert
+      if (!result.role) {
+        alert(`DEBUG: Role is undefined! Full result: ${JSON.stringify(result)}`)
+      }
+
+      const redirectUrl = getRoleBasedRedirect(role)
+      console.log(`Redirecting to: ${redirectUrl}`)
 
       // Include session tokens in URL hash for cross-domain auth
       if (session) {
