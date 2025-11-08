@@ -96,11 +96,18 @@ export async function login(email, password) {
     if (error) throw error
 
     // Fetch user role from user_profiles
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('user_profiles')
       .select('role, service_access')
       .eq('user_id', data.user.id)
       .single()
+
+    // Log profile query result for debugging
+    console.log('Profile query result:', { profile, profileError })
+
+    if (profileError) {
+      console.error('Failed to fetch user profile:', profileError)
+    }
 
     return {
       success: true,
