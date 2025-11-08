@@ -1,4 +1,4 @@
-import { login, supabase } from '@sailorskills/shared/auth'
+import { login, supabase } from '../lib/supabase-client.js'
 
 // Tab switching functionality
 const tabs = document.querySelectorAll('.auth-tab')
