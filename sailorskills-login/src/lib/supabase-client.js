@@ -49,12 +49,13 @@ const customStorage = {
 
   setItem: (key, value) => {
     localStorage.setItem(key, value)
-    setCookie(key, value, { domain: '.sailorskills.com' })
+    // Don't set domain - let browser use current domain (works for both Vercel and custom domains)
+    setCookie(key, value, { domain: '' })
   },
 
   removeItem: (key) => {
     localStorage.removeItem(key)
-    setCookie(key, '', { domain: '.sailorskills.com', maxAge: -1 })
+    setCookie(key, '', { domain: '', maxAge: -1 })
   }
 }
 
@@ -74,7 +75,7 @@ export const supabase = createClient(
     },
     cookieOptions: {
       name: 'sb-auth-token',
-      domain: '.sailorskills.com',
+      domain: '', // Empty domain works for current domain (Vercel or custom)
       path: '/',
       sameSite: 'lax',
       maxAge: 604800

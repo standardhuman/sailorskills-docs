@@ -35,15 +35,16 @@ function getRoleBasedRedirect(role) {
   }
 
   // Otherwise, redirect based on role
+  // Use Vercel URLs for now (will use custom domains once DNS is configured)
   switch (role) {
     case 'customer':
-      return 'https://portal.sailorskills.com'
+      return 'https://sailorskills-portal.vercel.app/portal.html'
     case 'staff':
-      return 'https://operations.sailorskills.com'
+      return 'https://sailorskills-operations.vercel.app'
     case 'admin':
-      return 'https://operations.sailorskills.com' // Admin goes to Operations by default
+      return 'https://sailorskills-operations.vercel.app' // Admin goes to Operations by default
     default:
-      return 'https://portal.sailorskills.com'
+      return 'https://sailorskills-portal.vercel.app/portal.html'
   }
 }
 
@@ -80,10 +81,26 @@ document.getElementById('password-login-form')?.addEventListener('submit', async
     const result = await login(email, password)
 
     if (result.success) {
-      // Login successful - redirect based on role
+      // Get the session from Supabase
+      const { data: { session } } = await supabase.auth.getSession()
+
+      // Login successful - redirect based on role with session in URL
       const redirectUrl = getRoleBasedRedirect(result.role)
       console.log(`Login successful. Redirecting ${result.role} to:`, redirectUrl)
-      window.location.href = redirectUrl
+
+      // Include session tokens in URL hash for cross-domain auth
+      if (session) {
+        const hashParams = new URLSearchParams({
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+          expires_in: session.expires_in.toString(),
+          token_type: session.token_type,
+          type: 'recovery' // Tells Supabase this is a session transfer
+        })
+        window.location.href = `${redirectUrl}#${hashParams.toString()}`
+      } else {
+        window.location.href = redirectUrl
+      }
     } else {
       // Login failed - show error
       showAlert(result.error || 'Login failed. Please check your credentials.')
