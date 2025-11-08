@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "public": true,
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    },
+    "submodules": true
+  }
+}
