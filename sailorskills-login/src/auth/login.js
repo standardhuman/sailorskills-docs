@@ -1,4 +1,4 @@
-import { login, enableAuthDebug } from '@sailorskills/shared/auth'
+import { login, enableAuthDebug } from '../lib/supabase-client.js'
 
 // Enable auth debugging in development
 if (import.meta.env.DEV) {

@@ -1,4 +1,4 @@
-import { supabase } from '@sailorskills/shared/auth'
+import { supabase } from '../lib/supabase-client.js'
 
 document.getElementById('reset-form')?.addEventListener('submit', async (e) => {
   e.preventDefault()

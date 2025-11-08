@@ -9,7 +9,6 @@
     "test": "playwright test"
   },
   "dependencies": {
-    "@sailorskills/shared": "file:../sailorskills-shared",
     "@supabase/supabase-js": "^2.39.0"
   },
   "devDependencies": {
