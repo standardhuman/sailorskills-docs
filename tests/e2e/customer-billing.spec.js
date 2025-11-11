@@ -1,14 +1,19 @@
 import { test, expect } from '@playwright/test';
+import { loginAndNavigateToService, TEST_USERS } from '../helpers/sso-auth.js';
 
 test.describe('Customer Portal Billing Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('https://sailorskills-portal.vercel.app/billing.html');
+    // Login via SSO and navigate to billing page
+    const serviceUrl = 'https://sailorskills-portal.vercel.app/billing.html';
+    await loginAndNavigateToService(
+      page,
+      TEST_USERS.owner.email,
+      TEST_USERS.owner.password,
+      serviceUrl
+    );
 
-    // Login as customer
-    await page.fill('#customer-email', 'standardhuman@gmail.com');
-    await page.fill('#customer-password', 'KLRss!650');
-    await page.click('button[type="submit"]');
-    await page.waitForURL('**/billing.html');
+    // Wait for page to fully load
+    await page.waitForLoadState('networkidle');
   });
 
   test('should load billing page', async ({ page }) => {

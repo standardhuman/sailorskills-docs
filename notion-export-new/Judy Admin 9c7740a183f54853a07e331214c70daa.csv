@@ -1,0 +1,19 @@
+﻿#,Interval,Date,Secondary Visit,Time In,Paint,Growth,Anodes,Thru-hulls,Prop,Notes,Time Out,Duration,Base Fee,Xtra Minutes,$ Time,$ Materials,Adjustments,Total,Monthly
+01,1,01/03/2023,No,1200,Poor,Heavy,Fair,Sound,Good,,1229,29,$99.00,9,$18.00,,,$117.00,$117.00
+02,1,02/01/2023,No,1352,Poor,Moderate,,Sound,Polished,,1409,17,$99.00,0,$0.00,,,$99.00,$99.00
+03,1,02/01/2023,No,1448,Poor,Moderate,,Sound,Good,,1522,34,$99.00,14,$28.00,,,$127.00,$127.00
+04,1,02/09/2023,No,1639,Poor,Moderate,Excellent,Sound,Good,Replaced anodes,1709,30,$99.00,10,$20.00,,,$119.00,$119.00
+05,1,03/02/2023,No,1612,Poor,Moderate,Excellent,Sound,Good,,1633,21,$99.00,1,$2.00,,,$101.00,$101.00
+06,1,04/11/2023,No,1547,Poor,Moderate,Excellent,Sound,Good,,1620,33,$99.00,13,$26.00,,,$125.00,$125.00
+07,1,05/01/2023,No,1435,Poor,Moderate,"Fair, Good",Sound,Good,,1506,31,$99.00,11,$22.00,,,$121.00,$121.00
+08,1,06/01/2023,No,1219,Poor,Moderate,"Fair, Good",Sound,Good,Increasing light barnacle growth,1244,25,$99.00,5,$10.00,,,$109.00,$109.00
+09,1,07/03/2023,No,1658,Poor,"Heavy, Moderate",Fair,Sound,Good,,1731,33,$99.00,13,$26.00,,,$125.00,$125.00
+10,1,08/01/2023,No,1427,Poor,"Heavy, Moderate","Good, Replaced",Sound,Good,Replaced shaft anode,1503,36,$99.00,16,$32.00,,,$131.00,$131.00
+11,1,09/11/2023,No,1307,Poor,"Heavy, Moderate","Fair, Good",Sound,Good,"Bottom paint has failed. Time to repaint. ",1339,32,$99.00,12,$24.00,,,$123.00,$123.00
+12,1,10/01/2023,No,1332,Poor,"Heavy, Moderate","Fair, Good",Sound,Good,,1357,25,$99.00,5,$10.00,,,$109.00,$109.00
+13,1,11/02/2023,No,1413,Poor,"Heavy, Moderate","Fair, Replaced",Sound,Good,Replaced 7/8” X2 shaft anode,1446,33,$99.00,13,$26.00,,,$125.00,$125.00
+14,1,12/01/2023,No,1418,Poor,"Heavy, Moderate","Fair, Good",Sound,Good,,1456,38,$99.00,18,$36.00,,,$135.00,$135.00
+15,1,01/10/2024,No,1322,Poor,Minimal,Fair,Sound,Good,,1343,21,$99.00,1,$2.00,,,$101.00,$101.00
+16,1,02/09/2024,No,1333,Poor,"Minimal, Moderate","Good, Replaced",Sound,Good,Replaced 7/8” X-2 streamlined shaft anode,1418,45,$99.00,25,$50.00,,,$149.00,$149.00
+17,1,03/11/2024,No,1253,Poor,Moderate,"Fair, Good",Sound,Good,,1313,20,$99.00,0,$0.00,,,$99.00,$99.00
+18,1,04/03/2024,No,1511,Poor,Moderate,"Fair, Good",Sound,Good,,1548,37,$99.00,17,$34.00,,,$133.00,$133.00

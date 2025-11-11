@@ -1,0 +1,388 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - link "SAILOR SKILLS" [ref=e3] [cursor=pointer]:
+      - /url: https://www.sailorskills.com/
+    - generic [ref=e4]:
+      - link "⚙️" [ref=e5] [cursor=pointer]:
+        - /url: https://sailorskills-settings.vercel.app
+        - generic [ref=e6]: ⚙️
+      - link "Logout" [ref=e7] [cursor=pointer]:
+        - /url: "#"
+  - banner [ref=e8]:
+    - navigation [ref=e10]:
+      - link "OPERATIONS" [ref=e11] [cursor=pointer]:
+        - /url: https://sailorskills-operations.vercel.app
+      - link "BILLING" [ref=e12] [cursor=pointer]:
+        - /url: https://sailorskills-billing.vercel.app
+      - button "CUSTOMER TOOLS ▾" [ref=e14] [cursor=pointer]:
+        - text: CUSTOMER TOOLS
+        - generic [ref=e15]: ▾
+      - button "ADMIN TOOLS ▾" [ref=e17] [cursor=pointer]:
+        - text: ADMIN TOOLS
+        - generic [ref=e18]: ▾
+      - link "INSIGHT" [ref=e19] [cursor=pointer]:
+        - /url: https://sailorskills-insight.vercel.app
+  - navigation [ref=e20]:
+    - generic [ref=e21]:
+      - link "Dashboard" [ref=e22] [cursor=pointer]:
+        - /url: "#dashboard"
+      - link "Work" [ref=e23] [cursor=pointer]:
+        - /url: "#work"
+      - link "Customers" [ref=e24] [cursor=pointer]:
+        - /url: "#customers"
+  - main [ref=e26]:
+    - generic [ref=e27]:
+      - heading "Admin Dashboard" [level=2] [ref=e28]
+      - generic [ref=e29]:
+        - generic "Total customers in the system (excludes test data)" [ref=e30]:
+          - generic [ref=e31]: Total Customers
+          - generic [ref=e32]:
+            - generic [ref=e33]: "179"
+            - generic [ref=e34]: (1 boats)
+        - generic "All-time revenue from invoices" [ref=e35]:
+          - generic [ref=e36]: Total Revenue
+          - generic [ref=e37]:
+            - generic [ref=e38]: $182,979
+            - generic [ref=e39]: all time
+        - generic "Paid invoices (93% collection rate)" [ref=e40]:
+          - generic [ref=e41]: Paid Revenue
+          - generic [ref=e42]:
+            - generic [ref=e43]: $170,124
+            - generic [ref=e44]: 93% collected
+        - generic "Total invoices processed" [ref=e45]:
+          - generic [ref=e46]: Invoices
+          - generic [ref=e47]:
+            - generic [ref=e48]: "1599"
+            - generic [ref=e49]: processed
+      - generic [ref=e50]:
+        - generic [ref=e51]:
+          - heading "⚡ Efficiency Metrics" [level=3] [ref=e52]
+          - button "🛠️ Efficiency Tools" [ref=e53] [cursor=pointer]
+        - generic "Services completed this month" [ref=e54]:
+          - generic [ref=e55]: This Month Services
+          - generic [ref=e56]:
+            - generic [ref=e57]: "11"
+            - generic [ref=e58]: ↓63% vs last month
+        - generic "Hours worked this month" [ref=e59]:
+          - generic [ref=e60]: This Month Hours
+          - generic [ref=e61]:
+            - generic [ref=e62]: "12.0"
+            - generic [ref=e63]: ↓3% vs last month • ⭐⭐⭐⭐
+        - generic "Total services across all time" [ref=e64]:
+          - generic [ref=e65]: All-Time Services
+          - generic [ref=e66]:
+            - generic [ref=e67]: "938"
+            - generic [ref=e68]: total services
+        - generic "Total hours worked across all time" [ref=e69]:
+          - generic [ref=e70]: All-Time Hours
+          - generic [ref=e71]:
+            - generic [ref=e72]: "472.4"
+            - generic [ref=e73]:
+              - text: actual • 607.4 with estimates
+              - text: ⭐⭐⭐⭐ 78% actual data
+        - generic "Average service duration" [ref=e74]:
+          - generic [ref=e75]: Avg Service Duration
+          - generic [ref=e76]:
+            - generic [ref=e77]: 0.50 hrs
+            - generic [ref=e78]: per service (actual data)
+      - generic [ref=e79]:
+        - generic [ref=e80]:
+          - heading "Today's Services" [level=3] [ref=e81]
+          - paragraph [ref=e83]: No services scheduled for today
+        - generic [ref=e84]:
+          - heading "Upcoming Services" [level=3] [ref=e85]
+          - generic [ref=e86]:
+            - generic [ref=e87] [cursor=pointer]:
+              - generic [ref=e88]: Tue, Nov 11
+              - strong [ref=e89]: Magic Juan
+              - generic [ref=e90]: Unknown
+              - generic [ref=e92]: 📅 Booked
+            - generic [ref=e93] [cursor=pointer]:
+              - generic [ref=e94]: Tue, Nov 11
+              - strong [ref=e95]: Puntster
+              - generic [ref=e96]: Unknown
+              - generic [ref=e98]: 📅 Booked
+            - generic [ref=e99] [cursor=pointer]:
+              - generic [ref=e100]: Tue, Nov 18
+              - strong [ref=e101]: Salty Lady
+              - generic [ref=e102]: Unknown
+              - generic [ref=e104]: 📅 Booked
+        - generic [ref=e105]:
+          - heading "Recently Completed" [level=3] [ref=e106]
+          - generic [ref=e107]:
+            - generic [ref=e108] [cursor=pointer]:
+              - generic [ref=e109]: Nov 7
+              - strong [ref=e110]: Maris
+            - generic [ref=e111] [cursor=pointer]:
+              - generic [ref=e112]: Nov 7
+              - strong [ref=e113]: Maris
+            - generic [ref=e114] [cursor=pointer]:
+              - generic [ref=e115]: Nov 7
+              - strong [ref=e116]: Maris
+            - generic [ref=e117] [cursor=pointer]:
+              - generic [ref=e118]: Nov 7
+              - strong [ref=e119]: Maris
+            - generic [ref=e120] [cursor=pointer]:
+              - generic [ref=e121]: Nov 7
+              - strong [ref=e122]: Maris
+        - generic [ref=e123]:
+          - heading "Actions Required" [level=3] [ref=e124]
+          - paragraph [ref=e126]: No actions required
+        - generic [ref=e127] [cursor=pointer]:
+          - heading "Work Queue" [level=3] [ref=e128]
+          - generic [ref=e130]:
+            - generic [ref=e131]: "Pending Orders: 14"
+            - generic [ref=e132]: "Needs Scheduling: 0"
+            - generic [ref=e133]:
+              - strong [ref=e134]: "Total:"
+              - text: "14"
+        - generic [ref=e135] [cursor=pointer]:
+          - heading "Customer Hub" [level=3] [ref=e136]
+          - generic [ref=e138]:
+            - generic [ref=e139]: "Unread Messages: 0"
+            - generic [ref=e140]: "Pending Requests: 0"
+            - generic [ref=e141]:
+              - strong [ref=e142]: "Total:"
+              - text: "0"
+        - generic [ref=e143]:
+          - heading "Due This Month" [level=3] [ref=e144]
+          - generic [ref=e146]:
+            - heading "Service Predictions for November" [level=4] [ref=e147]
+            - generic [ref=e148]:
+              - generic [ref=e149]:
+                - generic [ref=e150]: "44"
+                - generic [ref=e151]: Overdue
+              - generic [ref=e152]:
+                - generic [ref=e153]: "44"
+                - generic [ref=e154]: Due This Month
+            - generic [ref=e155]:
+              - generic [ref=e156] [cursor=pointer]:
+                - generic [ref=e157]:
+                  - strong [ref=e158]: Maiden California
+                  - generic [ref=e159]: Hawkeye King
+                  - generic "Pattern-based service month" [ref=e160]: 📅 November 2025
+                - generic [ref=e161]:
+                  - generic [ref=e162]: 🔴 Overdue
+                  - generic [ref=e163]: 10 days overdue
+                  - 'generic "Deviation from pattern: +7d" [ref=e164]': +7d
+                  - generic "Pattern-based prediction" [ref=e165]: P
+              - generic [ref=e166] [cursor=pointer]:
+                - generic [ref=e167]:
+                  - strong [ref=e168]: Ruby
+                  - generic [ref=e169]: Galen Loving
+                  - generic "Pattern-based service month" [ref=e170]: 📅 November 2025
+                - generic [ref=e171]:
+                  - generic [ref=e172]: 🔴 Overdue
+                  - generic [ref=e173]: 10 days overdue
+                  - 'generic "Deviation from pattern: +7d" [ref=e174]': +7d
+                  - generic "Pattern-based prediction" [ref=e175]: P
+              - generic [ref=e176] [cursor=pointer]:
+                - generic [ref=e177]:
+                  - strong [ref=e178]: Tandem
+                  - generic [ref=e179]: Kimber Oswald
+                  - generic "Pattern-based service month" [ref=e180]: 📅 November 2025
+                - generic [ref=e181]:
+                  - generic [ref=e182]: 🔴 Overdue
+                  - generic [ref=e183]: 10 days overdue
+                  - 'generic "Deviation from pattern: +7d" [ref=e184]': +7d
+                  - generic "Pattern-based prediction" [ref=e185]: P
+              - generic [ref=e186] [cursor=pointer]:
+                - generic [ref=e187]:
+                  - strong [ref=e188]: Twilight Zone
+                  - generic [ref=e189]: Paul Kamen
+                  - generic "Pattern-based service month" [ref=e190]: 📅 November 2025
+                - generic [ref=e191]:
+                  - generic [ref=e192]: 🔴 Overdue
+                  - generic [ref=e193]: 10 days overdue
+                  - 'generic "Deviation from pattern: +7d" [ref=e194]': +7d
+                  - generic "Pattern-based prediction" [ref=e195]: P
+              - generic [ref=e196] [cursor=pointer]:
+                - generic [ref=e197]:
+                  - strong [ref=e198]: Salty Lady
+                  - generic [ref=e199]: Craig Aufenkamp
+                  - generic "Pattern-based service month" [ref=e200]: 📅 November 2025
+                - generic [ref=e201]:
+                  - generic [ref=e202]: 🔴 Overdue
+                  - generic [ref=e203]: 10 days overdue
+                  - 'generic "Deviation from pattern: ✓ On pattern" [ref=e204]': ✓ On pattern
+                  - generic "Pattern-based prediction" [ref=e205]: P
+            - link "View all 44 predictions →" [ref=e206] [cursor=pointer]:
+              - /url: /forecast.html
+        - generic [ref=e207]:
+          - heading "Paint Alerts" [level=3] [ref=e208]
+          - generic [ref=e209]:
+            - generic [ref=e210] [cursor=pointer]:
+              - strong [ref=e211]: Tuatara
+              - generic [ref=e212]: Time Now
+            - generic [ref=e213] [cursor=pointer]:
+              - strong [ref=e214]: Take it Easy
+              - generic [ref=e215]: Time Now
+            - generic [ref=e216] [cursor=pointer]:
+              - strong [ref=e217]: Noelani
+              - generic [ref=e218]: Time Now
+            - generic [ref=e219] [cursor=pointer]:
+              - strong [ref=e220]: Psycho Tiller
+              - generic [ref=e221]: Time Now
+            - generic [ref=e222] [cursor=pointer]:
+              - strong [ref=e223]: Rumble On
+              - generic [ref=e224]: Time Now
+            - generic [ref=e225] [cursor=pointer]:
+              - strong [ref=e226]: Puntster
+              - generic [ref=e227]: Time Now
+            - generic [ref=e228] [cursor=pointer]:
+              - strong [ref=e229]: Mojo
+              - generic [ref=e230]: Time Now
+            - generic [ref=e231] [cursor=pointer]:
+              - strong [ref=e232]: Pearl
+              - generic [ref=e233]: Time Now
+            - generic [ref=e234] [cursor=pointer]:
+              - strong [ref=e235]: Southern Cross
+              - generic [ref=e236]: Time Now
+            - generic [ref=e237] [cursor=pointer]:
+              - strong [ref=e238]: Joyous Spirit
+              - generic [ref=e239]: Time Now
+            - generic [ref=e240] [cursor=pointer]:
+              - strong [ref=e241]: Freja
+              - generic [ref=e242]: Time Now
+            - generic [ref=e243] [cursor=pointer]:
+              - strong [ref=e244]: Fernando Augusto
+              - generic [ref=e245]: Time Now
+            - generic [ref=e246] [cursor=pointer]:
+              - strong [ref=e247]: Elise
+              - generic [ref=e248]: Time Now
+            - generic [ref=e249] [cursor=pointer]:
+              - strong [ref=e250]: Dream Keeper
+              - generic [ref=e251]: Time Now
+            - generic [ref=e252] [cursor=pointer]:
+              - strong [ref=e253]: Dream Catcher
+              - generic [ref=e254]: Time Now
+            - generic [ref=e255] [cursor=pointer]:
+              - strong [ref=e256]: Diva
+              - generic [ref=e257]: Time Now
+            - generic [ref=e258] [cursor=pointer]:
+              - strong [ref=e259]: Deux Coeurs
+              - generic [ref=e260]: Time Now
+            - generic [ref=e261] [cursor=pointer]:
+              - strong [ref=e262]: Dash
+              - generic [ref=e263]: Time Now
+            - generic [ref=e264] [cursor=pointer]:
+              - strong [ref=e265]: Constanza
+              - generic [ref=e266]: Time Now
+            - generic [ref=e267] [cursor=pointer]:
+              - strong [ref=e268]: Blue Heeler
+              - generic [ref=e269]: Time Now
+            - generic [ref=e270] [cursor=pointer]:
+              - strong [ref=e271]: Anacapa
+              - generic [ref=e272]: Time Now
+            - generic [ref=e273] [cursor=pointer]:
+              - strong [ref=e274]: Yakamoz
+              - generic [ref=e275]: OVERDUE
+            - generic [ref=e276] [cursor=pointer]:
+              - strong [ref=e277]: Voyager
+              - generic [ref=e278]: OVERDUE
+            - generic [ref=e279] [cursor=pointer]:
+              - strong [ref=e280]: Msafiri
+              - generic [ref=e281]: OVERDUE
+            - generic [ref=e282] [cursor=pointer]:
+              - strong [ref=e283]: Molly Brown
+              - generic [ref=e284]: OVERDUE
+            - generic [ref=e285] [cursor=pointer]:
+              - strong [ref=e286]: Risky
+              - generic [ref=e287]: OVERDUE
+            - generic [ref=e288] [cursor=pointer]:
+              - strong [ref=e289]: Que Sera Sera
+              - generic [ref=e290]: OVERDUE
+            - generic [ref=e291] [cursor=pointer]:
+              - strong [ref=e292]: Nimbus
+              - generic [ref=e293]: OVERDUE
+            - generic [ref=e294] [cursor=pointer]:
+              - strong [ref=e295]: Mor Wind
+              - generic [ref=e296]: OVERDUE
+            - generic [ref=e297] [cursor=pointer]:
+              - strong [ref=e298]: Sally 4th
+              - generic [ref=e299]: OVERDUE
+            - generic [ref=e300] [cursor=pointer]:
+              - strong [ref=e301]: Robin
+              - generic [ref=e302]: OVERDUE
+            - generic [ref=e303] [cursor=pointer]:
+              - strong [ref=e304]: Persephone
+              - generic [ref=e305]: OVERDUE
+            - generic [ref=e306] [cursor=pointer]:
+              - strong [ref=e307]: Snappy
+              - generic [ref=e308]: OVERDUE
+            - generic [ref=e309] [cursor=pointer]:
+              - strong [ref=e310]: Miss Lady
+              - generic [ref=e311]: OVERDUE
+            - generic [ref=e312] [cursor=pointer]:
+              - strong [ref=e313]: The Alfred
+              - generic [ref=e314]: OVERDUE
+            - generic [ref=e315] [cursor=pointer]:
+              - strong [ref=e316]: Tandem
+              - generic [ref=e317]: OVERDUE
+            - generic [ref=e318] [cursor=pointer]:
+              - strong [ref=e319]: Smogen 2
+              - generic [ref=e320]: OVERDUE
+            - generic [ref=e321] [cursor=pointer]:
+              - strong [ref=e322]: Second Wind
+              - generic [ref=e323]: OVERDUE
+            - generic [ref=e324] [cursor=pointer]:
+              - strong [ref=e325]: Nighthawk
+              - generic [ref=e326]: OVERDUE
+            - generic [ref=e327] [cursor=pointer]:
+              - strong [ref=e328]: Magic Juan
+              - generic [ref=e329]: OVERDUE
+            - generic [ref=e330] [cursor=pointer]:
+              - strong [ref=e331]: Kelly Marie
+              - generic [ref=e332]: OVERDUE
+            - generic [ref=e333] [cursor=pointer]:
+              - strong [ref=e334]: Impulse
+              - generic [ref=e335]: OVERDUE
+            - generic [ref=e336] [cursor=pointer]:
+              - strong [ref=e337]: High Road
+              - generic [ref=e338]: OVERDUE
+            - generic [ref=e339] [cursor=pointer]:
+              - strong [ref=e340]: Grace
+              - generic [ref=e341]: OVERDUE
+            - generic [ref=e342] [cursor=pointer]:
+              - strong [ref=e343]: Genesis
+              - generic [ref=e344]: OVERDUE
+            - generic [ref=e345] [cursor=pointer]:
+              - strong [ref=e346]: Funkadelic
+              - generic [ref=e347]: OVERDUE
+            - generic [ref=e348] [cursor=pointer]:
+              - strong [ref=e349]: Freyja
+              - generic [ref=e350]: OVERDUE
+            - generic [ref=e351] [cursor=pointer]:
+              - strong [ref=e352]: Free Spirit
+              - generic [ref=e353]: OVERDUE
+            - generic [ref=e354] [cursor=pointer]:
+              - strong [ref=e355]: Delta Cloud
+              - generic [ref=e356]: OVERDUE
+            - generic [ref=e357] [cursor=pointer]:
+              - strong [ref=e358]: Dakini
+              - generic [ref=e359]: OVERDUE
+            - generic [ref=e360] [cursor=pointer]:
+              - strong [ref=e361]: Cowboys Dream
+              - generic [ref=e362]: OVERDUE
+            - generic [ref=e363] [cursor=pointer]:
+              - strong [ref=e364]: Brigadoon
+              - generic [ref=e365]: OVERDUE
+            - generic [ref=e366] [cursor=pointer]:
+              - strong [ref=e367]: Booty
+              - generic [ref=e368]: OVERDUE
+            - generic [ref=e369] [cursor=pointer]:
+              - strong [ref=e370]: Another High Time
+              - generic [ref=e371]: OVERDUE
+            - generic [ref=e372] [cursor=pointer]:
+              - strong [ref=e373]: Andiamo
+              - generic [ref=e374]: OVERDUE
+            - generic [ref=e375] [cursor=pointer]:
+              - strong [ref=e376]: Amaterasu
+              - generic [ref=e377]: OVERDUE
+        - generic [ref=e378]:
+          - heading "Inventory Alerts" [level=3] [ref=e379]
+          - paragraph [ref=e381]: Inventory integration coming soon
+```

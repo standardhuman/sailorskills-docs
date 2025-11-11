@@ -1,5 +1,138 @@
 import { login, supabase } from '../lib/supabase-client.js'
 
+// Check for magic link callback or existing session on page load
+(async () => {
+  try {
+    // Check for auth tokens in URL (implicit flow for magic links)
+    const hasHashTokens = window.location.hash.includes('access_token')
+    const hasCodeParam = window.location.search.includes('code=')
+
+    if (hasHashTokens) {
+      console.log('[LOGIN] Magic link tokens detected in hash, waiting for Supabase auto-detection...')
+
+      // Wait for Supabase to automatically process the hash tokens
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      const { data: { session }, error } = await supabase.auth.getSession()
+
+      if (error) {
+        console.error('[LOGIN] Session error:', error)
+        // Clear invalid hash tokens to prevent loops
+        if (window.location.hash) {
+          history.replaceState(null, '', window.location.pathname + window.location.search)
+        }
+      } else if (session) {
+        console.log('[LOGIN] Session established from magic link')
+        await handleSessionRedirect(session)
+        return
+      } else {
+        console.warn('[LOGIN] Hash tokens present but no session established - clearing stale tokens')
+        // Clear stale hash tokens (likely from logout redirect)
+        if (window.location.hash) {
+          history.replaceState(null, '', window.location.pathname + window.location.search)
+        }
+      }
+    }
+
+    // Fallback: Check for PKCE code (for password login flow)
+    if (hasCodeParam) {
+      console.log('[LOGIN] PKCE code detected, manually exchanging code for session...')
+
+      const params = new URLSearchParams(window.location.search)
+      const code = params.get('code')
+
+      if (code) {
+        try {
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+
+          if (error) {
+            console.error('[LOGIN] Failed to exchange code:', error)
+          } else if (data.session) {
+            console.log('[LOGIN] Successfully exchanged code for session')
+            await handleSessionRedirect(data.session)
+            return
+          }
+        } catch (err) {
+          console.error('[LOGIN] Error exchanging code:', err)
+        }
+      }
+
+      console.log('[LOGIN] Code exchange failed or no session, checking manually...')
+    }
+
+    const { data: { session }, error } = await supabase.auth.getSession()
+
+    if (error) {
+      console.error('[LOGIN] Session error:', error)
+      return // Don't redirect on error, show login form
+    }
+
+    console.log('[LOGIN] Session check:', {
+      hasSession: !!session,
+      hasCodeParam,
+      userEmail: session?.user?.email,
+      expiresAt: session?.expires_at
+    })
+
+    if (session) {
+      // Verify the session is actually valid by making an authenticated request
+      const { data: user, error: userError } = await supabase.auth.getUser()
+
+      if (userError || !user) {
+        console.warn('[LOGIN] Session exists but is invalid (expired/revoked), clearing and showing login form')
+        // Clear invalid session from localStorage
+        await supabase.auth.signOut()
+        console.log('[LOGIN] Invalid session cleared, showing login form')
+      } else {
+        console.log('[LOGIN] Session is valid, redirecting...')
+        await handleSessionRedirect(session)
+      }
+    } else {
+      console.log('[LOGIN] No session found, showing login form')
+    }
+  } catch (err) {
+    console.error('[LOGIN] Fatal error:', err)
+    // Show login form on any error
+  }
+})()
+
+async function handleSessionRedirect(session) {
+  try {
+      // User authenticated via magic link or has existing session
+      console.log('[LOGIN] Session found, fetching user role...')
+
+      // Fetch user role to determine redirect
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .single()
+
+      if (profileError) {
+        console.warn('[LOGIN] No user_profile found, defaulting to customer role')
+      }
+
+      const role = profile?.role || 'customer'
+      console.log('[LOGIN] User role:', role)
+
+      const redirectUrl = getRoleBasedRedirect(role)
+      console.log('[LOGIN] Redirecting to:', redirectUrl)
+
+      // Transfer session to target service
+      // Note: Don't use type='recovery' (that's for password reset flows)
+      const hashParams = new URLSearchParams({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+        expires_in: session.expires_in.toString(),
+        token_type: session.token_type
+      })
+
+      window.location.href = `${redirectUrl}#${hashParams.toString()}`
+  } catch (err) {
+    console.error('[LOGIN] Error in handleSessionRedirect:', err)
+  }
+}
+
 // Tab switching functionality
 const tabs = document.querySelectorAll('.auth-tab')
 const panels = document.querySelectorAll('.auth-panel')
@@ -35,21 +168,21 @@ function getRoleBasedRedirect(role) {
   }
 
   // Otherwise, redirect based on role
-  // Use Vercel URLs for now (will use custom domains once DNS is configured)
+  // Use production custom domains
   switch (role) {
     case 'customer':
-      return 'https://sailorskills-portal.vercel.app/portal.html'
+      return 'https://portal.sailorskills.com/portal.html'
     case 'staff':
-      return 'https://sailorskills-operations.vercel.app'
+      return 'https://ops.sailorskills.com'
     case 'admin':
-      return 'https://sailorskills-operations.vercel.app' // Admin goes to Operations by default
+      return 'https://ops.sailorskills.com' // Admin goes to Operations by default
     case 'unknown':
       // If role detection failed, default to Operations (safer for staff/admin)
-      return 'https://sailorskills-operations.vercel.app'
+      return 'https://ops.sailorskills.com'
     default:
       // Fallback to Portal for unrecognized roles
       console.warn(`Unrecognized role: ${role}, redirecting to Portal`)
-      return 'https://sailorskills-portal.vercel.app/portal.html'
+      return 'https://portal.sailorskills.com/portal.html'
   }
 }
 
@@ -108,8 +241,8 @@ document.getElementById('password-login-form')?.addEventListener('submit', async
           access_token: session.access_token,
           refresh_token: session.refresh_token,
           expires_in: session.expires_in.toString(),
-          token_type: session.token_type,
-          type: 'recovery' // Tells Supabase this is a session transfer
+          token_type: session.token_type
+          // Note: Don't include type='recovery' (that's for password reset only)
         })
         window.location.href = `${redirectUrl}#${hashParams.toString()}`
       } else {
@@ -142,6 +275,9 @@ document.getElementById('magic-link-form')?.addEventListener('submit', async (e)
 
   try {
     const redirectTo = explicitRedirect || `${window.location.origin}/login.html`
+
+    console.log('[LOGIN] Requesting magic link for:', email)
+    console.log('[LOGIN] Redirect URL:', redirectTo)
 
     const { error } = await supabase.auth.signInWithOtp({
       email,

@@ -1,0 +1,13 @@
+﻿#,Interval,Date,Secondary Visit,Time In,Paint,Growth,Anodes,Thru-hulls,Prop,Notes,Time Out,Duration,Base Fee,Xtra Minutes,$ Time,$ Materials,Adjustments,Total,Monthly
+01,2,01/11/2023,No,0,Poor,Heavy,Fair,Sound,Good,"Attention: widespread osmotic blistering on rudder, keel and hull. All appear to be roughly dime-sized.",26,26,$99.00,6,$12.00,,,$111.00,$55.00
+02,2,03/03/2023,No,1224,Poor,Moderate,Fair,Sound,Good,,1247,23,$99.00,3,$6.00,,,$105.00,$52.00
+03,2,05/04/2023,No,1210,Poor,"Heavy, Moderate",Fair,Sound,Good,,1238,28,$99.00,8,$16.00,,,$115.00,$57.00
+04,2,07/02/2023,No,1739,Poor,Heavy,Fair,Sound,Good," Barnacles may be penetrating the fiberglass ",1807,28,$99.00,8,$16.00,,,$115.00,$57.00
+05,2,09/08/2023,No,957,Poor,"Heavy, Moderate","Fair, Good",Sound,Good,"Paint has failed. Widespread blistering and shelled animal growth ",1027,30,$99.00,10,$20.00,,,$119.00,$59.00
+06,2,11/03/2023,No,1310,Poor,"Heavy, Moderate","Fair, Good",Sound,Good,,1333,23,$99.00,3,$6.00,,,$105.00,$52.00
+07,2,01/09/2024,No,1444,Poor,"Heavy, Moderate","Fair, Good",Sound,Good,,1504,20,$99.00,0,$0.00,,,$99.00,$49.00
+08,2,03/11/2024,No,1205,"Missing, Poor",Moderate,"Fair, Good",Sound,Good,,1232,27,$99.00,7,$14.00,,,$113.00,$56.00
+09,2,05/02/2024,No,1411,"Missing, Poor","Heavy, Moderate",Fair,Sound,Good,,1437,26,$99.00,6,$12.00,,,$111.00,$55.00
+10,2,07/12/2024,No,1116,"Missing, Poor","Heavy, Moderate","Fair, Good",Sound,Good,,1134,18,$99.00,0,$0.00,,,$99.00,$49.00
+11,2,09/23/2024,No,1355,"Missing, Poor","Heavy, Moderate",Fair,Sound,Good,,1415,20,$99.00,0,$0.00,,,$99.00,$49.00
+12,,11/13/2024,No,1147,,,,,,,,-707,$99.00,0,$0.00,,,$99.00,$0.00

@@ -1,14 +1,19 @@
 import { test, expect } from '@playwright/test';
+import { loginAndNavigateToService, TEST_USERS } from '../helpers/sso-auth.js';
 
 test.describe('Operations Invoices Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('https://sailorskills-operations.vercel.app/invoices.html');
+    // Login via SSO and navigate to invoices page
+    const serviceUrl = 'https://ops.sailorskills.com/invoices.html';
+    await loginAndNavigateToService(
+      page,
+      TEST_USERS.owner.email,
+      TEST_USERS.owner.password,
+      serviceUrl
+    );
 
-    // Login as admin
-    await page.fill('#admin-email', 'standardhuman@gmail.com');
-    await page.fill('#admin-password', 'KLRss!650');
-    await page.click('button[type="submit"]');
-    await page.waitForURL('**/invoices.html');
+    // Wait for page to fully load
+    await page.waitForLoadState('networkidle');
   });
 
   test('should load invoices page', async ({ page }) => {

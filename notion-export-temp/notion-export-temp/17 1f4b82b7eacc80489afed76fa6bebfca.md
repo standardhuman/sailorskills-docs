@@ -1,0 +1,8 @@
+# 17
+
+Anodes: None
+Date: 05/15/2025
+Growth: Minimal
+Paint: Excellent
+Prop: None
+Thru-hulls: Sound
