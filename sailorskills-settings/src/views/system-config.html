@@ -15,6 +15,7 @@
 
   <!-- Page-Specific Styles -->
   <link rel="stylesheet" href="../styles/system-config.css">
+  <link rel="stylesheet" href="../styles/bcc-config.css">
 </head>
 <body>
   <div class="system-config">
@@ -281,6 +282,48 @@
         <div class="cleaning-frequency-actions">
           <button id="save-cleaning-frequency-btn" class="btn btn-primary">💾 Save Cleaning Frequency Configuration</button>
           <span id="cleaning-frequency-save-status" class="save-status"></span>
+        </div>
+      </section>
+
+      <!-- BCC Email Configuration -->
+      <section class="pricing-section bcc-config-section">
+        <h2>📧 Email BCC Configuration</h2>
+        <p class="section-description">Configure BCC recipients for email monitoring and auditing. Changes take effect immediately (no redeploy required).</p>
+
+        <!-- BCC Settings Table -->
+        <div class="bcc-settings-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>BCC Address</th>
+                <th>Active</th>
+                <th>Test</th>
+              </tr>
+            </thead>
+            <tbody id="bcc-settings-tbody">
+              <!-- Populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Global Fallback Info -->
+        <div class="bcc-fallback-info">
+          <p><strong>🌐 Global Fallback (ENV):</strong> <span id="global-bcc-fallback">Loading...</span></p>
+          <p class="info-text">ⓘ Services without specific BCC use the global fallback</p>
+        </div>
+
+        <!-- Actions -->
+        <div class="bcc-actions">
+          <button id="save-bcc-btn" class="btn btn-primary">💾 Save BCC Changes</button>
+          <button id="reset-bcc-btn" class="btn btn-secondary">↺ Reset to Database Values</button>
+          <span id="bcc-save-status" class="save-status"></span>
+        </div>
+
+        <!-- Change History -->
+        <div class="bcc-change-history">
+          <h3>📋 Recent BCC Changes</h3>
+          <div id="bcc-change-history"></div>
         </div>
       </section>
 
