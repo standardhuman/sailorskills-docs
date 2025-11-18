@@ -10,7 +10,7 @@
 
 ## What Was Completed
 
-### Phase 1: Environment Variable Setup ✅
+### Phase 1: Environment Variable Setup ✅ (Nov 11, 2025)
 Added `EMAIL_BCC_ADDRESS` to `.env.example` files in **all 11 services**:
 - Root project
 - Operations, Billing, Portal, Settings, Login
@@ -84,6 +84,73 @@ Created **6 new edge functions** in `sailorskills-settings/supabase/functions/`:
 | Marketing | No emails sent (only displays commit stories) |
 | Site | No emails sent (static site) |
 | Video | No emails sent (video upload only) |
+
+---
+
+### Phase 5: Database-Backed BCC Configuration ✅ (Nov 14, 2025)
+
+**Implemented database-driven BCC management** with admin UI in Settings service for immediate configuration changes without redeployment.
+
+**Database Tables Created:**
+- `email_bcc_settings` - Per-service BCC configuration (6 services: operations, billing, booking, portal, settings, shared)
+- `email_bcc_audit_log` - Full audit trail of all BCC address changes
+
+**Shared Utility Created:**
+- `sailorskills-shared/src/lib/bcc-lookup.js` - `getBccAddress(serviceName)` function
+- Used by all 9 edge functions for dynamic BCC lookup
+- 3-tier fallback: Database → ENV variable → null (graceful degradation)
+
+**Settings UI Enhanced:**
+- Added BCC Email Configuration section to System Configuration page
+- Features:
+  - Edit BCC addresses per service with real-time validation
+  - Active/inactive toggles per service
+  - Test email functionality (📧 button per service)
+  - View global ENV fallback address
+  - Recent change history display
+  - Full audit trail
+
+**Edge Functions Updated (9 total):**
+1. Operations: `send-notification` - Updated to use `getBccAddress('operations')`
+2. Billing: `send-email` - Updated for both invoice and receipt emails
+3. Billing: `send-receipt` - Updated with BCC lookup
+4-9. Settings (6 auth functions): All updated to use `getBccAddress('settings')`
+   - auth-send-magic-link
+   - auth-send-password-reset
+   - auth-send-signup-confirmation
+   - auth-send-email-change
+   - auth-send-invite
+   - auth-send-reauthentication
+
+**New Edge Function:**
+- `sailorskills-settings/supabase/functions/send-test-bcc` - Dedicated test email function
+
+**Key Benefits:**
+- **Immediate Effect**: BCC changes apply instantly (no redeploy)
+- **Per-Service Control**: Different BCC addresses for different services
+- **Audit Compliance**: Every change logged with user ID and timestamp
+- **Reliability**: ENV fallback ensures emails always work
+- **Observability**: Function logs show BCC source (database vs ENV)
+
+**How to Use:**
+1. Open: https://settings.sailorskills.com/src/views/system-config.html
+2. Scroll to "📧 Email BCC Configuration"
+3. Modify addresses, click "Save BCC Changes"
+4. Test with 📧 button
+5. Changes effective immediately!
+
+**Files Changed:**
+- `migrations/2025-11-14-bcc-settings.sql` - Database schema
+- `sailorskills-shared/src/lib/bcc-lookup.js` - BCC lookup utility (new)
+- `sailorskills-settings/src/views/system-config.html` - UI (BCC section added)
+- `sailorskills-settings/src/views/system-config.js` - UI logic (~300 lines)
+- `sailorskills-settings/src/styles/bcc-config.css` - Styling
+- 9 edge function files updated with `getBccAddress()` import
+- 1 new test edge function created
+
+**Testing Documentation:**
+- `docs/BCC_TESTING_CHECKLIST.md` - Comprehensive 12-step test plan
+- `docs/DEPLOYMENT_INSTRUCTIONS.md` - Step-by-step deployment guide
 
 ---
 
