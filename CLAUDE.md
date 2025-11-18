@@ -96,7 +96,45 @@ node sailorskills-portal/scripts/test-helpers/example-quick-query.mjs "SELECT CO
 - **Insight**: Strategic business intelligence - ensure queries don't impact production performance
 - **Booking**: Training scheduling - maintain Google Calendar sync integrity
 - **Video**: Video workflows - coordinate YouTube playlist structure with Operations
+- **Settings**: System configuration and email management - houses BCC email configuration, email templates, pricing config
 - **Shared**: Foundation package - breaking changes require coordinated rollout plan
+
+### Settings Service - BCC Email Configuration
+
+**Location**: https://settings.sailorskills.com/src/views/system-config.html
+
+**Features**:
+- Per-service BCC addresses (Operations, Billing, Booking, Portal, Settings, Shared)
+- Immediate effect (queries database on each email send - no redeploy required)
+- ENV fallback for reliability (EMAIL_BCC_ADDRESS)
+- Email validation (format, disposable domains, length checks)
+- Test email functionality with dedicated edge function
+- Full audit trail of all BCC changes
+
+**Database Tables**:
+- `email_bcc_settings`: Current BCC configuration per service (service_name, bcc_address, is_active, description)
+- `email_bcc_audit_log`: Change history for compliance (old_address, new_address, changed_by, changed_at, reason)
+
+**Edge Functions**:
+All edge functions across all services use `getBccAddress(serviceName)` from `sailorskills-shared/src/lib/bcc-lookup.js`
+- Operations: send-notification
+- Billing: send-email, send-receipt
+- Settings: auth-send-magic-link, auth-send-password-reset, auth-send-signup-confirmation, auth-send-email-change, auth-send-invite, auth-send-reauthentication, send-test-bcc
+
+**Usage**:
+1. Open Settings UI → System Configuration → BCC Email Configuration section
+2. Enter/modify BCC addresses for each service
+3. Click "Save BCC Changes" (takes effect immediately)
+4. Test with 📧 button to verify configuration
+5. All changes logged to audit table automatically
+
+**Fallback Behavior**:
+- Database is primary source (checked first on every email send)
+- Falls back to EMAIL_BCC_ADDRESS ENV variable if:
+  - No database entry exists for service
+  - Database entry is_active = false
+  - Database query fails (graceful degradation)
+- Logs show source: "(from database)" or "(from ENV fallback)"
 
 ### Cross-Service Coordination
 - When adding features to one service that require data from another, use database views or edge functions

@@ -16,6 +16,10 @@ let cleaningIntervals = [];
 let cleaningFormulas = {};
 let cleaningOverrides = {};
 
+// BCC Configuration State
+let bccSettings = {};
+let originalBccSettings = {};
+
 // Logout handler
 async function logout() {
   try {
@@ -42,6 +46,10 @@ async function init() {
     renderPricingForm();
     loadChangeHistory();
     await initCleaningFrequency();
+
+    // Add BCC initialization
+    await loadBccSettings();
+    await loadBccChangeHistory();
   } catch (error) {
     console.error('Failed to load pricing config:', error);
     alert('Failed to load pricing configuration. Please refresh the page.');
@@ -253,6 +261,10 @@ document.getElementById('confirm-changes-btn').addEventListener('click', async (
   document.getElementById('impact-modal').style.display = 'none';
   await saveAllChanges();
 });
+
+// BCC event listeners
+document.getElementById('save-bcc-btn')?.addEventListener('click', saveBccSettings);
+document.getElementById('reset-bcc-btn')?.addEventListener('click', resetBccSettings);
 
 // ========================================
 // Cleaning Frequency Configuration
@@ -547,6 +559,306 @@ async function saveCleaningFrequency() {
     saveBtn.disabled = false;
     saveBtn.textContent = '💾 Save Cleaning Frequency Configuration';
   }
+}
+
+// ========================================
+// BCC Configuration
+// ========================================
+
+// Load BCC settings from database
+async function loadBccSettings() {
+  try {
+    const { data, error } = await supabase
+      .from('email_bcc_settings')
+      .select('*')
+      .order('service_name');
+
+    if (error) throw error;
+
+    bccSettings = {};
+    (data || []).forEach(setting => {
+      bccSettings[setting.service_name] = {
+        bcc_address: setting.bcc_address,
+        is_active: setting.is_active,
+        description: setting.description
+      };
+    });
+
+    originalBccSettings = JSON.parse(JSON.stringify(bccSettings));
+    renderBccForm();
+    loadGlobalBccFallback();
+  } catch (error) {
+    console.error('Failed to load BCC settings:', error);
+    alert('Failed to load BCC configuration. Please refresh the page.');
+  }
+}
+
+// Load global BCC fallback from ENV (display only)
+function loadGlobalBccFallback() {
+  // Note: We can't directly read Deno.env from client
+  // Display placeholder - actual value used by edge functions
+  const fallbackEl = document.getElementById('global-bcc-fallback');
+  fallbackEl.textContent = 'standardhuman@gmail.com (from Supabase secrets)';
+}
+
+// Render BCC form
+function renderBccForm() {
+  const services = ['operations', 'billing', 'booking', 'portal', 'settings', 'shared'];
+  const tbody = document.getElementById('bcc-settings-tbody');
+
+  tbody.innerHTML = services.map(service => {
+    const setting = bccSettings[service] || { bcc_address: '', is_active: true };
+    return `
+      <tr data-service="${service}">
+        <td><strong>${service.charAt(0).toUpperCase() + service.slice(1)}</strong></td>
+        <td>
+          <input type="email"
+                 class="bcc-address-input"
+                 data-service="${service}"
+                 value="${setting.bcc_address || ''}"
+                 placeholder="email@example.com" />
+        </td>
+        <td style="text-align: center;">
+          <input type="checkbox"
+                 class="bcc-active-toggle"
+                 data-service="${service}"
+                 ${setting.is_active ? 'checked' : ''} />
+        </td>
+        <td>
+          <button class="btn-test-bcc" data-service="${service}">📧</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  attachBccEventListeners();
+}
+
+// Validate email address
+function validateBccAddress(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!email || email.trim() === '') {
+    return { valid: true }; // Empty is valid (will use fallback)
+  }
+
+  if (!emailRegex.test(email)) {
+    return { valid: false, error: 'Invalid email format' };
+  }
+
+  const disposableDomains = ['tempmail.com', 'guerrillamail.com', '10minutemail.com'];
+  const domain = email.split('@')[1];
+  if (disposableDomains.includes(domain)) {
+    return { valid: false, error: 'Disposable email domains not allowed' };
+  }
+
+  if (email.length > 254) {
+    return { valid: false, error: 'Email address too long' };
+  }
+
+  return { valid: true };
+}
+
+// Save BCC settings
+async function saveBccSettings() {
+  const user = await supabase.auth.getUser();
+  const userId = user.data.user?.id;
+
+  const saveBtn = document.getElementById('save-bcc-btn');
+  const statusEl = document.getElementById('bcc-save-status');
+
+  saveBtn.disabled = true;
+  saveBtn.textContent = '💾 Saving...';
+  statusEl.style.display = 'none';
+
+  try {
+    const services = ['operations', 'billing', 'booking', 'portal', 'settings', 'shared'];
+
+    for (const service of services) {
+      const addressInput = document.querySelector(`input.bcc-address-input[data-service="${service}"]`);
+      const activeToggle = document.querySelector(`input.bcc-active-toggle[data-service="${service}"]`);
+
+      const newAddress = addressInput.value.trim();
+      const isActive = activeToggle.checked;
+
+      // Validate
+      const validation = validateBccAddress(newAddress);
+      if (!validation.valid) {
+        alert(`${service}: ${validation.error}`);
+        return;
+      }
+
+      // Skip if no address provided
+      if (!newAddress) continue;
+
+      // Get old value for audit
+      const oldAddress = originalBccSettings[service]?.bcc_address || null;
+
+      // Upsert setting
+      const { error: upsertError } = await supabase
+        .from('email_bcc_settings')
+        .upsert({
+          service_name: service,
+          bcc_address: newAddress,
+          is_active: isActive,
+          updated_by: userId,
+          updated_at: new Date().toISOString()
+        });
+
+      if (upsertError) throw upsertError;
+
+      // Log to audit if changed
+      if (oldAddress !== newAddress) {
+        await supabase.from('email_bcc_audit_log').insert({
+          service_name: service,
+          old_address: oldAddress,
+          new_address: newAddress,
+          changed_by: userId,
+          changed_at: new Date().toISOString(),
+          reason: 'Updated via Settings UI'
+        });
+      }
+    }
+
+    statusEl.textContent = '✓ BCC settings saved successfully! Changes are effective immediately.';
+    statusEl.className = 'save-status success';
+    statusEl.style.display = 'inline';
+
+    // Reload
+    await loadBccSettings();
+    await loadBccChangeHistory();
+
+    setTimeout(() => {
+      statusEl.style.display = 'none';
+    }, 5000);
+
+  } catch (error) {
+    console.error('Failed to save BCC settings:', error);
+    statusEl.textContent = `✗ Failed to save: ${error.message}`;
+    statusEl.className = 'save-status error';
+    statusEl.style.display = 'inline';
+
+    setTimeout(() => {
+      statusEl.style.display = 'none';
+    }, 8000);
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = '💾 Save BCC Changes';
+  }
+}
+
+// Send test BCC email
+async function sendTestBccEmail(service) {
+  const addressInput = document.querySelector(`input.bcc-address-input[data-service="${service}"]`);
+  const bccAddress = addressInput.value.trim();
+
+  if (!bccAddress) {
+    alert('Please enter a BCC address first');
+    return;
+  }
+
+  const validation = validateBccAddress(bccAddress);
+  if (!validation.valid) {
+    alert(validation.error);
+    return;
+  }
+
+  try {
+    const session = await supabase.auth.getSession();
+    const accessToken = session.data.session?.access_token;
+
+    const response = await fetch(`${supabase.supabaseUrl}/functions/v1/send-test-bcc`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({
+        service_name: service,
+        bcc_address: bccAddress
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      alert(`✅ Test email sent! Check ${bccAddress} inbox for confirmation.`);
+    } else {
+      alert(`❌ Test email failed: ${result.error}`);
+    }
+  } catch (error) {
+    console.error('Test email error:', error);
+    alert('Failed to send test email. Please try again.');
+  }
+}
+
+// Load BCC change history
+async function loadBccChangeHistory() {
+  try {
+    const { data, error } = await supabase
+      .from('email_bcc_audit_log')
+      .select('*')
+      .order('changed_at', { ascending: false })
+      .limit(10);
+
+    if (error) throw error;
+
+    const historyEl = document.getElementById('bcc-change-history');
+
+    if (!data || data.length === 0) {
+      historyEl.innerHTML = '<p style="color: #666;">No recent changes</p>';
+      return;
+    }
+
+    historyEl.innerHTML = data.map(item => {
+      const date = new Date(item.changed_at);
+
+      return `
+        <div class="bcc-history-item">
+          <div class="timestamp">${date.toLocaleString()}</div>
+          <div class="change-detail">
+            Updated <strong>${item.service_name}</strong> BCC
+          </div>
+          <div class="change-detail">
+            ${item.old_address || '(none)'} → ${item.new_address}
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (error) {
+    console.error('Failed to load BCC change history:', error);
+  }
+}
+
+// Event listeners for BCC section
+function attachBccEventListeners() {
+  // Input validation on blur
+  document.querySelectorAll('.bcc-address-input').forEach(input => {
+    input.addEventListener('blur', (e) => {
+      const validation = validateBccAddress(e.target.value);
+      if (!validation.valid) {
+        e.target.classList.add('invalid');
+        e.target.title = validation.error;
+      } else {
+        e.target.classList.remove('invalid');
+        e.target.title = '';
+      }
+    });
+  });
+
+  // Test buttons
+  document.querySelectorAll('.btn-test-bcc').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const service = e.target.dataset.service;
+      sendTestBccEmail(service);
+    });
+  });
+}
+
+// Reset BCC settings
+async function resetBccSettings() {
+  await loadBccSettings();
+  alert('BCC settings reset to current database values');
 }
 
 // Initialize on page load
