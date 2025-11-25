@@ -116,11 +116,13 @@ DROP FUNCTION call_send_notification_edge_function(text, jsonb);
 1. `98e1a8f` - fix(charge): remove duplicate service log save and fix slider value reading
 2. `03a5e50` - fix(api): invoice endpoint now respects status from request body
 3. `b54f617` - fix(email): skip duplicate payment receipt when charging via billing
+4. `2e97b72` - fix(invoice): save conditions to service_logs table via edge function
 
 **Files Changed:**
 - `src/admin/inline-scripts/conditions-logging.js` - Removed duplicate save call
 - `src/admin/inline-scripts/enhanced-charge-flow.js` - Fixed slider reading order, set emailSent=true
 - `api/invoices.js` - Accept status, paymentMethod, paymentReference, paidAt from request
+- `src/admin/invoice-flow.js` - Now uses edge function instead of API (writes to correct table)
 
 ---
 
@@ -134,7 +136,22 @@ After these fixes:
 - [x] Email shows customer name correctly
 - [x] Email amount shows single $ (not $$)
 - [x] Checkmark centered in green circle
-- [ ] BCC emails received (configured but not verified this session)
+- [x] BCC emails received (Gmail filter needed `deliveredto:` not `to:`)
+- [x] Invoice Customer saves to service_logs table (not service_conditions_log)
+
+---
+
+## Session 2 Fixes (2025-11-25 evening)
+
+### 9. Invoice Customer Saving to Wrong Table (Fixed)
+**Problem:** Invoice Customer button saved conditions to `service_conditions_log` (33 records) instead of `service_logs` (1,215 records)
+**Root Cause:** `invoice-flow.js` used `fetch('/api/save-conditions')` which calls Vercel API → wrong table
+**Fix:** Updated to use `window.supabaseClient.functions.invoke('save-conditions')` (same as charge flow)
+
+### 10. BCC Emails Not Showing in Gmail (Fixed - User Side)
+**Problem:** User wasn't seeing BCC emails in their "Sailor Skills/BCCs" folder
+**Root Cause:** Gmail filter used `to:(standardhuman+bcc@gmail.com)` - but BCC addresses don't appear in the "to:" header
+**Fix:** Updated Gmail filter to use `deliveredto:standardhuman+bcc@gmail.com`
 
 ---
 
@@ -142,6 +159,7 @@ After these fixes:
 
 1. **Invoice PATCH 404** - `/api/invoices/:id` PATCH endpoint returns 404 (non-critical, logged as warning)
 2. **customer_services 406** - Query returns "Not Acceptable" (uses service_logs fallback)
+3. **Legacy table cleanup** - `service_conditions_log` has 33 orphaned records (can migrate or delete)
 
 ---
 
