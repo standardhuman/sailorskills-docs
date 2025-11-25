@@ -147,19 +147,64 @@ WHERE proname = 'notify_invoice_created'"
 - **sailorskills-operations:** `cc69ff9` - "fix(email): fix invoice email flow for charged customers"
 - **sailorskills-docs:** `ac83e34` - "chore: update sailorskills-operations submodule"
 
+## Additional Fix: Historical Conditions Display
+
+**Issue Reported:** "Last service: 3" showing instead of "Last service: Good"
+
+**Root Cause:**
+- Database RPC function returns numeric values as TEXT strings ("3" instead of number 3)
+- JavaScript `typeof` check failed for string "3"
+- Code fell through to string formatting which just displayed "3"
+
+**Fix:**
+✅ **File:** `sailorskills-billing/src/admin/inline-scripts/conditions-logging.js`
+
+**Changes:**
+- Updated paint condition display logic (lines 139-141)
+- Updated growth level display logic (lines 181-183)
+- Now converts numeric strings to numbers before mapping to labels
+- Uses `Number()` and `!isNaN()` check to handle both number types and numeric strings
+
+**Code change:**
+```javascript
+// Before: Only handled number type
+const displayValue = typeof paintCondition === 'number'
+    ? paintNumberToLabel(paintCondition)
+    : paintCondition.charAt(0).toUpperCase()...
+
+// After: Handles numeric strings too
+const numericValue = Number(paintCondition);
+const displayValue = !isNaN(numericValue) && typeof paintCondition !== 'object'
+    ? paintNumberToLabel(numericValue)
+    : paintCondition.charAt(0).toUpperCase()...
+```
+
+**Deployed:** ✅ Built and pushed to GitHub, Vercel will auto-deploy
+
+**Commits:**
+- **sailorskills-billing:** `c6e418b` - "fix(ui): handle numeric strings in historical condition display"
+- **sailorskills-docs:** `9ff4fa2` - "chore: update sailorskills-billing submodule"
+
 ## Status
 
 ✅ **ALL FIXES DEPLOYED AND READY FOR TESTING**
 
 ## Next Steps
 
-1. Test charging a customer in billing UI
-2. Verify payment receipt email received (not invoice ready)
-3. Verify BCC emails arrive
-4. Verify all variables replaced correctly
-5. Verify checkmark centered
-6. Set up Gmail filters for BCC emails (if not already done)
+1. **Wait for Vercel to redeploy billing** (automatic from GitHub push)
+2. Test charging a customer in billing UI
+3. Verify payment receipt email received (not invoice ready)
+4. Verify BCC emails arrive
+5. Verify all variables replaced correctly
+6. Verify checkmark centered
+7. **Verify "Last service" shows "Good" and "Moderate" (not "3")**
+8. Set up Gmail filters for BCC emails (if not already done)
 
 ---
 
-**Note:** All changes are live in production. No Vercel redeployment needed (changes were database/edge function only).
+**Note:** All changes deployed:
+- Database trigger changes: ✅ Live
+- Edge function changes: ✅ Deployed
+- Email template fixes: ✅ Live
+- BCC configuration: ✅ Live
+- Billing UI fixes: ✅ Pushed to GitHub (Vercel auto-deploying)
