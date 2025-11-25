@@ -5,6 +5,7 @@ Centralized settings and configuration management for the Sailorskills suite.
 ## Features
 - Email template management with engagement tracking
 - Business pricing configuration
+- BCC email configuration with per-service addresses, validation, test sending, and audit logging
 - User and team administration
 - Integration/API key management
 

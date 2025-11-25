@@ -8,10 +8,10 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getBccAddress } from '../../../sailorskills-shared/src/lib/bcc-lookup.js';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || '';
 const FROM_EMAIL = Deno.env.get('EMAIL_FROM_ADDRESS') || 'Sailor Skills <noreply@sailorskills.com>';
-const BCC_EMAIL = Deno.env.get('EMAIL_BCC_ADDRESS'); // Optional BCC for monitoring/auditing
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
@@ -144,8 +144,9 @@ async function sendEmail(to: string, subject: string, html: string): Promise<{ s
     };
 
     // Add BCC if configured (for monitoring/auditing)
-    if (BCC_EMAIL) {
-      emailPayload.bcc = [BCC_EMAIL];
+    const bcc = await getBccAddress('settings');
+    if (bcc) {
+      emailPayload.bcc = [bcc];
     }
 
     const response = await fetch('https://api.resend.com/emails', {
