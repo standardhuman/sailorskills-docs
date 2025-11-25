@@ -185,24 +185,89 @@ const displayValue = !isNaN(numericValue) && typeof paintCondition !== 'object'
 - **sailorskills-billing:** `c6e418b` - "fix(ui): handle numeric strings in historical condition display"
 - **sailorskills-docs:** `9ff4fa2` - "chore: update sailorskills-billing submodule"
 
+## Additional Fix 2: Duplicate Service Logs
+
+**Issue Reported:** Customer charged once but TWO service_logs entries created 1.5s apart with different data
+
+**Evidence from Database:**
+```
+Entry 1 (20:26:51): paint="good", growth="moderate", service_name=""
+Entry 2 (20:26:52): paint="3", growth="3", service_name="Recurring Cleaning & Anodes"
+```
+Both had same `order_id` (payment intent ID)
+
+**Root Causes:**
+1. Charge flow called TWO edge functions:
+   - `save-service-log` (basic info for email)
+   - `save-conditions` (detailed conditions)
+2. Both created service_logs entries instead of UPDATE/INSERT pattern working
+3. Slider `.value` returns numeric position "3" instead of label "good"
+
+**Fixes:**
+✅ **File:** `sailorskills-billing/src/admin/inline-scripts/enhanced-charge-flow.js`
+
+**Changes:**
+1. **Removed** redundant `save-service-log` call (lines 676-701)
+2. **Simplified** to single `save-conditions` call with all data
+3. **Fixed** slider value reading:
+   - Before: `.value` → "3" (numeric position)
+   - After: `.getAttribute('data-value')` → "good" (text label)
+4. Capture `serviceLogId` from `save-conditions` result for email linking
+
+**Result:**
+- Now creates single service_logs entry with all data
+- No more duplicates
+- Conditions saved as text labels ("good", "moderate") not numbers
+
+**Commits:**
+- **sailorskills-billing:** `e235ab0` - "fix(charge): prevent duplicate service logs and fix condition values"
+- **sailorskills-docs:** `5121d19` - "chore: update sailorskills-billing submodule"
+
 ## Status
 
 ✅ **ALL FIXES DEPLOYED AND READY FOR TESTING**
 
+## Complete Fix Summary
+
+This session fixed **5 interconnected issues**:
+
+1. ✅ Wrong email template (invoice vs receipt)
+2. ✅ Template variables not replaced
+3. ✅ Checkmark off-center
+4. ✅ No BCC emails
+5. ✅ Duplicate service logs + numeric condition values
+
 ## Next Steps
 
 1. **Wait for Vercel to redeploy billing** (automatic from GitHub push)
-2. Test charging a customer in billing UI
-3. Verify payment receipt email received (not invoice ready)
-4. Verify BCC emails arrive
-5. Verify all variables replaced correctly
-6. Verify checkmark centered
-7. **Verify "Last service" shows "Good" and "Moderate" (not "3")**
-8. Set up Gmail filters for BCC emails (if not already done)
+2. Test charging "Test customer 30ft monohull"
+3. **Verify SINGLE service log entry created** (not two)
+4. Verify payment receipt email received (not invoice ready)
+5. Verify BCC emails arrive at standardhuman+bcc@gmail.com
+6. Verify all email variables replaced correctly
+7. Verify checkmark centered
+8. **Verify "Last service" shows "Good" and "Moderate" (not "3")**
+9. Set up Gmail filters for BCC emails (if not already done)
 
 ---
 
-**Note:** All changes deployed:
+## All Commits This Session
+
+**sailorskills-operations:**
+- `cc69ff9` - fix(email): fix invoice email flow for charged customers
+
+**sailorskills-billing:**
+- `c6e418b` - fix(ui): handle numeric strings in historical condition display
+- `e235ab0` - fix(charge): prevent duplicate service logs and fix condition values
+
+**sailorskills-docs:**
+- `ac83e34` - chore: update sailorskills-operations submodule
+- `8232a7e` - docs: add handoff for billing email flow fixes
+- `9ff4fa2` - chore: update sailorskills-billing submodule
+- `bd492e9` - docs: update handoff with condition display fix
+- `5121d19` - chore: update sailorskills-billing submodule
+
+**All changes deployed:**
 - Database trigger changes: ✅ Live
 - Edge function changes: ✅ Deployed
 - Email template fixes: ✅ Live
