@@ -5,45 +5,72 @@
 
 ---
 
-## Session 5 Update (Latest)
+## Session 6 Update (Latest) - 2025-11-27
 
-### All Fixes Deployed
+### Service Completion Email Now Shows All Condition Data
 
-1. **Duplicate Invoice Email Bug - FIXED & DEPLOYED**
-   - Root cause: Billing service was calling `send-email` edge function which also sent an invoice email
-   - Operations `send-notification` already handles the proper invoice email
-   - Fix: Commented out duplicate call in `invoice-flow.js` (lines 197-236)
-   - Deployed: `vercel --prod` on billing service
-   - Commit: `f02ae64` - "fix(billing): remove duplicate invoice email"
+**Problem**: Service completion emails showed raw `{{variable}}` placeholders and missing data.
 
-2. **Missing Variable Fallbacks - FIXED & DEPLOYED**
-   - Root cause: Edge function used empty string for null/undefined values
-   - Fix: Added contextual fallbacks in `send-notification/index.ts`
-     - Text fields show "Not Assessed" when empty
-     - `anodeDetailsSection`: "No anode conditions recorded"
-     - `propellerSection`: "No propeller details recorded"
-     - `pricingBreakdownHtml`: "See invoice for pricing details"
-     - `videosSection`: hidden when empty
-   - Deployed: `supabase functions deploy send-notification`
-   - Commit: `40336ea` - "fix(email): add contextual fallbacks for empty template variables"
+**Solution**: Modified database trigger `notify_service_completion()` to include all condition data.
 
-### E2E Test Passing
-```
-Running 1 test using 1 worker
-  PASS: TEST CUSTOMER - Sailboat Monohull (47.4s)
-  - Customer search and selection working
-  - Invoice button click working
-  - "Invoice Sent!" confirmation modal detected
-  - Email delivered to validemailforsure@gmail.com
-```
+### Changes Deployed
+
+1. **SQL Helper Functions** - Label conversion and HTML formatting
+   - `get_paint_condition_label()` - Converts paint values to readable labels
+   - `get_growth_level_label()` - Converts growth values
+   - `get_thru_hull_label()` - Converts thru-hull status
+   - `format_propellers_html()` - Builds propeller section HTML
+   - `format_anodes_html()` - Builds anode table HTML with status colors
+   - `format_pricing_html()` - Builds pricing breakdown from invoice
+
+2. **Updated Trigger** - Now passes all condition data to email
+   - Paint condition, growth level, thru-hull condition
+   - Propeller section (if data exists)
+   - Anode table with status (Replaced/Inspected/Will Return/Will Order)
+   - Pricing breakdown from linked invoice
+
+3. **Email Template** - Updated `service_completion` template in database
+
+4. **Bug Fix: Duplicate Anodes**
+   - Was showing same anode twice (from both `anode_conditions` AND `anodes_installed`)
+   - Fix: Now only uses `anodes_installed` array (has all data including status)
+
+5. **Anode Status Display**
+   - `replaced` → "Replaced" (green #16a34a)
+   - `retrieve` → "In Stock - Will Return" (blue #3b82f6)
+   - `order` → "Will Order & Return" (orange #f97316)
+   - `inspected` → "Inspected" (gray #374151)
+
+### Commits
+- `57c0b57` - feat(email): add condition data to service completion emails
+- `0189789` - fix(email): fix duplicate anodes and add status display
+
+### Files Modified
+- `sailorskills-operations/database/migrations/add_email_condition_helpers.sql`
+- `email_templates` table (database) - service_completion template
 
 ### Verification Checklist
-- [x] Billing fix deployed to Vercel
-- [x] Send-notification fix deployed to Supabase
-- [x] E2E test passing
-- [x] Changes committed and pushed to GitHub
-- [ ] Manual check: Customer receives 2 emails (not 3) after invoice
-- [ ] Manual check: Empty fields show "Not Assessed" instead of blank
+- [x] SQL helper functions deployed to database
+- [x] Trigger updated in database
+- [x] Email template updated
+- [x] Duplicate anode bug fixed
+- [x] Status colors working
+- [ ] Test with "retrieve" status anode
+- [ ] Test with "order" status anode
+
+---
+
+## Session 5 Summary
+
+### Fixes Deployed
+
+1. **Duplicate Invoice Email Bug - FIXED**
+   - Commented out duplicate send-email call in `invoice-flow.js`
+   - Customer now receives 2 emails instead of 3
+
+2. **Missing Variable Fallbacks - FIXED**
+   - Empty sections now hidden instead of showing placeholders
+   - Text fields show "Not Assessed" when empty
 
 ---
 
