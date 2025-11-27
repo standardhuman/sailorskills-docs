@@ -1,143 +1,91 @@
-- use login standardhuman@gmail.com and pw KLRss!650 for any authentication needs
+# Sailorskills Suite - AI Agent Instructions
 
-## Development Workflow - Read This First!
+- **Test Credentials**: See 1Password (search: 'Sailorskills Login')
 
-**⚠️ IMPORTANT: This is a two-repo system. Read DEVELOPMENT_WORKFLOW.md before making changes.**
+## Quick Navigation
 
-**Quick Summary:**
-- **sailorskills-docs** (this repo): Documentation, planning, handoffs
-- **sailorskills-settings** (separate repo): Settings service code
-- **Develop Settings here:** `/Users/brian/app-development/sailorskills-repos/sailorskills-settings/`
-- **DO NOT use worktrees** for service development (deprecated)
-
-**Full guide:** See `DEVELOPMENT_WORKFLOW.md` in this directory.
+| I want to... | Go to |
+|--------------|-------|
+| Understand the architecture | `README.md` |
+| Navigate as an AI agent | `docs/AI_AGENT_GUIDE.md` |
+| Develop a service | `docs/guides/DEVELOPMENT_WORKFLOW.md` |
+| Query the database | `docs/guides/DATABASE_ACCESS.md` |
+| Set up local dev | `docs/guides/LOCAL_DEVELOPMENT.md` |
+| Run tests | `docs/guides/TESTING_PLATFORM_GUIDE.md` |
+| Deploy | `docs/setup/VERCEL_CONFIG_CHECKLIST.md` |
 
 ---
 
-## Database Access - Use This First!
+## Key Rules
 
-**IMPORTANT: You can now run SQL queries directly from Claude Code!**
+1. **Develop in service directories** - Each `sailorskills-*` folder is its own git repo
+2. **Worktrees are deprecated** - Do not use `.worktrees/`
+3. **Shared database** - All services connect to the same Supabase instance
+4. **Vercel deploys from service repos** - Not from this parent directory
 
-### When to Use Database Queries
-- ✅ Verifying data exists before testing
-- ✅ Debugging data issues
-- ✅ Checking database state during development
-- ✅ Running migrations and schema changes
-- ✅ Validating data after changes
-- ✅ Setting up test data
-- ✅ Investigating issues
+---
 
-### Quick Usage
-```bash
-# Load database connection
-source db-env.sh
-
-# Run any SQL query
-psql "$DATABASE_URL" -c "SELECT * FROM customers LIMIT 5"
-
-# Or use Node.js utility from anywhere
-node sailorskills-portal/scripts/test-helpers/example-quick-query.mjs "SELECT COUNT(*) FROM customers"
-```
-
-### Key Benefits
-- No need to open Supabase dashboard
-- Faster debugging and verification
-- Can automate testing workflows
-- Run migrations directly from Claude Code
-
-**Full documentation:** See `DATABASE_ACCESS.md` in this directory
-
-## Project Manager Role - Sailorskills Suite
+## Project Governance
 
 ### Architecture & Information Flow
-- Before making changes that affect multiple services, document the data flow impact across the suite (Estimator → Operations → Billing → Insight)
-- All database schema changes must be documented in MIGRATION_SUMMARY.md with timestamp and affected services
-- Services communicate via shared Supabase database - never introduce direct service-to-service API calls without architectural review
-- Changes to shared tables (customers, boats, bookings, invoices, service_logs, inventory, anodes) require cross-service impact analysis
+- Before changes affecting multiple services, document the data flow impact (Estimator → Operations → Billing → Insight)
+- All database schema changes must be documented in `MIGRATION_SUMMARY.md`
+- Services communicate via shared Supabase database - no direct service-to-service API calls
+- Changes to shared tables require cross-service impact analysis
 
 ### Shared Package Governance
-- Changes to sailorskills-shared must be tested across ALL dependent services before merging
-- Navigation updates in shared package require updating all service nav implementations
-- Design system changes (tokens, CSS variables, components) must maintain backward compatibility
-- Document shared package version updates in each service's changelog
+- Changes to sailorskills-shared must be tested across ALL dependent services
+- Navigation updates require updating all service nav implementations
+- Design system changes must maintain backward compatibility
 
-### Database & Integration Standards
-- All new tables/columns must follow existing naming conventions (snake_case)
-- Use JSONB for flexible/extensible fields (see propeller tracking in service_logs as reference)
-- Maintain Row-Level Security (RLS) policies when adding tables
-- Never delete database columns - mark as deprecated and create migration path
-- **Always use database query tools to verify schema and run migrations** (see Database Access section above)
-- Test migrations with `psql "$DATABASE_URL" -f migration.sql` before deploying
-- Use migration utilities in `sailorskills-portal/scripts/test-helpers/` for automated migrations
-
-### Roadmap & Planning
-- Maintain roadmap in root-level ROADMAP.md file with quarterly objectives
-- Track cross-service features using todo lists with service dependencies clearly marked
-- Before implementing new features, verify they don't duplicate existing functionality in other services
-- Priority order: Critical bugs → Estimator/Operations improvements → Insight analytics → New features
-
-### Documentation Standards
-- Update service-specific READMEs when changing functionality
-- Maintain architecture diagrams in root-level docs/ directory
-- Document API integrations (Stripe, YouTube, Google Calendar, Gemini) in INTEGRATIONS.md
-- Keep deployment URLs updated in service READMEs
+### Database Standards
+- Use snake_case naming conventions
+- Use JSONB for flexible fields
+- Maintain Row-Level Security (RLS) policies
+- Never delete columns - mark as deprecated and create migration path
+- See `docs/guides/DATABASE_ACCESS.md` for query instructions
 
 ### Testing & Deployment
-- Always test in Playwright MCP before marking features complete
-- Verify changes in Vercel preview deployments before merging to main
-- Run cross-service integration tests when changing shared database tables
+- Test with Playwright before marking features complete
+- Verify Vercel preview deployments before merging
+- Run cross-service integration tests when changing shared tables
 - Always push to git after completing changes
 
-### Service-Specific Responsibilities
-- **Estimator**: Customer acquisition - pricing changes affect revenue projections
-- **Operations**: Service delivery hub - changes affect field team workflows
-- **Billing**: Payment processing - changes must be Stripe-compliant
-- **Inventory**: Parts management - coordinate with Operations for anode/supply needs
-- **Insight**: Strategic business intelligence - ensure queries don't impact production performance
-- **Booking**: Training scheduling - maintain Google Calendar sync integrity
-- **Video**: Video workflows - coordinate YouTube playlist structure with Operations
-- **Settings**: System configuration and email management - houses BCC email configuration, email templates, pricing config
-- **Shared**: Foundation package - breaking changes require coordinated rollout plan
+---
 
-### Settings Service - BCC Email Configuration
+## Service Responsibilities
 
-**Location**: https://settings.sailorskills.com/src/views/system-config.html
+| Service | Responsibility | Key Considerations |
+|---------|---------------|-------------------|
+| **Estimator** | Customer acquisition | Pricing changes affect revenue projections |
+| **Operations** | Service delivery hub | Changes affect field team workflows |
+| **Billing** | Payment processing | Must be Stripe-compliant |
+| **Inventory** | Parts management | Coordinate with Operations for supplies |
+| **Insight** | Business intelligence | Queries must not impact production |
+| **Booking** | Training scheduling | Maintain Google Calendar sync |
+| **Video** | Video workflows | Coordinate YouTube structure with Operations |
+| **Settings** | System configuration | Houses BCC email config, templates, pricing |
+| **Portal** | Customer portal | Service history, invoices |
+| **Login** | SSO authentication | Centralized auth across services |
+| **Shared** | Foundation package | Breaking changes require coordinated rollout |
 
-**Features**:
-- Per-service BCC addresses (Operations, Billing, Booking, Portal, Settings, Shared)
-- Immediate effect (queries database on each email send - no redeploy required)
-- ENV fallback for reliability (EMAIL_BCC_ADDRESS)
-- Email validation (format, disposable domains, length checks)
-- Test email functionality with dedicated edge function
-- Full audit trail of all BCC changes
+---
 
-**Database Tables**:
-- `email_bcc_settings`: Current BCC configuration per service (service_name, bcc_address, is_active, description)
-- `email_bcc_audit_log`: Change history for compliance (old_address, new_address, changed_by, changed_at, reason)
+## Cross-Service Coordination
 
-**Edge Functions**:
-All edge functions across all services use `getBccAddress(serviceName)` from `sailorskills-shared/src/lib/bcc-lookup.js`
-- Operations: send-notification
-- Billing: send-email, send-receipt
-- Settings: auth-send-magic-link, auth-send-password-reset, auth-send-signup-confirmation, auth-send-email-change, auth-send-invite, auth-send-reauthentication, send-test-bcc
+- Use database views or edge functions for cross-service data
+- Webhook implementations must include retry logic
+- New integrations must be documented in `docs/architecture/INTEGRATIONS.md`
+- Customer-facing changes require UX consistency review
 
-**Usage**:
-1. Open Settings UI → System Configuration → BCC Email Configuration section
-2. Enter/modify BCC addresses for each service
-3. Click "Save BCC Changes" (takes effect immediately)
-4. Test with 📧 button to verify configuration
-5. All changes logged to audit table automatically
+---
 
-**Fallback Behavior**:
-- Database is primary source (checked first on every email send)
-- Falls back to EMAIL_BCC_ADDRESS ENV variable if:
-  - No database entry exists for service
-  - Database entry is_active = false
-  - Database query fails (graceful degradation)
-- Logs show source: "(from database)" or "(from ENV fallback)"
+## BCC Email Configuration
 
-### Cross-Service Coordination
-- When adding features to one service that require data from another, use database views or edge functions
-- Webhook implementations must include retry logic and error handling
-- New service integrations must be documented in the data flow diagram
-- Customer-facing changes (Estimator, Operations client portal, Booking) require UX consistency review
+**Location**: https://settings.sailorskills.com → System Configuration
+
+All services use `getBccAddress(serviceName)` from `sailorskills-shared/src/lib/bcc-lookup.js` for email BCC functionality.
+
+**Tables**: `email_bcc_settings`, `email_bcc_audit_log`
+
+See Settings service CLAUDE.md for detailed configuration.

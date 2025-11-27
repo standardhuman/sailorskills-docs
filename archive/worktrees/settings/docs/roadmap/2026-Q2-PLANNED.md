@@ -1,0 +1,258 @@
+# Q2 2026  Beyond (Planned)
+
+**Status:** Planning
+**Period:** April - June 2026 and beyond
+**Focus:** Operations mobile app, ownership tracking, inventory management
+
+For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
+
+---
+
+## Q2 2026
+
+### Mobile Platform Expansion
+- [ ] **Operations Native Mobile App**
+  - **Dependencies:** Q1 2026 Video & Billing Mobile Apps (needs lessons learned, reusable components)
+  - **Blocks:** Inventory Native Mobile App
+  - **Rationale:** After Video and Billing mobile apps prove the React Native stack, expand to Operations for field service log entry with offline support. Technicians need to document service conditions, capture photos, and record details at the boat without internet connectivity, then sync when back online. Current web app requires constant internet connection.
+  - **Prerequisites:** Q1 2026 Video & Billing mobile apps completed and field-tested
+  - **Core Features:**
+    - Offline service log entry (no internet required at boat)
+    - Photo capture and local storage
+    - Condition tracking (paint, anodes, growth, propeller)
+    - Time tracking (time in, time out, auto-calculate total hours)
+    - Customer/boat search (cached for offline)
+    - Background sync when connectivity restored
+    - GPS location tagging (optional)
+    - Signature capture for service completion
+  - **Technical Architecture:**
+    - React Native + Expo + SQLite (local database)
+    - Supabase sync when online
+    - Camera integration (React Native Camera)
+    - GPS integration (Expo Location)
+    - Signature pad component
+    - Reuse: Upload manager, network detection, notification service, theme system from Video/Billing mobile
+  - **Implementation:**
+    - Week 1-2: Core screens (service log entry, customer/boat lookup, photo capture)
+    - Week 3: Offline mode (SQLite queue, background sync)
+    - Week 4: GPS, signature capture, polish
+    - Week 5: Field testing and deployment
+  - **Impact:** Reliable service documentation in field with zero internet dependency, faster service completion workflow, no more lost data from connectivity issues
+  - **Estimated Effort:** 4-5 weeks
+  - **Dependencies:** Video & Billing mobile apps (lessons learned, reusable components)
+  - **Priority:** High (Q2 2026 - major field operations improvement)
+
+- [ ] **Inventory Native Mobile App** (Optional - Q2/Q3 2026)
+  - **Dependencies:** Operations Native Mobile App (optional - can start parallel)
+  - **Blocks:** None
+  - **Rationale:** Warehouse stock checks and barcode scanning require native camera access. Web app barcode scanning is unreliable on mobile browsers.
+  - **Core Features:** Barcode scanning, stock checks, order placement, low stock alerts
+  - **Estimated Effort:** 3-4 weeks
+  - **Priority:** Medium (nice-to-have, web app is functional)
+
+### Booking & Scheduling
+- [ ] Complete remaining phases of sailorskills-booking (50% → 100%)
+- [ ] Google Calendar sync enhancements
+- [ ] Automated reminder system
+
+### Video Management
+- [x] Complete mobile app development (React Native/Expo) - **Completed in Q1 2026**
+- [x] GoPro WiFi integration for direct uploads - **Completed in Q1 2026**
+- [ ] Enhanced YouTube playlist automation
+
+### Business Operations & Multi-Owner Management
+- [ ] **Ownership & Attribution Tracking System**
+  - **Dependencies:** Q1 2026 User Accounts & Audit Logging, Q1 2026 Referral Tracking
+  - **Blocks:** Settings Dashboard (needs staff management)
+  - **Rationale:** As the company adds multiple owners, need comprehensive system to track who brings in clients, assets, and inventory; assign responsibility for ongoing management; and allocate value/credit appropriately. Builds on Q1 2026 User Accounts system to add business ownership tracking. Critical for multi-owner accountability and profit-sharing calculations.
+  - **Prerequisites:** Q1 2026 User Accounts & Audit Logging (provides `users` table, authentication, base audit trail)
+  - **Scope - Four Core Tracking Categories:**
+    - **Client Relationships:** Track which owner/person brought in each customer, date acquired, acquisition channel, estimated lifetime value
+    - **Assets:** Track who contributed equipment, tools, boats, vehicles; date contributed, current value, depreciation, responsible party for maintenance
+    - **Inventory:** Track who purchased/contributed parts and supplies, date added, cost basis, current value, responsible party for management
+    - **Staff Assignments:** Assign staff (owners, contractors, employees) to specific jobs/services, track responsibility (may differ from original contributor)
+  - **Key Features:**
+    - **Attribution Dashboard:** View all contributions by owner/person (clients, assets, inventory) with values and dates
+    - **Responsibility Assignment:** Assign ongoing management responsibility (separate from original contributor)
+    - **Job Staffing:** Assign one or more staff members to each service/job in Operations
+    - **Value Tracking:** Track current value, changes over time, depreciation for assets
+    - **Historical Records:** Maintain complete audit trail of all contributions and assignments
+    - **Reporting:** Generate ownership reports, contribution summaries, staff workload reports
+  - **Database Schema:**
+    - New `ownership_attributions` table: `{ type: 'client'|'asset'|'inventory', entity_id: uuid, contributed_by: uuid (user_id from Q1), contributed_at: timestamp, value_at_contribution: decimal, current_value: decimal, notes: text }`
+    - New `staff_assignments` table: `{ assignment_type: 'service'|'job'|'ongoing_management', entity_id: uuid, assigned_to: uuid (user_id from Q1), assigned_at: timestamp, role: text, notes: text }`
+    - Update `customers` table: Add `attributed_to` (user_id), `acquisition_date`, `acquisition_channel`
+    - Update `service_orders` and `service_logs` tables: Add `assigned_staff` (array of user_ids)
+    - **Note:** Uses `users` table from Q1 2026, no separate `staff` table needed
+  - **Implementation:**
+    - **Phase 1 (Week 1):** Database schema design and migration for attribution tables
+    - **Phase 2 (Week 2):** Build attribution tracking UI in Dashboard (clients, assets, inventory)
+    - **Phase 3 (Week 3):** Implement staff assignment UI in Operations (assign staff to jobs/services)
+    - **Phase 4 (Week 3-4):** Build reporting dashboards (contribution summaries, workload reports)
+    - **Phase 5 (Week 4):** Backfill existing data with historical attributions where known
+  - **UI Locations:**
+    - **Dashboard:** New "Ownership & Contributions" section with attribution views and reports
+    - **Operations:** Add staff assignment picker to service creation/editing workflow
+    - **Inventory:** Add "Contributed By" tracking when adding new inventory items
+    - **Customer Profiles:** Display attribution information (who brought in this client)
+  - **Impact:**
+    - Clear ownership accountability for multi-owner business
+    - Accurate tracking of individual contributions for profit-sharing
+    - Proper staff management and workload distribution
+    - Historical audit trail for all business relationships and assets
+    - Foundation for future features (commission tracking, performance reviews, revenue sharing)
+  - **Dependencies:** Q1 2026 User Accounts & Audit Logging System (provides users table, authentication, base audit infrastructure)
+  - **Priority:** Critical (Q2 2026 - highest priority after user accounts, foundational for multi-owner operations)
+  - **Estimated Effort:** 5-6 days (40-48 hours)
+    - Database design & migrations: 1 day
+    - Attribution tracking UI: 1.5 days
+    - Staff assignment features: 1.5 days
+    - Reporting dashboards: 1.5 days
+    - Data backfill & testing: 0.5-1 day
+
+### Admin Tools & Configuration
+- [ ] **Settings Dashboard - Full Implementation**
+  - **Dependencies:** Ownership & Attribution Tracking (needs staff management)
+  - **Blocks:** Resend Email Template Dashboard (needs Resend credentials management)
+  - **Rationale:** Currently no centralized settings management - pricing variables, margins, templates, staff roles, permissions, and external service credentials are hardcoded or scattered across services. Need unified settings dashboard to manage all business configuration without code deployments. This is foundational for non-technical staff to manage business operations.
+  - **Current Gap:** Q1 2026 includes basic admin settings panels (see "Admin Settings & Configuration Panels"), but those are distributed across services and lack unified management. This initiative creates centralized, comprehensive settings hub.
+  - **Comprehensive Settings Categories:**
+    - **Pricing & Margins:**
+      - Estimator pricing variables (anode margin %, service base prices, labor rates, surcharge rates)
+      - Tax/fee configurations
+      - Seasonal pricing adjustments
+      - Bulk discount rules
+    - **Templates & Content:**
+      - Email templates (Resend - see separate initiative below for visual editor)
+      - Invoice templates
+      - Service completion report templates
+      - Customer portal content (welcome messages, help text)
+    - **Staff Management:**
+      - Staff roles and permissions (admin, technician, contractor, viewer)
+      - Role-based access control (RBAC) for each service
+      - Staff profiles (contact info, credentials, hourly rates)
+      - Active/inactive status management
+    - **External Service Integrations:**
+      - boatzincs.com login credentials
+      - Google Calendar API credentials and sync settings
+      - Stripe API keys and webhook configuration
+      - Resend API configuration
+      - YouTube API credentials
+      - Supabase connection settings
+      - Gemini AI API keys
+    - **Notification Preferences:**
+      - Email toggle switches (payment receipts, service completions, order confirmations)
+      - Notification recipients by event type
+      - Email scheduling preferences
+    - **Business Information:**
+      - Company name, address, phone, email
+      - Tax ID, business license numbers
+      - Logo and branding assets
+      - Payment terms and policies
+  - **Technical Architecture:**
+    - Create dedicated `sailorskills-settings` service or add to Dashboard
+    - New `business_settings` table with JSONB flexibility: `{ category: text, key: text, value: jsonb, updated_at: timestamp, updated_by: uuid }`
+    - Settings validation edge function (ensure valid types, ranges, formats)
+    - Settings audit log (track all changes with who/when/what)
+    - Secure credential storage (encrypt sensitive API keys)
+    - Settings caching layer for performance
+  - **UI Features:**
+    - Tabbed interface organized by category (Pricing, Templates, Staff, Integrations, etc.)
+    - Form validation with helpful error messages
+    - "Save" and "Revert" buttons with unsaved changes warning
+    - "Test Connection" buttons for external integrations
+    - Settings history/audit log viewer
+    - Import/export settings for backup/migration
+    - Search/filter across all settings
+  - **Implementation:**
+    - **Phase 1 (Week 1):** Database design, settings table, audit logging, API layer
+    - **Phase 2 (Week 2):** Build settings UI framework (tabs, forms, validation)
+    - **Phase 3 (Week 3):** Implement category-specific panels (Pricing, Staff, Integrations)
+    - **Phase 4 (Week 3-4):** Migrate hardcoded values to settings system across all services
+    - **Phase 5 (Week 4):** Testing, documentation, training materials
+  - **Migration Strategy:**
+    - Identify all hardcoded values across 10 services
+    - Create settings entries with current values as defaults
+    - Update services to read from settings API instead of hardcoded values
+    - Maintain backward compatibility during transition
+  - **Impact:**
+    - Non-technical staff can manage pricing, margins, and templates
+    - No code deployments needed for business configuration changes
+    - Centralized credential management (security improvement)
+    - Complete audit trail of all setting changes
+    - Faster business operations (no waiting for developer)
+  - **Integration Note:** Settings Dashboard should accept pre-filled values from Insight service's what-if scenarios (Q1 2026), enabling "Implement This Change" workflow where projections can be directly converted to live settings
+  - **Dependencies:** Staff management (from ownership tracking initiative) for staff roles/permissions
+  - **Priority:** High (Q2 2026 - foundational for business operations)
+  - **Estimated Effort:** 6-7 days (48-56 hours)
+    - Database & API layer: 1.5 days
+    - UI framework: 1.5 days
+    - Category panels: 2 days
+    - Service migration: 1.5 days
+    - Testing & documentation: 0.5-1 day
+
+- [ ] **Resend Email Template Dashboard**
+  - **Dependencies:** Settings Dashboard (needs Resend API credentials and permissions)
+  - **Blocks:** None
+  - **Rationale:** Currently email templates are managed in code or via Resend web interface. Need visual editor within Sailorskills to design, preview, and manage all email templates without leaving the admin tools. Empowers non-technical staff to update customer communications.
+  - **Features:**
+    - **Visual Template Editor:**
+      - WYSIWYG editor for email HTML/text
+      - Live preview (desktop and mobile views)
+      - Variable insertion (customer name, service details, invoice amounts, etc.)
+      - Template library (start from prebuilt templates)
+    - **Template Management:**
+      - List all Resend templates with search/filter
+      - Create new templates
+      - Edit existing templates
+      - Duplicate templates
+      - Archive/delete templates
+      - Version history with rollback capability
+    - **Template Categories:**
+      - Service completion notifications
+      - Payment receipts
+      - Invoice emails
+      - Order confirmations
+      - Booking confirmations/reminders
+      - Password reset / magic link emails
+      - Customer portal welcome emails
+    - **Testing Tools:**
+      - Send test emails to specified addresses
+      - Preview with sample data
+      - Spam score checker
+      - Mobile rendering preview
+    - **Integration with Resend API:**
+      - Sync templates to/from Resend
+      - Track template usage statistics (open rates, click rates)
+      - View recent sends by template
+  - **Technical Implementation:**
+    - Build UI in Dashboard or Settings service
+    - Use Resend API for template CRUD operations
+    - Consider email builder library (e.g., react-email, unlayer, grapesjs)
+    - Store template drafts locally before syncing to Resend
+    - New `email_template_drafts` table for work-in-progress templates
+  - **UI Location:**
+    - Dashboard → "Email Templates" section OR Settings Dashboard → "Templates" tab
+    - Accessible to admin users only (permissions from Settings Dashboard)
+  - **Implementation:**
+    - **Phase 1 (Week 1):** Research email builder libraries, design UI mockups
+    - **Phase 2 (Week 2):** Integrate Resend API, build template listing and sync
+    - **Phase 3 (Week 3):** Build visual editor with preview functionality
+    - **Phase 4 (Week 3-4):** Testing tools, version history, template library
+  - **Impact:**
+    - Non-technical staff can update email communications
+    - Faster iteration on customer messaging
+    - Better email quality (live preview reduces errors)
+    - No code deployments for email changes
+    - A/B testing capability (multiple template versions)
+  - **Dependencies:** Settings Dashboard (for Resend API credentials and permissions)
+  - **Priority:** Medium (Q2 2026 - after Settings Dashboard)
+  - **Estimated Effort:** 4-5 days (32-40 hours)
+    - Research & design: 0.5 day
+    - Resend integration: 1 day
+    - Visual editor: 1.5 days
+    - Testing & history features: 1 day
+    - Documentation: 0.5 day
+
+---
+

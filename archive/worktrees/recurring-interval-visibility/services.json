@@ -1,0 +1,248 @@
+{
+  "version": "1.0.0",
+  "description": "Sailorskills Services Registry - Local Development Configuration",
+  "updated": "2025-11-03",
+  "services": [
+    {
+      "name": "portal",
+      "displayName": "Customer Portal",
+      "type": "vite",
+      "port": 5174,
+      "url": "http://localhost:5174",
+      "directory": "sailorskills-portal",
+      "productionUrl": "https://portal.sailorskills.com",
+      "startCommand": "npm run dev",
+      "framework": "Vite + Vanilla JS",
+      "dependencies": ["shared", "supabase"],
+      "description": "Customer-facing self-service portal for service history, invoices, and account management"
+    },
+    {
+      "name": "billing",
+      "displayName": "Billing",
+      "type": "vite",
+      "port": 5173,
+      "url": "http://localhost:5173",
+      "directory": "sailorskills-billing",
+      "productionUrl": "https://sailorskills-billing.vercel.app",
+      "startCommand": "npm run dev",
+      "framework": "Vite + React",
+      "dependencies": ["shared", "supabase", "stripe"],
+      "description": "Financial management, invoicing, and payment processing"
+    },
+    {
+      "name": "operations",
+      "displayName": "Operations",
+      "type": "vite",
+      "port": 5176,
+      "url": "http://localhost:5176",
+      "directory": "sailorskills-operations",
+      "productionUrl": "https://ops.sailorskills.com",
+      "startCommand": "npm run dev",
+      "framework": "Vite + React (Schedule) + Vanilla JS",
+      "dependencies": ["shared", "supabase", "inventory-api"],
+      "description": "Admin operations hub for service logs, scheduling, and field preparation",
+      "notes": "Port changed from 5173 to 5176 to resolve conflict with Billing"
+    },
+    {
+      "name": "dashboard",
+      "displayName": "Insight (Dashboard)",
+      "type": "vite",
+      "port": 8080,
+      "url": "http://localhost:8080",
+      "directory": "sailorskills-dashboard",
+      "productionUrl": "https://sailorskills-insight.vercel.app",
+      "startCommand": "npm run dev",
+      "framework": "Vite + Vanilla JS",
+      "dependencies": ["shared", "supabase"],
+      "description": "Strategic business intelligence and analytics across all services"
+    },
+    {
+      "name": "estimator",
+      "displayName": "Estimator",
+      "type": "vite",
+      "port": 5175,
+      "url": "http://localhost:5175",
+      "directory": "sailorskills-estimator",
+      "productionUrl": "https://sailorskills-estimator-309d9lol8-brians-projects-bc2d3592.vercel.app",
+      "startCommand": "npm run dev",
+      "framework": "Vite + Vanilla JS",
+      "dependencies": ["shared", "supabase", "stripe"],
+      "description": "Customer-facing cost estimation and booking system"
+    },
+    {
+      "name": "inventory",
+      "displayName": "Inventory",
+      "type": "vite",
+      "port": 5177,
+      "url": "http://localhost:5177",
+      "directory": "sailorskills-inventory",
+      "productionUrl": "https://sailorskills-inventory-kqes0q8hl-brians-projects-bc2d3592.vercel.app",
+      "startCommand": "npm run dev",
+      "framework": "Vite + Vanilla JS",
+      "dependencies": ["shared", "supabase", "gemini-api", "python-scraper"],
+      "description": "Parts and supplies tracking with AI-powered assistance",
+      "notes": "Port changed from 8080 to 5177 to resolve conflict with Dashboard and Video"
+    },
+    {
+      "name": "booking-frontend",
+      "displayName": "Booking (Frontend)",
+      "type": "vite",
+      "port": 5178,
+      "url": "http://localhost:5178",
+      "directory": "sailorskills-booking",
+      "productionUrl": "https://sailorskills-schedule-6i3ugel27-brians-projects-bc2d3592.vercel.app",
+      "startCommand": "npm run dev",
+      "framework": "Vite + React",
+      "dependencies": ["shared", "supabase", "google-calendar", "booking-api"],
+      "description": "Public booking system for training sessions and consultations",
+      "notes": "Port changed from 3000 to 5178 to resolve conflict with Site and Marketing"
+    },
+    {
+      "name": "booking-api",
+      "displayName": "Booking API Server",
+      "type": "node-express",
+      "port": 3001,
+      "url": "http://localhost:3001",
+      "directory": "sailorskills-booking",
+      "startCommand": "node server.js",
+      "framework": "Express.js",
+      "dependencies": ["supabase", "google-calendar", "stripe"],
+      "description": "Backend API server for booking system (proxied by frontend)"
+    },
+    {
+      "name": "site",
+      "displayName": "Marketing Site",
+      "type": "vite",
+      "port": 5179,
+      "url": "http://localhost:5179",
+      "directory": "sailorskills-site",
+      "productionUrl": "https://sailorskills-site.vercel.app",
+      "startCommand": "npm run dev",
+      "framework": "Vite + React",
+      "dependencies": ["shared"],
+      "description": "Main marketing website",
+      "notes": "Port changed from 3000 to 5179 to resolve conflict with Booking and Marketing"
+    },
+    {
+      "name": "marketing",
+      "displayName": "Marketing (Alt)",
+      "type": "vite",
+      "port": 5180,
+      "url": "http://localhost:5180",
+      "directory": "sailorskills-marketing",
+      "productionUrl": "https://sailorskills-marketing.vercel.app",
+      "startCommand": "npm run dev",
+      "framework": "Vite + Vanilla JS",
+      "dependencies": ["shared", "github-api", "gemini-api"],
+      "description": "Alternative marketing site deployment",
+      "notes": "Port changed from 3000 to 5180 to resolve conflict with Booking and Site"
+    },
+    {
+      "name": "video",
+      "displayName": "Video (BOATY)",
+      "type": "flask",
+      "port": 5000,
+      "url": "http://localhost:5000",
+      "directory": "sailorskills-video",
+      "startCommand": "python app.py",
+      "framework": "Flask + Python",
+      "dependencies": ["youtube-api", "ffmpeg"],
+      "description": "Boat video organizer and YouTube automation",
+      "notes": "Port changed from 8080 to 5000 (Flask default) to resolve conflict with Dashboard and Inventory"
+    },
+    {
+      "name": "supabase",
+      "displayName": "Supabase (Local)",
+      "type": "supabase-cli",
+      "port": 54321,
+      "studioPort": 54323,
+      "url": "http://localhost:54321",
+      "studioUrl": "http://localhost:54323",
+      "directory": ".",
+      "startCommand": "supabase start",
+      "stopCommand": "supabase stop",
+      "description": "Local Supabase database, auth, storage, and edge functions"
+    }
+  ],
+  "shared": {
+    "name": "shared",
+    "displayName": "Shared Package",
+    "type": "git-submodule",
+    "directory": "sailorskills-shared",
+    "repository": "https://github.com/standardhuman/sailorskills-shared",
+    "description": "Shared utilities, design system, and navigation components",
+    "syncCommand": "git submodule update --init --recursive"
+  },
+  "portAllocation": {
+    "5000": "video",
+    "5173": "billing",
+    "5174": "portal",
+    "5175": "estimator",
+    "5176": "operations",
+    "5177": "inventory",
+    "5178": "booking-frontend",
+    "5179": "site",
+    "5180": "marketing",
+    "3001": "booking-api",
+    "8080": "dashboard",
+    "54321": "supabase (API)",
+    "54323": "supabase (Studio)"
+  },
+  "serviceGroups": {
+    "core": {
+      "name": "Core Services",
+      "services": ["portal", "billing", "operations", "dashboard"],
+      "description": "Essential services for daily operations"
+    },
+    "frontend": {
+      "name": "All Frontend Services",
+      "services": ["portal", "billing", "operations", "dashboard", "estimator", "inventory", "booking-frontend", "site", "marketing"],
+      "description": "All Vite-based frontend applications"
+    },
+    "customer-facing": {
+      "name": "Customer-Facing",
+      "services": ["portal", "estimator", "booking-frontend", "site", "marketing"],
+      "description": "Public and customer-accessible services"
+    },
+    "admin-only": {
+      "name": "Admin Only",
+      "services": ["billing", "operations", "dashboard", "inventory"],
+      "description": "Internal admin services"
+    }
+  },
+  "dataFlow": {
+    "description": "Data flow between services",
+    "flows": [
+      {
+        "from": "estimator",
+        "to": "operations",
+        "data": "Customer quotes and initial bookings"
+      },
+      {
+        "from": "operations",
+        "to": "billing",
+        "data": "Service completion events and condition data"
+      },
+      {
+        "from": "billing",
+        "to": "portal",
+        "data": "Invoices and payment data"
+      },
+      {
+        "from": "operations",
+        "to": "portal",
+        "data": "Service logs and boat condition history"
+      },
+      {
+        "from": "inventory",
+        "to": "operations",
+        "data": "Anode availability and packing lists"
+      },
+      {
+        "from": "*",
+        "to": "dashboard",
+        "data": "All metrics and analytics data"
+      }
+    ]
+  }
+}

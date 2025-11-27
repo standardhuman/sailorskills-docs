@@ -1,0 +1,18 @@
+﻿#,Anodes,Duration,Notes,Paint,Prop,Thru-hulls,Time In,Time Out
+01,Fair,59,,"Fair, Good",Good,Sound,1613,1712
+02,Fair,35,,Fair,Good,Sound,1613,1648
+04,Good,27,,"Fair, Poor",Good,Sound,1651,1718
+03,Fair,38,"Paddlewheel appears to be installed out of alignment. ","Fair, Poor",Good,Sound,1244,1322
+06,Fair,40,,"Fair, Poor",Good,Sound,1120,1200
+05,Good,31,,"Fair, Poor",Good,Sound,1334,1405
+07,Fair,38,,"Fair, Poor",Good,Sound,1408,1446
+09,Fair,38,"Would be time to replace shaft anode on next service. ","Fair, Poor",Good,Sound,1436,1514
+08,Good,38,,"Fair, Poor",Good,Sound,1450,1528
+10,"Fair, Replaced",40,Installed 1” heavy streamlined shaft anode,"Fair, Poor",Good,Sound,1202,1242
+12,Good,26,"Widespread embedded black algae in paint, indicative of anti-fouling properties failure. Cleaning will involve removing surface growth only to preserve paint coverage. ","Missing, Poor",Good,Sound,1300,1326
+11,Excellent,23,"Paint wearing through in several areas. Bottom in need of repainting. ","Missing, Poor",Good,Sound,1453,1516
+13,Good,22,,Excellent,Good,Sound,1243,1305
+14,"Fair, Good",22,,Excellent,Good,Sound,1545,1607
+15,,17,,,,,1413,1430
+16,,18,,,,,1344,1402
+17,,38,,,,,1250,1328

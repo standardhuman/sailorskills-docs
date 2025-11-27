@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Logs - Settings</title>
+
+  <!-- Montserrat Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="/shared/src/ui/design-tokens.css">
+  <link rel="stylesheet" href="/shared/src/ui/styles.css">
+
+  <!-- Page-Specific Styles -->
+  <link rel="stylesheet" href="../styles/email-logs.css">
+</head>
+<body>
+  <div class="email-logs">
+    <header class="logs-header">
+      <h1>Email Logs & Analytics</h1>
+      <div class="header-actions">
+        <button id="export-csv-btn" class="btn btn-secondary">📥 Export CSV</button>
+      </div>
+    </header>
+
+    <!-- Analytics Summary Cards -->
+    <section class="analytics-section">
+      <div class="stat-cards">
+        <div class="stat-card">
+          <div class="stat-label">Total Sent</div>
+          <div class="stat-value" id="stat-total">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Open Rate</div>
+          <div class="stat-value" id="stat-open-rate">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Click Rate</div>
+          <div class="stat-value" id="stat-click-rate">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Bounce Rate</div>
+          <div class="stat-value" id="stat-bounce-rate">-</div>
+        </div>
+      </div>
+
+      <!-- Engagement Funnel -->
+      <div class="analytics-card">
+        <h3>Engagement Funnel</h3>
+        <div class="funnel-container" id="funnel-container">
+          <div class="funnel-stage">
+            <div class="funnel-label">Sent</div>
+            <div class="funnel-bar" style="width: 100%;">
+              <span class="funnel-count" id="funnel-sent">-</span>
+            </div>
+          </div>
+          <div class="funnel-stage">
+            <div class="funnel-label">Delivered</div>
+            <div class="funnel-bar" id="funnel-delivered-bar">
+              <span class="funnel-count" id="funnel-delivered">-</span>
+            </div>
+          </div>
+          <div class="funnel-stage">
+            <div class="funnel-label">Opened</div>
+            <div class="funnel-bar" id="funnel-opened-bar">
+              <span class="funnel-count" id="funnel-opened">-</span>
+            </div>
+          </div>
+          <div class="funnel-stage">
+            <div class="funnel-label">Clicked</div>
+            <div class="funnel-bar" id="funnel-clicked-bar">
+              <span class="funnel-count" id="funnel-clicked">-</span>
+            </div>
+          </div>
+          <div class="funnel-stage">
+            <div class="funnel-label">Replied</div>
+            <div class="funnel-bar" id="funnel-replied-bar">
+              <span class="funnel-count" id="funnel-replied">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance by Email Type -->
+      <div class="analytics-card">
+        <h3>Performance by Email Type</h3>
+        <div class="performance-table-container">
+          <table class="performance-table">
+            <thead>
+              <tr>
+                <th>Email Type</th>
+                <th>Total Sent</th>
+                <th>Open Rate</th>
+                <th>Click Rate</th>
+              </tr>
+            </thead>
+            <tbody id="performance-table-body">
+              <tr>
+                <td colspan="4" style="text-align: center; padding: 20px; color: #666;">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Insights -->
+      <div class="analytics-card">
+        <h3>📊 Insights & Recommendations</h3>
+        <div id="insights-container" class="insights-container">
+          <p style="color: #666;">Analyzing email performance...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filters -->
+    <section class="filters-section">
+      <div class="filters-grid">
+        <div class="filter-field">
+          <label>Status</label>
+          <select id="filter-status">
+            <option value="">All</option>
+            <option value="sent">Sent</option>
+            <option value="pending">Pending</option>
+            <option value="failed">Failed</option>
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label>Email Type</label>
+          <select id="filter-type">
+            <option value="">All Types</option>
+            <option value="order_confirmation">Order Confirmation</option>
+            <option value="service_completion">Service Completion</option>
+            <option value="new_invoice">New Invoice</option>
+            <option value="upcoming_service">Upcoming Service</option>
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label>Start Date</label>
+          <input type="date" id="filter-start-date" />
+        </div>
+
+        <div class="filter-field">
+          <label>End Date</label>
+          <input type="date" id="filter-end-date" />
+        </div>
+
+        <div class="filter-field">
+          <label>Search</label>
+          <input type="text" id="filter-search" placeholder="Email or subject..." />
+        </div>
+
+        <div class="filter-actions">
+          <button id="apply-filters-btn" class="btn btn-primary">Apply Filters</button>
+          <button id="clear-filters-btn" class="btn btn-secondary">Clear</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Email Logs Table -->
+    <section class="logs-table-section">
+      <div class="table-container">
+        <table class="logs-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Recipient</th>
+              <th>Subject</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Engagement</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="logs-table-body">
+            <tr>
+              <td colspan="7" class="loading-row">Loading...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="pagination">
+        <button id="prev-page" class="btn btn-secondary" disabled>← Previous</button>
+        <span id="page-info">Page 1 of 1</span>
+        <button id="next-page" class="btn btn-secondary" disabled>Next →</button>
+      </div>
+    </section>
+
+    <!-- Email Detail Modal -->
+    <div id="detail-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Email Details</h2>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body" id="detail-body">
+          <!-- Details populated by JS -->
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary modal-close">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./email-logs.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "sailorskills-repos",
+  "version": "1.0.0",
+  "description": "Sailorskills Repository - Cross-service integration tests",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:integration": "playwright test tests/integration/"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@supabase/supabase-js": "^2.77.0",
+    "dotenv": "^17.2.3",
+    "pg": "^8.16.3"
+  }
+}

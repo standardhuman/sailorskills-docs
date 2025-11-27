@@ -1,0 +1,30 @@
+{
+  "name": "sailorskills-repos",
+  "version": "1.0.0",
+  "description": "Sailorskills Suite - Multi-service architecture with integration tests",
+  "type": "module",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:integration": "playwright test tests/integration",
+    "test:e2e": "playwright test tests/e2e",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report"
+  },
+  "keywords": [
+    "integration-tests",
+    "playwright",
+    "sailorskills"
+  ],
+  "author": "Sailorskills",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@supabase/supabase-js": "^2.39.0"
+  }
+}

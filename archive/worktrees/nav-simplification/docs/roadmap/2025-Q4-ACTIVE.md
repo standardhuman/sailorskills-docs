@@ -1,0 +1,274 @@
+# Q4 2025 - Current Quarter (Detailed)
+
+**Status:** Active
+**Period:** October - December 2025
+**Focus:** Service architecture cleanup, navigation improvements, testing infrastructure
+
+For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
+
+---
+
+## Service Architecture & Portal Separation ✅
+- [x] **Separate Customer Portal from Operations**
+  - **Completed:** 2025-10-25
+  - **Rationale:** Separate admin-only operations dashboard from customer-facing portal for better security, performance, and development clarity
+  - **Implementation:**
+    - Created new `sailorskills-portal` repository
+    - Deployed at https://sailorskills-portal.vercel.app (Vercel) and https://portal.sailorskills.com (pending DNS)
+    - Moved all customer auth, service history, invoices, account management to portal repo
+    - Operations repo now admin-only at https://ops.sailorskills.com
+    - Both repos share `sailorskills-shared` package via git submodules
+    - Both repos use same Supabase database with RLS for access control
+  - **Impact:** Complete code isolation, independent deployment cycles, smaller bundle sizes, clearer security boundary
+  - **Documentation:** See `/PORTAL_SEPARATION_PLAN.md` and `/DNS_CONFIGURATION.md`
+
+## Testing & Quality Infrastructure ✅
+- [x] **Comprehensive Testing Platform**
+  - **Completed:** 2025-10-29
+  - **Rationale:** Establish automated testing infrastructure to catch visual regressions, deployment issues, cross-service integration problems, and database schema errors before production
+  - **Implementation:**
+    - Four-layer testing architecture: Pre-commit hooks, CI/CD pipeline, Post-deployment smoke tests, Visual regression & integration tests
+    - GitHub Actions workflows for automated PR validation
+    - Playwright test framework with visual regression (screenshot comparison)
+    - Database validation scripts (schema validation, RLS policy testing, migration dry-run)
+    - Pre-commit hooks (Husky + lint-staged) in sailorskills-portal
+    - Cross-service integration test framework
+    - Test data management utilities
+    - Created reusable testing-platform skill for future services
+  - **Impact:** Automated testing catches issues before production, validates cross-service data flows, ensures database migrations are safe, visual regressions detected automatically
+  - **Documentation:** See `/TESTING_PLATFORM_GUIDE.md`, `/TESTING_SETUP_CHECKLIST.md`, and `/skills/testing-platform/`
+  - **Next Steps:**
+    - Add SUPABASE_SERVICE_ROLE_KEY secret for full database access in tests
+    - Expand testing to other services (billing, operations, dashboard, inventory)
+    - Generate visual regression baselines for all critical pages
+    - Write feature-specific integration tests as features are implemented
+
+## Service Architecture & Naming
+- [x] **Rename sailorskills-dashboard → sailorskills-insight**
+  - **Completed:** 2025-11-02
+  - **Rationale:** "Insight" differentiates strategic BI service from operational dashboards in other services (Operations, Inventory, Billing). Avoids confusion when referring to "dashboard."
+  - **Tasks:**
+    - Rename GitHub repository: `sailorskills-dashboard` → `sailorskills-insight`
+    - Update Vercel project name and deployment URL
+    - Update navigation links in all services (shared package navigation)
+    - Update documentation references
+    - Update environment variable names if needed
+  - **Impact:** Repository, Vercel deployment, navigation across all services, documentation
+  - **Dependencies:** None (design already complete in `/docs/plans/2025-11-01-strategic-insight-transformation.md`)
+  - **Priority:** High (clean slate before Q1 2026 implementation)
+  - **Estimated Effort:** 2-3 hours
+
+- [ ] **Rename sailorskills-billing → sailorskills-completion**
+  - **Rationale:** Current name undersells the service - it's 60% service documentation/condition tracking and 40% payment processing. "Completion" better reflects its role as the final step in the service workflow where technicians document work performed AND process payment.
+  - **Impact:** Repository rename, Vercel project, documentation updates, edge function references, hardcoded URLs
+  - **Dependencies:** None
+  - **Priority:** Medium
+  - **Estimated Effort:** 2-3 hours
+
+## Documentation & Governance
+- [x] Establish project management documentation repository (sailorskills-docs)
+- [x] Define project manager rules and cross-service guidelines in CLAUDE.md
+- [x] **Notion Roadmap Integration**
+  - **Completed:** 2025-11-02
+  - **Rationale:** Enable visual roadmap management with Timeline (Gantt) and Kanban views for better planning and progress tracking
+  - **Implementation:**
+    - Created Notion database with all roadmap properties (Status, Quarter, Priority, Service, Dates, Dependencies)
+    - Built automated sync script (`scripts/sync-notion-roadmap.mjs`) to push ROADMAP.md changes to Notion via API
+    - Configured Timeline view (Gantt-style) grouped by Quarter
+    - Configured Kanban views (by Status and by Quarter)
+    - Added npm script: `npm run sync-roadmap`
+    - ROADMAP.md remains source of truth, Notion provides visualization
+  - **Impact:** Visual project planning, better quarterly visibility, drag-and-drop task management, team collaboration via Notion sharing
+  - **Documentation:** See `/NOTION_SYNC_README.md`
+- [ ] **React-Based Roadmap Visualization**
+  - **Rationale:** Custom interactive roadmap visualization using SVAR Gantt library, providing alternative to Notion with more control over features, styling, and integration with Sailorskills suite
+  - **Features:**
+    - Interactive Gantt chart with drag-and-drop task scheduling
+    - Combined Timeline + Kanban view in single interface
+    - Real-time parsing of ROADMAP.md (no external dependencies)
+    - Filtering by Quarter, Service, Priority, Status
+    - Responsive design for desktop and mobile
+    - Export to PDF/PNG for sharing
+    - Embeddable in Dashboard/Operations for quick reference
+  - **Technology Stack:**
+    - React + Vite
+    - SVAR Gantt (open-source MIT license)
+    - Parses ROADMAP.md directly (no backend needed)
+    - Deployable to Vercel as standalone app or embedded component
+  - **Implementation Approach:**
+    - Create new `sailorskills-roadmap` repository
+    - Build roadmap parser (reuse logic from Notion sync script)
+    - Integrate SVAR Gantt React component
+    - Add filtering and view controls
+    - Design responsive layout
+    - Deploy to Vercel at https://roadmap.sailorskills.com
+  - **Benefits vs Notion:**
+    - Full control over features and styling
+    - No external service dependencies
+    - Can embed in other services
+    - Custom integrations (link to GitHub PRs, Jira, etc.)
+    - Better performance for large roadmaps
+  - **Impact:** Custom roadmap visualization, potential for deeper suite integration
+  - **Dependencies:** None
+  - **Priority:** Medium (nice-to-have alternative to Notion)
+  - **Estimated Effort:** 4-6 hours
+- [ ] Create architecture diagrams in docs/ directory
+- [ ] Create INTEGRATIONS.md documenting all external APIs
+
+## Bug Fixes & UI Issues
+- [ ] **Dashboard Navigation: Remove Breadcrumb from Second Tier**
+  - **Issue:** Dashboard second-tier navigation is showing a breadcrumb instead of proper navigation items. Breadcrumbs were removed from the design system but Dashboard still has remnants.
+  - **Expected Behavior:** Second tier should show navigation tabs/links (not breadcrumb trail)
+  - **Fix Location:** `sailorskills-dashboard` - likely in navigation component or shared navigation implementation
+  - **Root Cause:** Dashboard may be using outdated navigation component or has custom breadcrumb implementation that wasn't removed during design system update
+  - **Action Items:**
+    - Inspect Dashboard second-tier navigation HTML/component
+    - Remove breadcrumb styling/logic
+    - Ensure using latest shared navigation component from `sailorskills-shared`
+    - Verify three-tier navigation displays correctly (tier 1: top bar, tier 2: section nav, tier 3: sub-section if needed)
+    - Test across all Dashboard pages to ensure consistent navigation
+  - **Priority:** Medium (UI inconsistency, not blocking functionality)
+  - **Estimated Effort:** 1-2 hours
+  - **Impact:** Consistent navigation UX across Dashboard matching other services
+
+- [ ] **Operations Navigation Optimization & Simplification**
+  - **Rationale:** Operations navigation has grown organically and may have too many menu items, causing clutter and cognitive overload. Need to audit current navigation structure, identify opportunities to condense/combine related items, and implement cleaner navigation patterns (dropdowns, grouped menus, etc.).
+  - **Current State Analysis Needed:**
+    - Audit all current Operations navigation items (all three tiers)
+    - Identify redundant or rarely-used items
+    - Group related functionality that could be combined
+    - Assess information architecture and user flow
+  - **Potential Optimization Strategies:**
+    - **Dropdown Menus:** Group related items under parent menu (e.g., "Scheduling" dropdown with "Calendar", "Pending Orders", "Needs Scheduling")
+    - **Mega Menu:** For categories with many sub-items, use mega menu with visual grouping
+    - **Consolidate Pages:** Combine related views into single page with tabs (e.g., "Customer Management" page with tabs for "All Customers", "Add Customer", "Customer Search")
+    - **Contextual Actions:** Move some actions to contextual menus (three-dot menus on cards/rows) instead of top-level nav
+    - **Quick Actions Button:** Single "+" button with dropdown for common create actions (Add Customer, Schedule Service, etc.)
+    - **Search-First Navigation:** Add global search for customers/boats to reduce need for dedicated nav items
+  - **Example Consolidations to Consider:**
+    - Scheduling group: Calendar, Pending Orders, Needs Scheduling → Single "Scheduling" dropdown or page with tabs
+    - Customer management: Customers list, Add Customer, Customer Search → Single page with search bar and "Add" button
+    - Service logs: View Logs, Add Log → Single "Service History" page
+    - Reports/Analytics: Group any reporting items under "Reports" dropdown
+  - **Implementation Approach:**
+    - **Phase 1: Audit & Analysis (2-3 hours)**
+      - Document current navigation structure (screenshot + list all items)
+      - Conduct usage analysis: which items are most/least used (analytics or manual assessment)
+      - Interview/survey users: what do they use most? what's confusing?
+      - Create navigation wireframes with proposed groupings
+    - **Phase 2: Design New Structure (2-3 hours)**
+      - Design simplified navigation hierarchy
+      - Create wireframes/mockups showing dropdowns, grouped menus
+      - Validate against common user workflows (e.g., "schedule a service", "find customer info")
+      - Get feedback on proposed structure
+    - **Phase 3: Implementation (4-6 hours)**
+      - Update Operations navigation component
+      - Implement dropdowns or mega menu (if chosen)
+      - Add quick actions button (if applicable)
+      - Update routing and page structures (if consolidating pages)
+      - Test all navigation paths work correctly
+    - **Phase 4: User Testing & Refinement (1-2 hours)**
+      - Test with actual users (owner, technicians)
+      - Gather feedback on new structure
+      - Make adjustments based on feedback
+      - Document final navigation structure
+  - **Design Patterns to Consider:**
+    - **Tiered Dropdowns:** Hover or click to reveal grouped items
+    - **Icon + Label Menus:** Visual icons help with recognition
+    - **Collapsible Sections:** Expand/collapse menu groups as needed
+    - **Favorites/Pinned Items:** Let users pin most-used items to top
+    - **Breadcrumbs (conditionally):** Only on deep pages, not in main nav
+  - **Success Criteria:**
+    - Reduce top-level navigation items by 30-50%
+    - Users can find any feature in ≤2 clicks
+    - Navigation feels cleaner, less cluttered
+    - Common workflows are faster (fewer clicks)
+    - Mobile navigation is usable (responsive design)
+  - **Dependencies:**
+    - Current Operations navigation structure audit
+    - User feedback on pain points
+  - **Blocks:** None (independent UX improvement)
+  - **Priority:** Medium (Q4 2025 or Q1 2026 - improves daily UX but not urgent)
+  - **Estimated Effort:** 8-14 hours total
+    - Audit & analysis: 2-3 hours
+    - Design: 2-3 hours
+    - Implementation: 4-6 hours
+    - Testing & refinement: 1-2 hours
+  - **Impact:**
+    - Cleaner, more intuitive navigation
+    - Faster access to common features
+    - Reduced cognitive load for users
+    - Better mobile/tablet experience
+    - Easier onboarding for new users
+    - Foundation for consistent nav across all services
+  - **Notes:**
+    - This optimization should inform navigation design for other services (Billing, Inventory, etc.)
+    - Consider creating shared navigation patterns in `sailorskills-shared` after Operations proves successful
+    - Document navigation design decisions for future reference
+
+## Operations - Workflow & Data
+- [x] **Pending Orders Queue & Confirmation Workflow** ✅
+  - **Completed:** 2025-10-30
+  - **Rationale:** Currently no dedicated view for incoming orders from Estimator - orders go straight to calendar without confirmation step. Need proper order intake workflow.
+  - **Features:**
+    - Dedicated "Pending Orders" inbox showing all `service_orders` with `status='pending'`
+    - Order details view (customer, boat, service type, estimated amount, order number)
+    - Action buttons: "Confirm & Schedule", "Decline", "Contact Customer"
+    - Calendar picker to set actual `scheduled_date`
+    - Status update workflow: pending → confirmed → in_progress → completed
+    - Notifications when new orders arrive from Estimator
+  - **Impact:** Proper order management workflow, prevents missed orders, enables scheduling conflicts detection
+  - **Documentation:** See `PENDING_ORDERS_FEATURE.md`
+
+- [x] **"Needs Scheduling" Queue & Quick Add** ✅
+  - **Completed:** 2025-10-30
+  - **Rationale:** Ad-hoc service requests (customer calls, emails, in-person requests) need quick capture without immediately committing to a schedule. Owner needs to collect all boats needing service, then batch-schedule by reviewing personal calendar and workload together.
+  - **User Story:** Customer requests pressure washing (or diving, maintenance, etc.) via phone/email. Need to quickly mark boat as "needs service" with service type, then later review all pending boats and schedule them together while checking personal appointments and capacity.
+  - **Features:**
+    - **Quick Add Button:** Prominent "+ Needs Scheduling" button in Operations nav
+    - **Quick Add Modal:**
+      - Customer/boat selector (typeahead search)
+      - Service type dropdown (diving, pressure washing, maintenance, bottom painting, etc.)
+      - Priority selector (urgent, normal, low)
+      - Optional notes field (customer request details, special requirements)
+      - Optional target date range (e.g., "sometime in next 2 weeks")
+      - Quick save (no calendar picker at this stage)
+    - **"Needs Scheduling" Queue View:**
+      - List view showing all boats awaiting scheduling
+      - Sortable by priority, service type, date added, customer name
+      - Filterable by service type, priority, customer
+      - Batch actions: "Schedule Selected", "Mark as Scheduled", "Remove"
+      - Visual indicators: priority badges, days waiting counter
+    - **Scheduling Actions:**
+      - Individual: "Schedule Now" button → opens calendar picker, creates service_order
+      - Batch: Select multiple boats → "Open Calendar View" → drag-and-drop scheduling
+      - Quick status: "Mark as Scheduled" (manually scheduled elsewhere) → removes from queue
+    - **Integration with Calendar:**
+      - When scheduling from queue, automatically create service_order with selected date
+      - Update queue status to "scheduled", remove from "Needs Scheduling" view
+      - Link back to original queue entry for audit trail
+  - **Database Schema:**
+    - New `scheduling_queue` table: `{ id: uuid, customer_id: uuid, boat_id: uuid, service_type: text, priority: text, notes: text, target_date_range: daterange, added_at: timestamp, added_by: uuid (staff_id), status: 'pending'|'scheduled'|'removed', scheduled_service_order_id: uuid }`
+  - **UI Location:** Operations → Scheduling section
+    - New "Needs Scheduling" tab/view alongside calendar
+    - Quick add button in top nav or scheduling header
+  - **Impact:**
+    - Capture ad-hoc service requests immediately without scheduling pressure
+    - Batch scheduling workflow (review all pending boats together with personal calendar)
+    - Nothing falls through the cracks (visible queue of all pending boats)
+    - Faster response to customers (quick acknowledgment: "Got it, I'll schedule you soon")
+    - Better capacity planning (see full workload before committing to dates)
+  - **Database:** `scheduling_queue` table with RLS policies
+  - **Documentation:** See `NEEDS_SCHEDULING_FEATURE.md`
+
+- [x] **Import Notion service log data to Supabase** ✅
+  - **Completed:** 2025-10-20
+  - **Rationale:** Migrate historical service data (Boat Conditions Log + Admin Log) from Notion child databases into service_logs table
+  - **Implementation:**
+    - 1,465 service logs imported (date range: 2023-01-03 to 2025-10-31)
+    - YouTube playlist columns added to boats table (`playlist_id`, `playlist_url`)
+    - Import infrastructure in `/sailorskills-operations/scripts/notion-import.mjs`
+    - LEFT JOIN logic merging Conditions + Admin logs by service number
+    - Field mappings documented in `notion-service-logs-config.json`
+  - **Status:** Import complete, infrastructure ready for future updates
+  - **Documentation:** See `/sailorskills-operations/scripts/README-SERVICE-LOGS-IMPORT.md`

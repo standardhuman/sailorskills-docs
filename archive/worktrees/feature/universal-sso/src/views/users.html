@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Management - Settings</title>
+
+  <!-- Montserrat Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="/shared/src/ui/design-tokens.css">
+  <link rel="stylesheet" href="/shared/src/ui/styles.css">
+
+  <!-- Page-Specific Styles -->
+  <link rel="stylesheet" href="../styles/users.css">
+</head>
+<body>
+  <div class="users-page">
+    <header class="users-header">
+      <h1>User Management</h1>
+      <div class="header-actions">
+        <button id="invite-user-btn" class="btn btn-primary">+ Invite User</button>
+      </div>
+    </header>
+
+    <main class="users-main">
+      <!-- Role Descriptions -->
+      <section class="role-descriptions">
+        <div class="role-card">
+          <h3>👑 Admin</h3>
+          <p>Full access to all features and settings</p>
+          <ul>
+            <li>Manage all services</li>
+            <li>Manage users and permissions</li>
+            <li>Configure pricing and settings</li>
+          </ul>
+        </div>
+        <div class="role-card">
+          <h3>🔧 Technician</h3>
+          <p>Service-focused access for field team</p>
+          <ul>
+            <li>Complete services</li>
+            <li>Manage inventory</li>
+            <li>View billing (read-only)</li>
+          </ul>
+        </div>
+        <div class="role-card">
+          <h3>👀 Viewer</h3>
+          <p>Read-only access to assigned services</p>
+          <ul>
+            <li>View data only</li>
+            <li>No editing permissions</li>
+            <li>Limited to assigned services</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Users Table -->
+      <section class="users-table-section">
+        <div class="table-container">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Service Access</th>
+                <th>Status</th>
+                <th>Last Sign In</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body">
+              <tr>
+                <td colspan="6" class="loading-row">Loading users...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <!-- Invite User Modal -->
+    <div id="invite-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Invite New User</h2>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="invite-form">
+            <div class="form-field">
+              <label for="invite-email">Email Address</label>
+              <input type="email" id="invite-email" required placeholder="user@example.com" />
+            </div>
+
+            <div class="form-field">
+              <label for="invite-role">Role</label>
+              <select id="invite-role" required>
+                <option value="viewer">Viewer (Read-only)</option>
+                <option value="technician">Technician (Service + Inventory)</option>
+                <option value="admin">Admin (Full Access)</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label>Service Access</label>
+              <div class="checkbox-group" id="invite-services">
+                <label class="checkbox-label">
+                  <input type="checkbox" value="estimator" />
+                  <span>Estimator</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="operations" />
+                  <span>Operations</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="billing" />
+                  <span>Billing</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="inventory" />
+                  <span>Inventory</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="insight" />
+                  <span>Insight</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="settings" />
+                  <span>Settings</span>
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" form="invite-form" class="btn btn-primary">Send Invitation</button>
+          <button class="btn btn-secondary modal-close">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="edit-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Edit User</h2>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="edit-form">
+            <input type="hidden" id="edit-user-id" />
+
+            <div class="form-field">
+              <label>Email</label>
+              <input type="text" id="edit-email" disabled />
+            </div>
+
+            <div class="form-field">
+              <label for="edit-role">Role</label>
+              <select id="edit-role" required>
+                <option value="viewer">Viewer (Read-only)</option>
+                <option value="technician">Technician (Service + Inventory)</option>
+                <option value="admin">Admin (Full Access)</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label>Service Access</label>
+              <div class="checkbox-group" id="edit-services">
+                <label class="checkbox-label">
+                  <input type="checkbox" value="estimator" />
+                  <span>Estimator</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="operations" />
+                  <span>Operations</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="billing" />
+                  <span>Billing</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="inventory" />
+                  <span>Inventory</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="insight" />
+                  <span>Insight</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="settings" />
+                  <span>Settings</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="checkbox-label">
+                <input type="checkbox" id="edit-is-active" />
+                <span>Account Active</span>
+              </label>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" form="edit-form" class="btn btn-primary">Save Changes</button>
+          <button id="delete-user-btn" class="btn btn-danger">Delete User</button>
+          <button class="btn btn-secondary modal-close">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./users.js"></script>
+</body>
+</html>

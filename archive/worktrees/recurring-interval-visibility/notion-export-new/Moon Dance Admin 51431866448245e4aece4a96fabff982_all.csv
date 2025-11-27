@@ -1,0 +1,13 @@
+﻿#,Anodes,Duration,Notes,Paint,Prop,Thru-hulls,Time In,Time Out
+01,Good,15,"Call for loose prop. Found prop cone loose, tightened with socket wrench. Prop and saildrive otherwise secure.",,Good,,1030,1045
+02,,5,Checked for presenece of propeller. Propeller not present. Twine found wrapped around prop shaft.,,,,1640,1645
+03,,30,"Safety bolt found broken off inside prop shaft ",,,,1128,1158
+05,Replaced,10,Installed 851983-SR Volvo Penta 120 Saildrive Split Ring Zinc Anode,,Good,,1200,1210
+04,Missing,52,"Line found wrapped around prop shaft. Anode absent. Light damage to lower keel: lead is compressed on forward lower port corner. See video for details. No obstructions detected in thru-hulls. ",Good,Good,Sound,1343,1435
+06,Excellent,68,,"Fair, Poor",Good,Sound,1342,1450
+07,Excellent,40,,"Fair, Poor",Good,Sound,1256,1336
+08,,62,,,,,926,1028
+09,,45,,,,,1225,1310
+10,,15,,,,,1300,1315
+11,,29,,,,,1120,1149
+12,,21,,,,,1249,1310

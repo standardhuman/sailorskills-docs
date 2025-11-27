@@ -1,0 +1,12 @@
+﻿#,Anodes,Duration,Notes,Paint,Prop,Thru-hulls,Time In,Time Out
+01,Fair,55,,Fair,Good,Sound,1200,1255
+02,Good,47,,Excellent,Good,Sound,1216,1303
+03,Good,50,Propspeed appears to have failed; heavy growth and barnacle found on prop. Cutlass bearing may be walking forward out of strut.,Excellent,Good,Sound,1251,1341
+05,"Fair, Replaced",71,"Replaced Max Prop 63mm anode. Widespread embedded black algae present, indicative of failing anti-fouling properties. ",Fair,Good,Sound,1202,1313
+04,Good,49,,"Fair, Good",Good,Sound,1221,1310
+06,Good,36,,"Fair, Poor",Good,Sound,1152,1228
+07,Good,38,,"Fair, Poor",Good,Sound,1242,1320
+08,,13,,,,,1340,1353
+09,,13,,,,,1418,1431
+10,,17,,,,,1725,1742
+11,,38,,,,,1255,1333

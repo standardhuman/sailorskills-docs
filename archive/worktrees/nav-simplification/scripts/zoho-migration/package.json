@@ -1,0 +1,22 @@
+{
+  "name": "zoho-migration",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Migration scripts for Zoho Billing to Sailor Skills",
+  "scripts": {
+    "analyze": "node 1-analyze-data.mjs",
+    "map-customers": "node 2-map-customers.mjs",
+    "import-invoices": "node 3-import-invoices.mjs",
+    "import-payments": "node 4-import-payments.mjs",
+    "link-service-logs": "node 5-link-service-logs.mjs",
+    "relink-service-logs": "node 5b-relink-service-logs.mjs",
+    "validate": "node 6-validate.mjs",
+    "rollback": "node rollback.mjs",
+    "manual-link": "node manual-link-helper.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "csv-parser": "^3.0.0",
+    "dotenv": "^16.3.1"
+  }
+}

@@ -1,0 +1,636 @@
+# Sailorskills Suite - Roadmap
+
+Last updated: 2025-10-25
+
+## Overview
+This roadmap tracks major cross-service initiatives, architectural changes, and strategic priorities for the Sailorskills suite.
+
+---
+
+## Q4 2025 - Current Quarter
+
+### Service Architecture & Portal Separation ✅
+- [x] **Separate Customer Portal from Operations**
+  - **Completed:** 2025-10-25
+  - **Rationale:** Separate admin-only operations dashboard from customer-facing portal for better security, performance, and development clarity
+  - **Implementation:**
+    - Created new `sailorskills-portal` repository
+    - Deployed at https://sailorskills-portal.vercel.app (Vercel) and https://portal.sailorskills.com (pending DNS)
+    - Moved all customer auth, service history, invoices, account management to portal repo
+    - Operations repo now admin-only at https://ops.sailorskills.com
+    - Both repos share `sailorskills-shared` package via git submodules
+    - Both repos use same Supabase database with RLS for access control
+  - **Impact:** Complete code isolation, independent deployment cycles, smaller bundle sizes, clearer security boundary
+  - **Documentation:** See `/PORTAL_SEPARATION_PLAN.md` and `/DNS_CONFIGURATION.md`
+
+### Service Architecture & Naming
+- [ ] **Rename sailorskills-billing → sailorskills-completion**
+  - **Rationale:** Current name undersells the service - it's 60% service documentation/condition tracking and 40% payment processing. "Completion" better reflects its role as the final step in the service workflow where technicians document work performed AND process payment.
+  - **Impact:** Repository rename, Vercel project, documentation updates, edge function references, hardcoded URLs
+  - **Dependencies:** None
+  - **Priority:** Medium
+  - **Estimated Effort:** 2-3 hours
+
+### Documentation & Governance
+- [x] Establish project management documentation repository (sailorskills-docs)
+- [x] Define project manager rules and cross-service guidelines in CLAUDE.md
+- [ ] Create architecture diagrams in docs/ directory
+- [ ] Create INTEGRATIONS.md documenting all external APIs
+
+### Operations - Workflow & Data
+- [ ] **Pending Orders Queue & Confirmation Workflow**
+  - **Rationale:** Currently no dedicated view for incoming orders from Estimator - orders go straight to calendar without confirmation step. Need proper order intake workflow.
+  - **Features:**
+    - Dedicated "Pending Orders" inbox showing all `service_orders` with `status='pending'`
+    - Order details view (customer, boat, service type, estimated amount, order number)
+    - Action buttons: "Confirm & Schedule", "Decline", "Contact Customer"
+    - Calendar picker to set actual `scheduled_date`
+    - Status update workflow: pending → confirmed → in_progress → completed
+    - Notifications when new orders arrive from Estimator
+  - **Impact:** Proper order management workflow, prevents missed orders, enables scheduling conflicts detection
+  - **Dependencies:** Existing `service_orders` table
+  - **Priority:** High (critical workflow gap)
+  - **Estimated Effort:** 1-2 days
+
+- [ ] **Import Notion service log data to Supabase**
+  - **Rationale:** Migrate historical service data (Boat Conditions Log + Admin Log) from Notion child databases into service_logs table
+  - **Details:** See `/sailorskills-operations/NOTION_SERVICE_LOG_IMPORT_HANDOFF.md`
+  - **Impact:** Operations service history, YouTube playlist links added to boats table
+  - **Dependencies:** Notion API token, existing boats table from customer profile import
+  - **Priority:** High (foundational data for Operations)
+  - **Estimated Effort:** ~90 minutes
+
+---
+
+## Q1 2026
+
+### Dashboard & Analytics
+- [ ] Complete core analytics widgets for sailorskills-dashboard
+- [ ] Implement revenue tracking across all services
+- [ ] Add booking conversion rate metrics
+- [ ] Customer lifetime value calculations
+
+### Operations Improvements
+- [x] **Customer Portal - Separated into Independent Service**
+  - **Completed:** 2025-10-25 (portal separation complete)
+  - **Status:** Portal is now a separate service at https://portal.sailorskills.com
+  - **Repository:** https://github.com/standardhuman/sailorskills-portal
+  - **Key Features Implemented:** Multi-boat access, dual auth (magic link + password), service history, invoices, messages, service requests, account management
+  - **Impact:** ✅ Complete separation achieved, independent deployments, improved security
+  - **Next Steps:** Enhance portal features (notifications, better mobile UX, dashboard widgets)
+
+- [ ] **Internal Admin Design System Modernization**
+  - **Rationale:** Unify visual design across internal admin services (Dashboard, Operations, Inventory, Completion/Billing, Video, Booking) with modern, polished aesthetic from Billing. Separate internal admin UX from customer-facing Estimator brand. Improve daily experience for team workflows.
+  - **Scope:** Internal services only (excludes Estimator, Site)
+  - **Visual Updates:**
+    - **Border Radius:** Sharp corners (0px) → Rounded (4-12px scale)
+    - **Color Palette:** Add purple accent (#667eea) + gradients for modern feel
+    - **Shadows:** Minimal flat → Stronger depth (cards, modals, nav)
+    - **Interactive States:** Add card elevation on hover, gradient nav accents
+    - **Three-Tier Nav:** Keep structure, apply visual polish (rounded active states, gradient backgrounds)
+  - **Technical Approach:**
+    - Phase 1 (Week 1): Update `sailorskills-shared/src/ui/design-tokens.css` + `styles.css`
+    - Phase 2 (Week 1): Pilot implementation on Dashboard, test thoroughly
+    - Phase 3 (Week 2): Roll out to Operations → Inventory → Completion
+    - Phase 4 (Week 3): Complete Video → Booking, final polish + documentation
+  - **Component Updates:**
+    - Buttons: Rounded corners, keep brightness hover
+    - Cards: Rounded + hover lift effect (translateY + shadow)
+    - Modals: Rounded, stronger shadows
+    - Forms: Rounded inputs, better focus states
+    - Navigation (all 3 tiers): Rounded active states, gradient accents
+    - Badges: Add gradient variant option
+    - New Shared components: Extract Billing's condition sliders, card patterns
+  - **Impact:** Unified, modern, delightful UX across all internal tools. Clearer separation between internal admin (modern/polished) and customer acquisition (professional/minimal). Improved daily experience for team with consistent, pleasant interface.
+  - **Dependencies:** None (self-contained design system update)
+  - **Priority:** High (Q1 2026 - foundational improvement)
+  - **Estimated Effort:** 24-35 hours over 3 weeks
+    - Shared updates: 6-9 hours
+    - Dashboard pilot: 3-4 hours
+    - 5 services rollout: 10-15 hours
+    - Testing/polish: 5-7 hours
+  - **Rollout Strategy:** Controlled pilot (Dashboard first) reduces risk, allows refinement before full expansion
+  - **Deliverables:**
+    - Updated Shared design tokens with purple palette, radius scale, stronger shadows, gradients
+    - Modernized Shared component library (buttons, cards, modals, forms, nav)
+    - All 6 internal services using consistent modern styling
+    - Visual regression test suite (Playwright screenshots)
+    - Design system documentation
+
+- [ ] **Admin Settings & Configuration Panels**
+  - **Rationale:** Need centralized control over business operations: email notifications, pricing variables, and customer-facing content. Currently these are hardcoded or require code changes.
+  - **Architecture:** Distributed approach - each service manages its own settings panel to maintain service autonomy
+  - **Features by Service:**
+    - **Estimator Settings:**
+      - Pricing variables panel (anode margin %, service base prices, surcharge rates)
+      - Labor rate configuration
+      - Tax/fee settings
+    - **Operations Settings:**
+      - Email toggles (service completion notifications, order confirmations)
+      - Customer portal format/content settings (branding, welcome text, feature visibility)
+      - Default service templates
+    - **Completion Settings:**
+      - Email toggles (payment receipts, invoice notifications)
+      - Email content configuration (footer text, payment terms)
+      - Invoice formatting options
+    - **Booking Settings:**
+      - Email toggles (booking confirmations, reminders, cancellations)
+      - Booking policy text customization
+  - **Technical Implementation:**
+    - New `business_settings` table in Supabase (JSONB for flexibility)
+    - Settings structure: `{ service: string, category: string, settings: jsonb }`
+    - Edge function for settings validation and defaults
+    - React settings panels with form validation
+  - **Impact:** Eliminates need for code deployments to adjust pricing, email behavior, or customer-facing content. Enables quick business process changes without developer intervention.
+  - **Dependencies:** Customer Portal implementation (portal must exist before format settings can be configured)
+  - **Priority:** Medium (Q1 2026 - after customer portal)
+  - **Estimated Effort:** 3-4 days (1 day planning/database, 2-3 days implementing panels across services)
+
+- [ ] Enhance packing list automation
+- [ ] Improve service history visualization
+- [ ] Mobile optimization for field use
+
+### Development Workflow & Infrastructure
+- [ ] **Implement Development Branch Strategy for All Services**
+  - **Rationale:** Currently all 10 services develop directly on `main` branch with immediate production deployment on every push. This creates significant risks: untested code can reach production, no staging environment for integration testing, difficulty rolling back problematic deployments, and inability to test cross-service features together. Need proper development → staging → production workflow with safety gates.
+  - **Current State:**
+    - All services (Portal, Operations, Billing/Completion, Estimator, Dashboard, Inventory, Booking, Video, Site, Shared) use single `main` branch
+    - Every push to `main` triggers immediate Vercel production deployment
+    - No `develop`, `staging`, or formal branching strategy exists
+    - Vercel preview deployments available but not utilized
+    - CLAUDE.md instructs to push directly to main after local testing
+    - Only 1 feature branch exists across all 10 services (estimator feature/transaction-viewing)
+  - **Proposed Workflow:** Modified GitHub Flow with `develop` branch
+    - **Branch Structure:** `feature/* → develop (staging) → main (production)`
+    - **Development Process:**
+      - Create feature branches from `develop` for new work
+      - Feature branch PRs merge to `develop` after review
+      - `develop` auto-deploys to Vercel preview URL (staging environment)
+      - Feature branches get individual preview URLs for PR review
+      - `main` remains production-only, updated via PR from `develop`
+      - Emergency hotfixes can bypass and go direct to `main` with backport to `develop`
+    - **Benefits:**
+      - Leverages existing Vercel preview deployment infrastructure (no new tools needed)
+      - Staging environment for integration testing before production
+      - Test database migrations on preview deployment first
+      - Coordinate cross-service releases (test compatible versions together on develop)
+      - Easy rollbacks (revert PR to main)
+      - Individual preview URLs for every feature PR
+  - **Implementation Plan:**
+    - **Phase 1 (Week 1):** Core Services Setup
+      - Create `develop` branches for Portal, Operations, and Billing/Completion
+      - Update Vercel project settings (main = production, develop = preview)
+      - Test workflow with small feature on each service
+      - Document preview URLs and staging access
+    - **Phase 2 (Week 2):** Remaining Services Rollout
+      - Create `develop` branches for remaining 7 services (Estimator, Dashboard, Inventory, Booking, Video, Site)
+      - Create `develop` branch for sailorskills-shared (special handling as submodule)
+      - Update git submodule references in services to point to shared@develop during development
+      - Verify all services have working preview deployments
+    - **Phase 3 (Week 3):** Documentation & Training
+      - Update all CLAUDE.md files with new branching workflow
+      - Document: feature branch creation, PR process, staging testing procedures, promote-to-production process
+      - Create workflow diagram showing feature → develop → main flow
+      - Document emergency hotfix procedure (when to bypass develop)
+      - Add database migration testing workflow (test on develop preview first)
+    - **Phase 4 (Week 4):** Protection & Validation
+      - Configure GitHub branch protection rules on all `main` branches
+      - Prevent direct pushes to `main` (require PR from develop)
+      - Set up status checks for automated tests (where applicable)
+      - Document rollback procedures (revert commits, revert merges)
+      - Test full workflow end-to-end on all services
+      - Update project manager guidelines in root CLAUDE.md
+  - **Special Considerations:**
+    - **Git Submodules (sailorskills-shared):** Need coordinated strategy - create shared@develop, services reference shared@develop during development, only update to shared@main when promoting to production. Document submodule branch coordination workflow.
+    - **Database Migrations:** Establish testing workflow - always test migrations on `develop` preview deployment before running on production. Document migration rollback procedures.
+    - **Cross-Service Dependencies:** When multiple services need compatible changes (e.g., database schema change affecting Portal + Operations + Billing), coordinate versions on `develop` branches and test together before promoting to `main`.
+    - **Environment Variables:** Document any differences between develop (staging) and main (production) environment configs.
+  - **Impact:**
+    - **Safety:** Significantly reduced risk of production bugs (staging environment catches issues first)
+    - **Testing:** Ability to test in production-like environment before release
+    - **Collaboration:** Better code review process with preview URLs
+    - **Rollbacks:** Easier to revert problematic changes (just revert PR)
+    - **Coordination:** Can test cross-service features together on develop before production
+    - **Confidence:** Team can deploy with higher confidence knowing changes passed staging validation
+  - **Dependencies:** None (self-contained workflow improvement, leverages existing Vercel infrastructure)
+  - **Priority:** High (reduces production risk, enables safer rapid development)
+  - **Estimated Effort:** 12-16 hours spread over 4 weeks
+    - Branch creation & Vercel configuration: 4-6 hours
+    - Documentation updates: 3-4 hours
+    - GitHub protection configuration: 2-3 hours
+    - Testing & validation across all services: 3-3 hours
+  - **Success Criteria:**
+    - All 10 services have `develop` branch created and set as default branch for development
+    - Vercel preview URLs working for all service `develop` branches
+    - All CLAUDE.md files updated with new workflow instructions
+    - Branch protection active on all `main` branches (prevent direct pushes)
+    - Emergency hotfix procedure documented
+    - At least one feature successfully deployed through full workflow (feature → develop → main) on each service
+    - sailorskills-shared submodule workflow documented and validated
+
+### Quality Assurance & Testing
+- [ ] **Comprehensive Responsive Testing Across All Services**
+  - **Rationale:** Currently no systematic responsive testing across the 10-service suite. Services are developed primarily for desktop, but customers increasingly access on mobile/tablet (especially Portal, Estimator, Booking). Need comprehensive testing strategy to ensure all services work properly across all device sizes and orientations.
+  - **Current State:**
+    - Responsive design implemented ad-hoc without formal testing
+    - No automated responsive testing in place
+    - Visual regressions may occur when updating shared design system
+    - Customer-facing services (Portal, Estimator, Booking, Site) critical for mobile UX
+    - Internal admin tools (Dashboard, Operations, Inventory, Billing, Video) used on tablets in field
+  - **Scope:** All 10 services (Portal, Operations, Billing/Completion, Estimator, Dashboard, Inventory, Booking, Video, Site, Shared)
+    - **Customer-Facing Priority:** Portal, Estimator, Booking, Site (highest impact)
+    - **Admin Tools:** Dashboard, Operations, Inventory, Billing, Video (field use on tablets)
+  - **Testing Approaches (Multi-Layered Strategy):**
+    - **1. Automated Viewport Testing (Playwright):**
+      - Test all critical user flows across 3 breakpoints: mobile (375px), tablet (768px), desktop (1440px)
+      - Verify navigation, forms, modals, tables render correctly at each breakpoint
+      - Test both portrait and landscape orientations
+      - Run on every PR via GitHub Actions
+    - **2. Manual Testing Checklist:**
+      - Document comprehensive testing checklist per service
+      - Test on actual devices (iPhone, iPad, Android phone/tablet)
+      - Verify touch interactions (tap targets, swipe gestures, pinch zoom)
+      - Check for text overflow, layout breaks, missing scroll containers
+      - Test keyboard behavior on mobile (input focus, virtual keyboard)
+    - **3. Visual Regression Testing:**
+      - Screenshot comparison across all breakpoints using Playwright
+      - Integrate with design system changes (catch unintended responsive breakage)
+      - Baseline screenshots for all major pages/components
+      - Alert on visual diffs during CI/CD pipeline
+    - **4. Real Device Testing:**
+      - Test on physical devices (iPhone 13/14/15, iPad, Samsung Galaxy, etc.)
+      - Use BrowserStack or similar for broader device coverage
+      - Test on different screen densities (1x, 2x, 3x)
+      - Verify performance on low-end devices
+  - **Implementation Plan:**
+    - **Phase 1 (Week 1):** Setup & Infrastructure
+      - Configure Playwright for multi-viewport testing
+      - Set up visual regression baseline screenshots
+      - Document responsive breakpoints in shared design system
+      - Create manual testing checklist template
+    - **Phase 2 (Week 2):** Customer-Facing Services
+      - Implement automated tests for Portal (login, service history, invoices, messages)
+      - Test Estimator (quote builder, form flows, payment)
+      - Test Booking (calendar picker, confirmation flow)
+      - Test Site (marketing pages, contact forms)
+      - Capture visual regression baselines for all pages
+    - **Phase 3 (Week 3):** Admin Tools & Internal Services
+      - Test Dashboard (analytics widgets, navigation)
+      - Test Operations (service logs, customer management, calendar)
+      - Test Inventory (product search, AI assistant)
+      - Test Billing/Completion (service documentation, condition tracking, payment)
+      - Test Video (playlist management, upload workflows)
+    - **Phase 4 (Week 4):** Real Device Testing & Documentation
+      - Conduct manual testing on 5-8 physical devices
+      - Document device-specific issues and workarounds
+      - Create responsive testing runbook for future development
+      - Add responsive testing to PR template and CLAUDE.md
+      - Set up CI/CD integration for automated tests
+  - **Breakpoints to Test:**
+    - **Mobile Small:** 375px (iPhone SE, small phones)
+    - **Mobile Large:** 414px (iPhone 14 Pro Max)
+    - **Tablet Portrait:** 768px (iPad Mini)
+    - **Tablet Landscape:** 1024px (iPad)
+    - **Desktop Small:** 1280px (laptop)
+    - **Desktop Large:** 1440px+ (monitor)
+  - **Critical Test Scenarios by Service:**
+    - **Portal:** Login flow, service request, invoice viewing, boat selection, messages
+    - **Estimator:** Quote builder, anode selection, service options, pricing display, checkout
+    - **Operations:** Service log creation, condition tracking, customer search, calendar view
+    - **Dashboard:** Analytics widgets, revenue charts, table displays
+    - **Inventory:** Product search, AI assistant chat, order placement
+    - **Billing:** Service completion, condition sliders, payment processing
+    - **Booking:** Date picker, time slot selection, confirmation
+    - **Video:** Playlist management, upload interface
+    - **Site:** Navigation, contact forms, service pages
+  - **Deliverables:**
+    - Automated Playwright test suite covering all services and breakpoints
+    - Visual regression baseline screenshots (100+ pages across services)
+    - Manual testing checklist document
+    - Real device testing report with device compatibility matrix
+    - Responsive testing runbook for developers
+    - CI/CD integration (tests run on every PR)
+    - Documentation updates to CLAUDE.md and service READMEs
+  - **Impact:**
+    - Improved mobile/tablet experience for customers (higher conversion, satisfaction)
+    - Catch responsive regressions before production
+    - Confidence when updating shared design system
+    - Better field experience for technicians using admin tools on tablets
+    - Faster development (automated tests catch issues early)
+    - Professional mobile experience across all touchpoints
+  - **Dependencies:**
+    - Development branch strategy (to test on preview deployments)
+    - Playwright MCP already available for manual testing
+  - **Priority:** High (Q1 2026 - foundational for mobile-first customer experience)
+  - **Estimated Effort:** 5-6 days (40-48 hours)
+    - Infrastructure setup: 0.5 day
+    - Customer-facing services testing: 1.5 days
+    - Admin tools testing: 1.5 days
+    - Real device testing: 1 day
+    - Documentation & CI integration: 0.5-1 day
+  - **Success Criteria:**
+    - Automated tests pass for all services across 6 breakpoints
+    - Visual regression tests integrated into CI/CD
+    - Manual testing completed on 5+ physical devices
+    - Zero critical responsive issues in customer-facing services
+    - All services have documented responsive testing checklist
+    - Responsive testing added to development workflow
+
+---
+
+## Q2 2026
+
+### Booking & Scheduling
+- [ ] Complete remaining phases of sailorskills-booking (50% → 100%)
+- [ ] Google Calendar sync enhancements
+- [ ] Automated reminder system
+
+### Video Management
+- [ ] Complete mobile app development (React Native/Expo)
+- [ ] GoPro WiFi integration for direct uploads
+- [ ] Enhanced YouTube playlist automation
+
+### Business Operations & Multi-Owner Management
+- [ ] **Ownership & Attribution Tracking System**
+  - **Rationale:** As the company adds multiple owners, need comprehensive system to track who brings in clients, assets, and inventory; assign responsibility for ongoing management; and allocate value/credit appropriately. Current system has no ownership attribution or staff assignment capabilities. Critical for multi-owner accountability, contractor/employee management, and eventual profit-sharing calculations.
+  - **Scope - Four Core Tracking Categories:**
+    - **Client Relationships:** Track which owner/person brought in each customer, date acquired, acquisition channel, estimated lifetime value
+    - **Assets:** Track who contributed equipment, tools, boats, vehicles; date contributed, current value, depreciation, responsible party for maintenance
+    - **Inventory:** Track who purchased/contributed parts and supplies, date added, cost basis, current value, responsible party for management
+    - **Staff Assignments:** Assign staff (owners, contractors, employees) to specific jobs/services, track responsibility (may differ from original contributor)
+  - **Key Features:**
+    - **Attribution Dashboard:** View all contributions by owner/person (clients, assets, inventory) with values and dates
+    - **Responsibility Assignment:** Assign ongoing management responsibility (separate from original contributor)
+    - **Job Staffing:** Assign one or more staff members to each service/job in Operations
+    - **Value Tracking:** Track current value, changes over time, depreciation for assets
+    - **Historical Records:** Maintain complete audit trail of all contributions and assignments
+    - **Reporting:** Generate ownership reports, contribution summaries, staff workload reports
+  - **Database Schema:**
+    - New `ownership_attributions` table: `{ type: 'client'|'asset'|'inventory', entity_id: uuid, contributed_by: uuid (staff_id), contributed_at: timestamp, value_at_contribution: decimal, current_value: decimal, notes: text }`
+    - New `staff_assignments` table: `{ assignment_type: 'service'|'job'|'ongoing_management', entity_id: uuid, assigned_to: uuid (staff_id), assigned_at: timestamp, role: text, notes: text }`
+    - New `staff` table: `{ id: uuid, type: 'owner'|'contractor'|'employee', name: text, email: text, active: boolean, hire_date: date, metadata: jsonb }`
+    - Update `customers` table: Add `attributed_to` (staff_id), `acquisition_date`, `acquisition_channel`
+    - Update `service_orders` and `service_logs` tables: Add `assigned_staff` (array of staff_ids)
+  - **Implementation:**
+    - **Phase 1 (Week 1):** Database schema design and migration, create staff management table
+    - **Phase 2 (Week 2):** Build attribution tracking UI in Dashboard (clients, assets, inventory)
+    - **Phase 3 (Week 3):** Implement staff assignment UI in Operations (assign staff to jobs/services)
+    - **Phase 4 (Week 3-4):** Build reporting dashboards (contribution summaries, workload reports)
+    - **Phase 5 (Week 4):** Backfill existing data with historical attributions where known
+  - **UI Locations:**
+    - **Dashboard:** New "Ownership & Contributions" section with attribution views and reports
+    - **Operations:** Add staff assignment picker to service creation/editing workflow
+    - **Inventory:** Add "Contributed By" tracking when adding new inventory items
+    - **Customer Profiles:** Display attribution information (who brought in this client)
+  - **Impact:**
+    - Clear ownership accountability for multi-owner business
+    - Accurate tracking of individual contributions for profit-sharing
+    - Proper staff management and workload distribution
+    - Historical audit trail for all business relationships and assets
+    - Foundation for future features (commission tracking, performance reviews, revenue sharing)
+  - **Dependencies:** Staff/user management system (create staff table first)
+  - **Priority:** Critical (Q2 2026 - highest priority, foundational for multi-owner operations)
+  - **Estimated Effort:** 5-6 days (40-48 hours)
+    - Database design & migrations: 1 day
+    - Attribution tracking UI: 1.5 days
+    - Staff assignment features: 1.5 days
+    - Reporting dashboards: 1.5 days
+    - Data backfill & testing: 0.5-1 day
+
+### Admin Tools & Configuration
+- [ ] **Settings Dashboard - Full Implementation**
+  - **Rationale:** Currently no centralized settings management - pricing variables, margins, templates, staff roles, permissions, and external service credentials are hardcoded or scattered across services. Need unified settings dashboard to manage all business configuration without code deployments. This is foundational for non-technical staff to manage business operations.
+  - **Current Gap:** Q1 2026 includes basic admin settings panels (see "Admin Settings & Configuration Panels"), but those are distributed across services and lack unified management. This initiative creates centralized, comprehensive settings hub.
+  - **Comprehensive Settings Categories:**
+    - **Pricing & Margins:**
+      - Estimator pricing variables (anode margin %, service base prices, labor rates, surcharge rates)
+      - Tax/fee configurations
+      - Seasonal pricing adjustments
+      - Bulk discount rules
+    - **Templates & Content:**
+      - Email templates (Resend - see separate initiative below for visual editor)
+      - Invoice templates
+      - Service completion report templates
+      - Customer portal content (welcome messages, help text)
+    - **Staff Management:**
+      - Staff roles and permissions (admin, technician, contractor, viewer)
+      - Role-based access control (RBAC) for each service
+      - Staff profiles (contact info, credentials, hourly rates)
+      - Active/inactive status management
+    - **External Service Integrations:**
+      - boatzincs.com login credentials
+      - Google Calendar API credentials and sync settings
+      - Stripe API keys and webhook configuration
+      - Resend API configuration
+      - YouTube API credentials
+      - Supabase connection settings
+      - Gemini AI API keys
+    - **Notification Preferences:**
+      - Email toggle switches (payment receipts, service completions, order confirmations)
+      - Notification recipients by event type
+      - Email scheduling preferences
+    - **Business Information:**
+      - Company name, address, phone, email
+      - Tax ID, business license numbers
+      - Logo and branding assets
+      - Payment terms and policies
+  - **Technical Architecture:**
+    - Create dedicated `sailorskills-settings` service or add to Dashboard
+    - New `business_settings` table with JSONB flexibility: `{ category: text, key: text, value: jsonb, updated_at: timestamp, updated_by: uuid }`
+    - Settings validation edge function (ensure valid types, ranges, formats)
+    - Settings audit log (track all changes with who/when/what)
+    - Secure credential storage (encrypt sensitive API keys)
+    - Settings caching layer for performance
+  - **UI Features:**
+    - Tabbed interface organized by category (Pricing, Templates, Staff, Integrations, etc.)
+    - Form validation with helpful error messages
+    - "Save" and "Revert" buttons with unsaved changes warning
+    - "Test Connection" buttons for external integrations
+    - Settings history/audit log viewer
+    - Import/export settings for backup/migration
+    - Search/filter across all settings
+  - **Implementation:**
+    - **Phase 1 (Week 1):** Database design, settings table, audit logging, API layer
+    - **Phase 2 (Week 2):** Build settings UI framework (tabs, forms, validation)
+    - **Phase 3 (Week 3):** Implement category-specific panels (Pricing, Staff, Integrations)
+    - **Phase 4 (Week 3-4):** Migrate hardcoded values to settings system across all services
+    - **Phase 5 (Week 4):** Testing, documentation, training materials
+  - **Migration Strategy:**
+    - Identify all hardcoded values across 10 services
+    - Create settings entries with current values as defaults
+    - Update services to read from settings API instead of hardcoded values
+    - Maintain backward compatibility during transition
+  - **Impact:**
+    - Non-technical staff can manage pricing, margins, and templates
+    - No code deployments needed for business configuration changes
+    - Centralized credential management (security improvement)
+    - Complete audit trail of all setting changes
+    - Faster business operations (no waiting for developer)
+  - **Dependencies:** Staff management (from ownership tracking initiative) for staff roles/permissions
+  - **Priority:** High (Q2 2026 - foundational for business operations)
+  - **Estimated Effort:** 6-7 days (48-56 hours)
+    - Database & API layer: 1.5 days
+    - UI framework: 1.5 days
+    - Category panels: 2 days
+    - Service migration: 1.5 days
+    - Testing & documentation: 0.5-1 day
+
+- [ ] **Resend Email Template Dashboard**
+  - **Rationale:** Currently email templates are managed in code or via Resend web interface. Need visual editor within Sailorskills to design, preview, and manage all email templates without leaving the admin tools. Empowers non-technical staff to update customer communications.
+  - **Features:**
+    - **Visual Template Editor:**
+      - WYSIWYG editor for email HTML/text
+      - Live preview (desktop and mobile views)
+      - Variable insertion (customer name, service details, invoice amounts, etc.)
+      - Template library (start from prebuilt templates)
+    - **Template Management:**
+      - List all Resend templates with search/filter
+      - Create new templates
+      - Edit existing templates
+      - Duplicate templates
+      - Archive/delete templates
+      - Version history with rollback capability
+    - **Template Categories:**
+      - Service completion notifications
+      - Payment receipts
+      - Invoice emails
+      - Order confirmations
+      - Booking confirmations/reminders
+      - Password reset / magic link emails
+      - Customer portal welcome emails
+    - **Testing Tools:**
+      - Send test emails to specified addresses
+      - Preview with sample data
+      - Spam score checker
+      - Mobile rendering preview
+    - **Integration with Resend API:**
+      - Sync templates to/from Resend
+      - Track template usage statistics (open rates, click rates)
+      - View recent sends by template
+  - **Technical Implementation:**
+    - Build UI in Dashboard or Settings service
+    - Use Resend API for template CRUD operations
+    - Consider email builder library (e.g., react-email, unlayer, grapesjs)
+    - Store template drafts locally before syncing to Resend
+    - New `email_template_drafts` table for work-in-progress templates
+  - **UI Location:**
+    - Dashboard → "Email Templates" section OR Settings Dashboard → "Templates" tab
+    - Accessible to admin users only (permissions from Settings Dashboard)
+  - **Implementation:**
+    - **Phase 1 (Week 1):** Research email builder libraries, design UI mockups
+    - **Phase 2 (Week 2):** Integrate Resend API, build template listing and sync
+    - **Phase 3 (Week 3):** Build visual editor with preview functionality
+    - **Phase 4 (Week 3-4):** Testing tools, version history, template library
+  - **Impact:**
+    - Non-technical staff can update email communications
+    - Faster iteration on customer messaging
+    - Better email quality (live preview reduces errors)
+    - No code deployments for email changes
+    - A/B testing capability (multiple template versions)
+  - **Dependencies:** Settings Dashboard (for Resend API credentials and permissions)
+  - **Priority:** Medium (Q2 2026 - after Settings Dashboard)
+  - **Estimated Effort:** 4-5 days (32-40 hours)
+    - Research & design: 0.5 day
+    - Resend integration: 1 day
+    - Visual editor: 1.5 days
+    - Testing & history features: 1 day
+    - Documentation: 0.5 day
+
+---
+
+## Backlog - Not Yet Scheduled
+
+### Infrastructure
+- [ ] Implement centralized logging/monitoring across services
+- [ ] Performance optimization for Supabase queries
+- [ ] Automated backup and disaster recovery procedures
+
+### Customer Experience
+- [ ] Unified customer portal across all services (Operations portal scheduled for Q1 2026 - see Operations Improvements)
+- [ ] Mobile-responsive design system updates
+- [ ] Customer notification preferences (included in Operations portal - Q1 2026)
+
+### Inventory & Parts
+- [ ] Automated reordering system based on usage patterns
+- [ ] Enhanced AI product recommendations (Gemini integration)
+- [ ] Multi-location inventory support
+
+### Data Quality & Migration
+- [ ] **Manual Review of Service Log-Invoice Missing Links**
+  - **Rationale:** After automated Zoho billing migration, 337 service logs (23.1%) remain unlinked to invoices. Manual review can link an additional 40-80 logs where automated matching failed, improving data integrity and billing accuracy. Remaining unlinked logs are structural (pre-Zoho services, customers not in Zoho).
+  - **Current State:**
+    - Total service logs: ~1,460
+    - Currently linked: 1,123 (76.9%)
+    - Unlinked remaining: 337 (23.1%)
+    - Automated matching complete, manual review needed for edge cases
+  - **Breakdown of Unlinked Logs:**
+    - 163 logs (48.4%): Services before first Zoho invoice → Skip, no invoice exists
+    - 82 logs (24.3%): Customer has no Zoho invoices → Skip, not in Zoho
+    - 37 logs (11.0%): Recent services (post-Zoho migration) → **High priority to link**
+    - 24 logs (7.1%): Gap >30 days from nearest invoice → **Medium priority review**
+    - 19 logs (5.6%): Service after last invoice → Review (customer left?)
+    - 12 logs (3.6%): Unknown customer → Skip, cannot identify
+  - **Review Process:**
+    - Use CLI helper tool: `npm run manual-link -- <service_log_id>`
+    - Tool shows service details, customer's invoices, closest matches by date
+    - Actions: Link to invoice, mark as reviewed/skipped, or flag for later
+    - Prioritize recent services (Sept-Oct 2025) - likely modern invoices exist
+    - Review wide gaps (>30 days) - may be legitimate linkages
+    - Skip pre-Zoho services and customers with no Zoho history
+  - **Key Files:**
+    - `scripts/zoho-migration/MANUAL_REVIEW_GUIDE.md` - Complete review guide with SQL queries
+    - `scripts/zoho-migration/unlinked-service-logs-remaining.csv` - 337 logs to review
+    - `scripts/zoho-migration/manual-link-helper.mjs` - CLI tool (via `npm run manual-link`)
+  - **Expected Outcomes:**
+    - **Best case:** Link 60-80 additional logs (recent services + wide gaps)
+    - **Realistic:** Link 40-50 logs (mostly recent services)
+    - **Final linkage rate:** 79-80% (up from current 76.9%)
+    - Remaining ~250-280 unlinked logs are structural limitations and should remain unlinked
+  - **Implementation:**
+    - Use existing CLI tool and helper scripts
+    - Review in priority order: recent services (37) → wide gaps (24) → others
+    - Document decisions and rationale
+    - Update database directly via SQL or helper tool
+    - Track progress with SQL queries (linkage percentage)
+  - **Impact:**
+    - Improved billing accuracy and data integrity
+    - Better understanding of customer service history
+    - Foundation for accurate revenue reporting in Dashboard
+    - Clean historical data for future analytics
+  - **Dependencies:** Zoho migration complete (already done)
+  - **Priority:** Low (data quality improvement, not urgent)
+  - **Estimated Effort:** 4-8 hours (depends on review thoroughness)
+    - Recent services review (37 logs): 1-2 hours
+    - Wide gap review (24 logs): 1-2 hours
+    - Other cases investigation: 2-4 hours
+
+---
+
+## Completed
+
+### 2025-10-19
+- [x] Established sailorskills-docs repository for project management
+- [x] Created project manager guidelines in CLAUDE.md
+
+### 2025-10-17
+- [x] Consolidated service_conditions_log and service_conditions → service_logs (unified table)
+- [x] Enhanced propeller tracking with JSONB array (supports unlimited propellers)
+- [x] Added granular paint detail tracking (keel, waterline, boot stripe)
+
+---
+
+## Notes
+
+### Priority Definitions
+- **Critical:** Blocks other work or affects production
+- **High:** Important for business goals, scheduled for current quarter
+- **Medium:** Valuable improvement, scheduled for next 2 quarters
+- **Low:** Nice-to-have, in backlog
+
+### Cross-Service Coordination
+When planning features that touch multiple services, follow the data flow:
+```
+Estimator → Operations → Completion (billing) → Dashboard
+                ↓
+           Inventory
+```

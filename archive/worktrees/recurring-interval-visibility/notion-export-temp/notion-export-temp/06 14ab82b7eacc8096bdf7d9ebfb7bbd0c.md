@@ -1,0 +1,8 @@
+# 06
+
+Anodes: None
+Date: 11/25/2024
+Growth: Moderate
+Paint: Missing, Poor
+Prop: None
+Thru-hulls: Sound

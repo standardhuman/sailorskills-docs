@@ -1,0 +1,1477 @@
+# Q1 2026 (Detailed)
+
+**Status:** Next Quarter
+**Period:** January - March 2026
+**Focus:** Mobile app completion, user accounts, business intelligence transformation
+
+For high-level summary, see [main ROADMAP.md](../../ROADMAP.md)
+
+---
+
+## Q1 2026
+
+### Mobile-First Platform Strategy
+- [ ] **Complete Video Native Mobile App & Begin Billing Mobile Conversion**
+  - **Dependencies:** None
+  - **Blocks:** Q2 2026 Operations Native Mobile App
+  - **Rationale:** Field operations require native mobile apps for reliability, session persistence, and background processing. Current web apps have critical limitations: browser sessions reload during long dives (losing Billing form state), and video uploads cannot run reliably in background. Native apps provide persistent sessions, background upload/download capabilities, offline-first architecture, and better battery/network management. Video mobile app (React Native/Expo) is 87% complete (Phases 1-7 done), needs final testing and deployment. Billing has immediate need for session persistence during dives.
+  - **Current State - Video Mobile (sailorskills-video/BOATY-Mobile):**
+    - **Status:** 87.5% complete (7 of 8 phases done)
+    - **Completed Phases:**
+      - Phase 1: Core setup, navigation, database (SQLite)
+      - Phase 2: GoPro WiFi integration, download manager
+      - Phase 3: Video library, rename workflow, storage management
+      - Phase 4: YouTube OAuth, upload manager, playlist management
+      - Phase 5: Cellular optimization, network detection, data usage tracking
+      - Phase 6: Background processing, notifications (upload/download progress)
+      - Phase 7: Dark mode, theme system, loading states
+    - **Remaining:** Phase 8 (testing & deployment - 5-7 days)
+    - **Tech Stack:** React Native 0.81.4, Expo 52.x, React Navigation 6.x
+    - **Documentation:** `/sailorskills-video/docs/mobile/` (PROGRESS.md, MOBILE_ROADMAP.md)
+  - **Current State - Billing Web App:**
+    - **Problem:** Mobile browser reloads page during long dives (30-60+ minutes), losing all form state when technician returns to surface. Need to re-select boat, re-enter conditions, restart workflow.
+    - **Impact:** Frustrating user experience, lost data, extra time per service
+    - **Current Architecture:** Vite web app, no PWA features, no session persistence
+  - **Implementation Plan:**
+    - **Phase 1 (Week 1-2): Video Mobile Final Push**
+      - Complete Phase 8: Device testing (iOS/Android), field testing with GoPro, performance optimization
+      - App Store preparation: Icons, screenshots, descriptions, privacy policy
+      - Deploy to TestFlight (iOS) and Internal Testing (Android)
+      - Field testing: Real GoPro cameras, cellular uploads, background processing, battery drain
+      - Production release to App Store and Play Store
+      - **Deliverables:** Video mobile app published and in production use
+    - **Phase 2 (Week 2-3): Billing PWA Quick Fix (Short-term Solution)**
+      - Add PWA capabilities: Service workers, offline support, session persistence
+      - Implement wake locks to prevent browser sleep during dives
+      - Add local storage persistence for form state (auto-save every 30s)
+      - Restore form state on page reload (boat selection, conditions, notes)
+      - Add "Resume Last Session" prompt on app launch
+      - Test: Start service entry, lock phone for 30 min, unlock and verify state restored
+      - **Immediate Timestamp Capture on Start/End Service:**
+        - Write timestamp to service log immediately when "Start Service" button clicked (not when "Charge Customer" or "Log Only" clicked)
+        - Write timestamp to service log immediately when "End Service" button clicked
+        - **Rationale:** Overcomes browser persistence issue by capturing critical timestamps before any potential session loss during dive
+        - **Impact:** Ensures accurate service time tracking even if browser reloads during dive
+        - **Priority:** Critical - include in PWA quick fix implementation
+      - **Deliverables:** Billing web app reliably maintains session during dives + accurate timestamp capture
+      - **Estimated Effort:** 3-5 days
+      - **Why PWA First:** Buys time while Video native proves the React Native stack, solves immediate problem with minimal risk
+    - **Phase 3 (Week 4-7): Billing Native Mobile App (Long-term Solution)**
+      - Convert Billing to React Native app (leverage Video mobile codebase)
+      - Reuse components: Upload manager, network detection, notification service, theme system, database patterns
+      - Core features: Service completion workflow, condition tracking (sliders), anode documentation, photo capture/upload, payment processing (Stripe), offline queue
+      - Background processing: Save service logs offline, sync when connected
+      - Notifications: Service saved, payment processed, sync complete
+      - Testing: Field testing during actual service calls, verify no data loss, test offline → online transitions
+      - Deploy: TestFlight → Production release
+      - **Deliverables:** Billing native app in production, PWA deprecated
+      - **Estimated Effort:** 3-4 weeks
+      - **Leverage from Video Mobile:**
+        - 60% of Video mobile code is reusable (upload manager, network service, notifications, database, theme)
+        - Authentication patterns already proven
+        - Background processing proven reliable
+        - Cellular optimization strategies validated
+  - **Technical Architecture:**
+    - **Video Mobile:** React Native + Expo + SQLite + YouTube API + GoPro HTTP API
+    - **Billing PWA (interim):** Vite + Service Workers + IndexedDB + Wake Lock API
+    - **Billing Mobile:** React Native + Expo + SQLite + Supabase + Stripe SDK
+    - **Shared:** React Native components library (create after Video & Billing mobile both working)
+  - **Why This Sequence:**
+    1. **Video mobile first** - 87% done, finish it to prove React Native stack works in field
+    2. **Billing PWA second** - Quick 3-5 day fix solves immediate session problem with low risk
+    3. **Billing native third** - After Video mobile field-tested, confident in React Native approach, reuse 60% of code
+    4. **Shared library after** - Extract common patterns once both apps working (don't prematurely optimize)
+  - **Services Requiring Native Apps (Priority Order):**
+    1. **Video (Q1 2026 - Week 1-2)** - Background uploads critical, 87% done ✅
+    2. **Billing/Completion (Q1 2026 - Week 2-7)** - Session persistence critical, PWA → Native
+    3. **Operations (Q2 2026)** - Field service logs, offline support, GPS, camera, signature capture
+    4. **Inventory (Q2-Q3 2026)** - Barcode scanning, stock checks in warehouse
+    5. **Dashboard (Q3 2026)** - Analytics on-the-go (lower priority, web works fine)
+    6. **Portal (Future)** - Customer-facing, web is acceptable (mobile-responsive sufficient)
+    7. **Estimator (Excluded)** - Customer acquisition tool, web-only by design
+  - **Services Staying Web-Only:**
+    - **Estimator:** Customer-facing quote builder, intentionally web-only for accessibility
+    - **Site:** Marketing site, no native app needed
+    - **Booking:** Training scheduling, web sufficient (calendar integration works in browser)
+  - **Success Metrics:**
+    - **Video Mobile:** 80%+ adoption, 50%+ uploads happen in field (not at desk), 99%+ upload success rate
+    - **Billing PWA:** Zero session loss during dives, 100% form state recovery
+    - **Billing Mobile:** 90%+ field adoption, <1% data loss, 95%+ offline-to-online sync success
+    - **Cross-Platform:** All native apps maintain feature parity with web versions
+  - **Impact:**
+    - ✅ **Video:** Reliable background uploads over cellular, no laptop required in field
+    - ✅ **Billing:** No more lost sessions during dives, confident data entry workflow
+    - ✅ **Operations:** Offline service log entry at boat (no internet required), sync when back online
+    - ✅ **Inventory:** Fast barcode scanning, real-time stock checks in warehouse
+    - ✅ **Platform:** Native mobile-first experience across all field-facing services
+  - **Dependencies:**
+    - Video mobile Phase 8 completion (testing infrastructure, deployment process)
+    - App Store developer account (✅ assumed exists)
+    - Play Store developer account (✅ assumed exists)
+    - Stripe mobile SDK setup for Billing native app
+  - **Blocks:** Q2 2026 Operations native app (needs Video mobile lessons learned)
+  - **Priority:** Critical (Q1 2026 - foundational for field operations)
+  - **Estimated Effort:**
+    - Video Phase 8: 5-7 days
+    - Billing PWA: 3-5 days
+    - Billing Native: 3-4 weeks
+    - **Total: 5-6 weeks**
+  - **Documentation:**
+    - `/sailorskills-video/docs/mobile/MOBILE_ROADMAP.md` - Complete Video mobile development plan
+    - `/sailorskills-video/docs/mobile/PROGRESS.md` - Current status and phase completion
+    - `/sailorskills-video/docs/mobile/MOBILE_SETUP.md` - Dev environment setup
+    - `/sailorskills-video/docs/mobile/GOPRO_INTEGRATION.md` - GoPro WiFi API reference
+
+### User Accounts & Multi-User Infrastructure
+- [ ] **User Accounts & Comprehensive Audit Logging System**
+  - **Dependencies:** None
+  - **Blocks:** Strategic BI Insight service, Referral Tracking, Service Start Notifications, Q2 2026 Ownership & Attribution Tracking
+  - **Rationale:** Foundational infrastructure for multi-user/multi-owner operations. Currently no user authentication for staff, no audit trails to track who created/modified data, and no accountability system. Required before onboarding multiple owners, contractors, or employees. Enables revenue attribution, performance tracking, and role-based access control.
+  - **Full Proposal:** See `/docs/roadmap-submission-user-accounts-audit-logging.md`
+  - **Current Gaps:**
+    - No user authentication for internal staff (admin services open to anyone with URL)
+    - No audit trails - cannot determine who created/modified service logs, boats, invoices, schedules
+    - No accountability - actions are anonymous, no way to trace errors to source
+    - No revenue attribution per user/technician
+    - Single-user assumption across all services
+  - **Key Features:**
+    - **User Account System:**
+      - User roles: Owner, Admin, Technician, Contractor, Viewer
+      - Authentication via Supabase Auth (email/password + magic links)
+      - User management UI (create, edit, deactivate accounts)
+      - User profiles with role, type (owner/employee/contractor), hire date, hourly rate
+    - **Comprehensive Audit Logging:**
+      - Track every create/update/delete across all services
+      - Log who, what, when, action, changes (before/after), IP, service name
+      - Add `created_by`, `updated_by`, timestamps to all core tables
+      - Audit log viewer with filtering (user, entity type, date range)
+      - Historical audit trail for compliance and debugging
+    - **Role-Based Access Control (RBAC):**
+      - Permission matrix for all features across all services
+      - Supabase RLS policies based on user role
+      - UI-level guards (hide/disable features by role)
+      - API-level permission validation
+      - Contractors see only assigned work, Viewers are read-only
+    - **Revenue Attribution & Performance Tracking:**
+      - Link invoices to service technician
+      - Track revenue generated per user
+      - Performance metrics: revenue/user, services/user, efficiency ($/hour)
+      - Commission calculation support
+      - User performance dashboard widgets
+  - **Database Schema:**
+    - New `users` table: id, email, full_name, role, type, active, hire_date, hourly_rate, preferences
+    - New `audit_logs` table: user_id, entity_type, entity_id, action, changes (JSONB), ip_address, service_name, timestamp
+    - Add to all tables: `created_by`, `updated_by`, `created_at`, `updated_at`
+    - Add to invoices: `service_technician_id` for revenue attribution
+    - Add to service_logs: `technician_id`, `revenue_generated`
+  - **Implementation Phases:**
+    - **Phase 1 (Week 1):** User accounts foundation - schema, Supabase Auth setup, user management UI, login flow
+    - **Phase 2 (Week 1-2):** Audit logging infrastructure - `audit_logs` table, edge function, add tracking columns, audit viewer UI
+    - **Phase 3 (Week 2-3):** RBAC implementation - permission matrix, RLS policies, UI/API guards, testing
+    - **Phase 4 (Week 3-4):** Service integration - integrate into Operations, Billing, Inventory, Dashboard, Estimator
+    - **Phase 5 (Week 4):** Reporting & analytics - user performance dashboard, revenue reports, commission tracking, audit exports
+  - **Services Affected:**
+    - **Operations:** Track who creates service logs, schedules services, modifies boats
+    - **Billing/Completion:** Track who initiates billing, processes payments, revenue attribution
+    - **Inventory:** Track who adds/modifies inventory, places orders
+    - **Dashboard:** User performance widgets, revenue by user, audit log explorer
+    - **Estimator:** Track who creates quotes, customer acquisition attribution
+    - **Portal:** No changes (customer-facing only)
+  - **Impact:**
+    - ✅ Multi-user accountability - know who did what, when
+    - ✅ Revenue attribution - track performance per technician
+    - ✅ Safe multi-user onboarding - can add owners/contractors/employees
+    - ✅ Compliance/audit trail for business operations
+    - ✅ Role-based permissions - control access by user type
+    - ✅ Performance tracking - revenue/services/efficiency metrics per user
+    - ✅ Foundation for commission tracking, profit sharing, workload balancing
+  - **Dependencies:** Existing Supabase Auth (✅ already used for customer portal), Supabase database (✅ exists)
+  - **Blocks:** Q2 2026 Ownership & Attribution Tracking System (needs user accounts first)
+  - **Priority:** Critical (Q1 2026 - highest priority, foundational for multi-user operations)
+  - **Estimated Effort:** 3-4 weeks (large, cross-service initiative)
+  - **Success Metrics:**
+    - 100% user accountability (every action tracked)
+    - 3+ users onboarded within first week
+    - Zero anonymous actions across all services
+    - 100% of invoices linked to technician for revenue attribution
+    - Role-based permissions working correctly for all user types
+
+### Insight & Analytics (renamed from Dashboard)
+- [ ] **Strategic Business Intelligence: Insight Service**
+  - **Dependencies:** User Accounts & Comprehensive Audit Logging System (needs technician attribution for performance metrics)
+  - **Blocks:** None
+  - **Service Rename:** `sailorskills-dashboard` → `sailorskills-insight` (completed 2025-11-02)
+  - **Rationale:** Create strategic business intelligence & planning hub. "Insight" avoids confusion with operational "dashboards" in Operations, Inventory, Billing services. Enable data-driven decisions about pricing, capacity, customer focus, and growth through adaptive perspectives and interactive what-if scenario modeling.
+  - **Full Design:** See `/docs/plans/2025-11-01-strategic-insight-transformation.md`
+  - **Architecture:** Adaptive dashboard with 4 perspectives (Executive, Financial, Operations, Customer), materialized database views for performance, interactive what-if scenarios
+  - **Key Capabilities:**
+    - **Four Adaptive Perspectives:**
+      - Executive Overview: 30-second daily check-in (KPIs, revenue trends, goals, alerts)
+      - Financial Performance: Revenue by service type, pricing analysis, forecasting, profit margins
+      - Operations Efficiency: Capacity utilization, $/hour by technician, schedule density
+      - Customer Intelligence: LTV segmentation, churn risk, retention metrics
+    - **Interactive What-If Scenarios:**
+      - Pricing: "What if I raise diving prices by 15%?" → projected revenue impact
+      - Capacity: "What if I add 10 hours/week?" → additional revenue potential
+      - Hiring: "What if I hire technician at $X/hour?" → break-even analysis
+      - Retention: "What if I reduce churn by 5%?" → LTV impact
+      - **Integration with Settings Dashboard:** What-if scenarios should include "Implement This Change" button that opens Settings Dashboard (Q2 2026) with the modeled values pre-filled, enabling one-click transition from projection to implementation
+    - **Materialized Database Views:**
+      - `mv_service_profitability`: Revenue, hours, $/hour by service type
+      - `mv_customer_lifetime_value`: LTV segmentation, churn risk indicators
+      - `mv_capacity_utilization`: Daily capacity metrics, schedule density
+      - `mv_technician_performance`: Performance by technician (requires User Accounts)
+    - **Critical Alerts Integration:** Pull 3-5 urgent items from Operations, Billing, Inventory
+  - **Strategic Questions Answered:**
+    - ✅ Profitability by service type (which services are most profitable after labor/time?)
+    - ✅ Capacity utilization (fully booked? can take more work? schedule gaps?)
+    - ✅ Pricing optimization (should I raise/lower prices? optimal price point?)
+    - ✅ Customer value segmentation (top 20% customers by LTV, service preferences?)
+  - **Implementation Phases (7-8 weeks):**
+    - Phase 1: Foundation (materialized views, perspective framework, alerts bar)
+    - Phase 2: Executive Overview perspective
+    - Phase 3: Financial Performance perspective
+    - Phase 4: Operations Efficiency perspective
+    - Phase 5: Customer Intelligence perspective
+    - Phase 6: What-If scenario modeling
+    - Phase 7: Polish & testing
+  - **Dependencies:** Q1 2026 User Accounts system (provides technician attribution)
+  - **Timeline:** Q1 2026 (starts after User Accounts complete)
+  - **Priority:** High (foundational for business intelligence and strategic planning)
+  - **Estimated Effort:** 7-8 weeks (1 developer full-time)
+
+- [x] **Revenue Efficiency Metrics Widget** ✅
+  - **Completed:** 2025-11-03
+  - **Rationale:** Track operational efficiency and profitability with key performance indicators
+  - **Metrics Delivered:**
+    - Average dollars per hour revenue (total revenue / total service hours)
+    - Average dollars per boat (total revenue / number of boats serviced)
+    - Boats serviced per hour (number of boats / total service hours)
+  - **Features Implemented:**
+    - Real-time calculations from service_logs and invoices data
+    - Date range filters (7 days, 30 days, 90 days, year-to-date)
+    - Service type breakdown toggle
+    - Comparison data (service count and excluded services)
+  - **Impact:** Provides actionable insights into business efficiency, helps identify optimal service mix, supports pricing decisions
+  - **Location:** Insight service widget (https://sailorskills-insight.vercel.app)
+  - **Documentation:** See `/docs/plans/2025-10-31-revenue-efficiency-metrics-widget.md`
+
+- [ ] **Service Log Analytics & Predictive Insights** 🆕
+  - **Status:** Data Ready (1,196 service logs imported 2025-11-04)
+  - **Dependencies:** Service logs imported ✅ (completed during database rebuild)
+  - **Blocks:** Strategic BI Insight service (provides data for perspectives)
+  - **Rationale:** Leverage 2.8 years of service history (1,196 records across 137 boats) to enable predictive maintenance, optimize scheduling, improve pricing accuracy, and proactively alert customers before problems occur.
+  - **Data Foundation:**
+    - **Paint condition:** 1,085 records (90.7% coverage) - tracks degradation over time
+    - **Growth level:** 1,134 records (94.8% coverage) - identifies seasonal patterns
+    - **Time tracking:** 926 duration records (77.4% coverage) - actual service times
+    - **Anode conditions:** Historical overall ratings ("Good", "Fair", "Poor")
+    - **Date range:** January 2023 → October 2025 (2.8 years)
+  - **Capabilities Enabled:**
+    1. **Paint Repaint Urgency Analysis**
+       - Calculate paint degradation trends per boat (improving/stable/declining)
+       - Predict when each boat will need repainting (populate `estimated_repaint_date`)
+       - Generate repaint priority list based on urgency
+       - Proactively alert customers before paint fails
+       - **Value:** Increase repaint revenue, reduce emergency work
+    2. **Growth Pattern & Seasonality Analysis**
+       - Identify seasonal growth patterns (spring/summer peak vs. winter)
+       - Determine optimal service intervals by marina/location
+       - Predict heavy growth periods for resource planning
+       - Adjust service schedules based on actual growth rates
+       - **Value:** Optimize scheduling, improve service quality
+    3. **Service Frequency Analytics**
+       - Compare actual vs. scheduled service intervals
+       - Identify boats that skip scheduled services (churn risk)
+       - Calculate service adherence rates per plan type
+       - **Value:** Reduce churn, improve retention
+    4. **Time Estimation & Pricing Models**
+       - Calculate average service time by boat size/type
+       - Identify factors that extend duration (growth level, paint condition)
+       - Improve pricing accuracy based on actual time data
+       - Optimize technician scheduling with realistic estimates
+       - **Value:** Better pricing, more accurate scheduling
+    5. **Historical Anode Tracking**
+       - Track anode consumption rates per boat
+       - Predict when anodes need replacement
+       - Calculate anode lifespan by boat type/location
+       - Generate anode purchase forecasts
+       - **Value:** Inventory optimization, proactive maintenance
+  - **Implementation Phases:**
+    - **Phase 1 (Week 1):** Paint repaint urgency analysis script
+      - Linear regression on paint condition over time
+      - Calculate `estimated_repaint_date` for each boat
+      - Populate `paint_condition_trend` field
+      - **Deliverable:** `/scripts/analyze-paint-repaint-urgency.mjs`
+    - **Phase 2 (Week 2):** Growth seasonality analysis
+      - Aggregate growth observations by month/marina
+      - Identify seasonal patterns
+      - Generate optimal interval recommendations
+      - **Deliverable:** Growth insights dashboard widget
+    - **Phase 3 (Week 3):** Service frequency & churn analytics
+      - Calculate actual vs. scheduled interval deltas
+      - Flag boats with service gaps (potential churn)
+      - Service adherence metrics per plan type
+      - **Deliverable:** Retention risk dashboard widget
+    - **Phase 4 (Week 4):** Time estimation & pricing model
+      - Average duration by boat size/type
+      - Factor analysis (growth, paint condition effects)
+      - Pricing recommendation engine
+      - **Deliverable:** Pricing insights dashboard widget
+    - **Phase 5 (Week 5):** Anode lifecycle analytics
+      - Anode consumption rate calculation
+      - Replacement prediction model
+      - Inventory purchase forecasting
+      - **Deliverable:** Anode analytics dashboard widget
+  - **Integration Points:**
+    - **Insight Service:** Dashboard widgets for each analysis type
+    - **Operations:** Repaint urgency alerts, churn risk warnings
+    - **Inventory:** Anode purchase forecasts
+    - **Billing:** Pricing recommendations based on actual time data
+  - **Timeline:** Q1 2026 (5 weeks total, can run in parallel with Insight service development)
+  - **Priority:** High (unlocks predictive maintenance, improves revenue/retention)
+  - **Estimated Effort:** 5 weeks (1 developer)
+  - **Documentation:** `/DATABASE_REBUILD_SUMMARY_2025-11-04.md` (What's Now Possible section)
+
+### Customer Acquisition & Referral Tracking
+- [ ] **Comprehensive Referral Tracking System**
+  - **Dependencies:** User Accounts & Comprehensive Audit Logging System (needs staff referral attribution)
+  - **Blocks:** Q2 2026 Ownership & Attribution Tracking (referral data feeds attribution system)
+  - **Rationale:** Track customer acquisition sources to identify most effective marketing channels, reward referrers, and understand growth patterns. Need to capture who referred each client (existing customer, team member, external diver, word-of-mouth, online search, etc.) to enable referral incentive programs, calculate customer acquisition cost (CAC), and recognize top referrers.
+  - **Scope:** Track all referral sources across customer lifecycle
+    - **Referrer Types:**
+      - Existing customer (another client referred them)
+      - Team member/staff (employee/contractor brought them in)
+      - External professional (diver, marina staff, boat dealer not in system)
+      - Marketing channel (Google, Facebook, website, boat show, etc.)
+      - Word-of-mouth / unknown source
+    - **Referral Incentives:**
+      - Track referral rewards/credits given to referrers
+      - Generate referral leaderboards (top referrers by count/value)
+      - Automate referral reward fulfillment (discount codes, credits)
+  - **Database Schema:**
+    - Update `customers` table: Add `referral_source_type: 'customer'|'staff'|'external_professional'|'marketing'|'word_of_mouth'`, `referrer_customer_id: uuid` (if customer referral), `referrer_staff_id: uuid` (if staff referral), `referrer_external_name: text` (if external professional), `marketing_channel: text` (if marketing), `referral_date: timestamp`, `referral_notes: text`
+    - New `referral_rewards` table: `{ id: uuid, referrer_id: uuid, referrer_type: 'customer'|'staff', referred_customer_id: uuid, reward_type: 'discount'|'credit'|'cash', reward_amount: decimal, reward_status: 'pending'|'issued'|'redeemed', issued_at: timestamp, redeemed_at: timestamp, notes: text }`
+    - New `referral_campaigns` table (optional): `{ id: uuid, campaign_name: text, start_date: date, end_date: date, reward_structure: jsonb, active: boolean }` (for time-limited referral promotions)
+  - **Data Collection Points:**
+    - **Estimator:** Add "How did you hear about us?" field to quote form
+      - Dropdown: "Referred by existing customer", "Referred by team member", "Another diver/professional", "Google search", "Social media", "Boat show", "Marina", "Other"
+      - If "existing customer" → show customer search/typeahead
+      - If "team member" → show staff dropdown (requires Q1 User Accounts)
+      - If "other professional" → free text field for name
+      - Optional notes field for details
+    - **Operations:** Add referral tracking to manual customer creation
+      - Same fields as Estimator
+      - Editable after creation (can update if referral source discovered later)
+    - **Portal:** Show "Refer a Friend" feature
+      - Generate unique referral link/code per customer
+      - Track clicks and conversions from referral links
+      - Display referral rewards earned
+  - **Reporting & Analytics:**
+    - **Dashboard Widgets:**
+      - Referral source breakdown (pie chart: customer vs. staff vs. marketing, etc.)
+      - Top referrers leaderboard (customers and staff, by count and by LTV)
+      - Referral conversion rate (referred customers vs. total)
+      - Customer Acquisition Cost (CAC) by channel
+      - Referral trend over time (line chart)
+    - **Referral Reports:**
+      - Exportable CSV: all referrals with referrer details, referred customer, LTV
+      - Staff attribution report: customers brought in by each team member
+      - Customer referral report: customers who have referred others
+      - Marketing channel effectiveness: CAC and LTV by source
+  - **Referral Reward Workflow (Optional Enhancement):**
+    - **Automatic Reward Triggers:**
+      - When referred customer completes first paid service → issue reward to referrer
+      - Configurable reward structure (e.g., $50 credit, 10% discount on next service)
+      - Email notification to referrer: "Thanks for referring [Name]! You've earned [Reward]"
+    - **Reward Redemption:**
+      - Track reward balance per customer/staff member
+      - Apply credits during invoice creation in Billing
+      - Show available credits in Portal (customers) and Operations (staff)
+  - **UI Locations:**
+    - **Estimator:** "How did you hear about us?" section on quote form
+    - **Operations:** Referral section on customer profile (view and edit referral source)
+    - **Operations:** "Add Customer" modal includes referral tracking fields
+    - **Dashboard:** New "Referrals" tab with leaderboards, charts, reports
+    - **Portal:** "Refer a Friend" page with unique link, referral tracking, rewards balance
+    - **Billing:** Display customer's referral credits during payment (if reward system implemented)
+  - **Implementation Phases:**
+    - **Phase 1 (Week 1):** Database schema, migration to add referral fields to customers table
+    - **Phase 2 (Week 1):** Estimator integration - add "How did you hear about us?" to quote form
+    - **Phase 3 (Week 2):** Operations integration - add referral tracking to customer profile and creation
+    - **Phase 4 (Week 2):** Dashboard reporting - referral analytics widgets, leaderboards, source breakdown
+    - **Phase 5 (Week 3):** Portal "Refer a Friend" feature - unique links, tracking, rewards display
+    - **Phase 6 (Week 3 - Optional):** Automated referral reward system - triggers, notifications, redemption
+  - **Impact:**
+    - Identify most effective customer acquisition channels (double down on what works)
+    - Recognize and reward top referrers (customers and staff)
+    - Enable referral incentive programs (structured rewards for customer/staff referrals)
+    - Calculate accurate CAC by source (data-driven marketing decisions)
+    - Build referral culture (gamification with leaderboards)
+    - Understand word-of-mouth vs. paid marketing effectiveness
+    - Attribute revenue to specific team members or customers (who brings in most valuable clients?)
+  - **Dependencies:**
+    - Q1 User Accounts system (for staff referral attribution)
+    - Customer Portal (for "Refer a Friend" feature and reward display)
+    - Dashboard analytics infrastructure
+  - **Blocks:** Q2 Ownership & Attribution Tracking (referral data feeds into attribution system)
+  - **Priority:** Medium-High (Q1 2026 - foundational for customer acquisition understanding and incentive programs)
+  - **Estimated Effort:** 3-4 days (24-32 hours)
+    - Database schema & migration: 0.5 day
+    - Estimator & Operations integration: 1 day
+    - Dashboard reporting: 1 day
+    - Portal "Refer a Friend": 0.5-1 day
+    - Automated rewards (optional): 0.5 day
+    - Testing & documentation: 0.5 day
+  - **Success Metrics:**
+    - 90%+ of new customers have referral source captured
+    - 30%+ of customers come from referrals (customer or staff)
+    - Top 10 referrers identified within first month
+    - Referral program launches within 60 days (if reward system implemented)
+    - Accurate CAC calculated per acquisition channel
+  - **Questions for Decision:**
+    - Referral reward structure? (Proposed: $50 credit or 10% discount for referrer, 5% discount for referred customer)
+    - Reward eligibility? (Proposed: after referred customer completes first paid service)
+    - Staff referral rewards different from customer? (Proposed: yes, potentially cash bonus vs. service credit)
+    - Track failed referrals (people who inquired but didn't convert)? (Proposed: no, only successful conversions)
+    - Unique referral links for all customers or opt-in? (Proposed: all customers get link, feature in Portal)
+
+### Billing & Payment Operations
+- [ ] **Service Start Notifications & Safety Check-In System**
+  - **Dependencies:** User Accounts & Comprehensive Audit Logging System (needs user roles for technician identification)
+  - **Blocks:** None
+  - **Rationale:** Notify owner and team when technician starts work for operational awareness and safety. When technician clicks "Start Service" in Billing, automatically send text/email notification with service details. Provides safety check-in mechanism - if technician doesn't return/complete service within expected timeframe, team knows something may be wrong. Simple "Don't start the engines" communication to keep everyone informed.
+  - **Core Features:**
+    - **Automatic Notifications on "Start Service" Click:**
+      - Send SMS and email to owner immediately when "Start Service" button clicked
+      - Include: Technician name, customer name, boat name, service type, start time, location (if available)
+      - Optional: CC other team members based on notification preferences
+    - **Safety Check-In Tracking:**
+      - Track expected service duration based on service type and boat history
+      - Dashboard widget showing active services and elapsed time
+      - Visual alert if service exceeds expected duration (e.g., 2x average time)
+      - "Service Running Long" notifications (text/email) if no completion after threshold
+    - **Service Completion Notification:**
+      - Send notification when service marked complete ("Charge Customer" or "Log Only")
+      - Include: End time, total duration, services performed, payment status
+  - **Notification Content Examples:**
+    - **Start Service:** "Brian started diving service on [Boat Name] for [Customer Name] at 9:45 AM. Estimated duration: 2.5 hours."
+    - **Running Long:** "⚠️ Diving service on [Boat Name] started 3 hours ago (expected 2.5 hrs). Last check-in: 9:45 AM."
+    - **Service Complete:** "✅ Brian completed diving service on [Boat Name] at 12:30 PM. Duration: 2h 45m. Payment: $350 (charged)."
+  - **Database Schema:**
+    - Add to `service_logs`: `service_started_at: timestamp`, `expected_duration_hours: decimal`, `service_completed_at: timestamp`
+    - New `service_notifications` table: `{ service_log_id: uuid, notification_type: 'start'|'running_long'|'complete', sent_at: timestamp, recipients: text[], delivery_status: jsonb }`
+    - Update `business_settings` table: Add notification preferences (recipients, thresholds, enabled/disabled toggles)
+  - **Technical Implementation:**
+    - Edge function: `send-service-notification` (triggered by Billing "Start Service" button)
+    - SMS: Twilio API integration (or similar)
+    - Email: Resend API (already integrated)
+    - Background job: Check for long-running services every 15 minutes
+    - Settings UI: Configure notification recipients, duration thresholds, opt-in/opt-out per notification type
+  - **UI Locations:**
+    - **Billing/Completion:** No UI change needed - "Start Service" button triggers notification automatically
+    - **Dashboard:** New "Active Services" widget showing in-progress services with elapsed time
+    - **Settings Dashboard:** Notification preferences panel (recipients, thresholds, toggle on/off)
+    - **Operations:** Optional: Show "Service Started" indicator on customer/boat cards
+  - **Implementation Phases:**
+    - **Phase 1 (Week 1):** Database schema, notification infrastructure (edge function, Twilio setup)
+    - **Phase 2 (Week 1):** Integrate with Billing "Start Service" button, send start notifications
+    - **Phase 3 (Week 2):** Build "Active Services" dashboard widget, long-running detection
+    - **Phase 4 (Week 2):** Settings UI for notification preferences, completion notifications
+    - **Phase 5 (Week 2):** Testing (real-world service scenarios), documentation
+  - **Safety Benefits:**
+    - Team knows when technician is underwater/in potentially dangerous situation
+    - Automatic alert if service runs unusually long (potential emergency)
+    - Check-in mechanism without requiring manual action from technician
+    - Peace of mind for team and technician's family
+    - Can track technician location/last known activity if needed
+  - **Operational Benefits:**
+    - Owner immediately aware of when work starts (no need to ask "did you start yet?")
+    - Track service duration in real-time
+    - Better scheduling (know when technician will be free for next service)
+    - Historical data on actual vs. estimated service duration
+    - Improved communication with customers (can inform them when technician started)
+  - **Impact:**
+    - Enhanced safety for technicians working alone (especially divers)
+    - Automatic operational awareness for owner/team
+    - Reduced need for check-in calls/texts
+    - Early warning system for potential problems
+    - Professional communication ("work has started" updates)
+    - Foundation for future features (GPS tracking, emergency alerts, time tracking)
+  - **Dependencies:**
+    - Billing/Completion service (✅ exists)
+    - Resend email integration (✅ exists)
+    - Twilio SMS integration (new - requires account setup)
+    - Settings Dashboard for notification preferences (can be minimal MVP first)
+  - **Blocks:** None (independent feature)
+  - **Priority:** High (Q1 2026 - safety and operational awareness)
+  - **Estimated Effort:** 2-3 days (16-24 hours)
+    - Notification infrastructure: 0.5 day
+    - Billing integration: 0.5 day
+    - Dashboard widget: 0.5 day
+    - Settings UI: 0.5 day
+    - Testing & Twilio setup: 0.5-1 day
+  - **Success Metrics:**
+    - 100% of services trigger start notification
+    - 95%+ notification delivery success rate (SMS + email)
+    - Zero missed long-running service alerts
+    - Owner reports improved awareness and peace of mind
+    - Team uses "Active Services" widget daily
+  - **Questions for Decision:**
+    - SMS provider preference? (Proposed: Twilio - industry standard, reliable)
+    - Long-running service threshold? (Proposed: 2x expected duration OR 4 hours, whichever is shorter)
+    - Who receives notifications by default? (Proposed: Owner always, other team members opt-in)
+    - Include GPS location in notifications? (Proposed: yes if available from mobile device)
+    - Emergency escalation if no completion after X hours? (Proposed: manual for now, automated later)
+
+- [ ] **Monthly Payment Method Validation & Pre-Service Workflow**
+  - **Dependencies:** None
+  - **Blocks:** None
+  - **Rationale:** Proactively verify payment methods are valid before providing service to reduce failed payments, chargebacks, and collections issues. Catch expired/invalid cards before service is performed, giving customers time to update payment info. Improves cash flow and reduces administrative burden of chasing failed payments.
+  - **Investigation Required:** Research Stripe API capabilities for payment method validation
+    - Can Stripe ping/validate payment methods without charging? (likely: SetupIntent with $0 authorization)
+    - Does validation trigger customer notifications or affect their account?
+    - Rate limits and costs for monthly validation of all customers?
+    - How to handle validation failures (expired cards, insufficient funds, etc.)?
+  - **Proposed Workflow:**
+    - **Monthly Automated Validation (1st of each month):**
+      - Query Stripe for all customers with saved payment methods
+      - Ping each payment method to verify validity (likely using SetupIntent or card verification)
+      - Log validation results (valid/invalid/expired) to database
+      - Generate report of invalid payment methods
+    - **Pre-Service Check (Operations workflow):**
+      - Before scheduling service, check customer's payment method status
+      - Display warning indicator if payment method invalid/expired (visual alert in UI)
+      - Optionally block scheduling until payment method updated
+      - Send automated notification to customer requesting payment update
+    - **Customer Notification Flow:**
+      - Email customers with invalid payment methods (friendly reminder)
+      - Provide direct link to Portal for updating payment info
+      - Escalate if payment not updated within 7 days (second reminder)
+      - Operations dashboard shows customers with payment issues
+  - **Database Schema:**
+    - New `payment_method_validations` table: `{ customer_id: uuid, stripe_payment_method_id: text, validation_date: timestamp, status: 'valid'|'invalid'|'expired'|'declined', error_details: text }`
+    - Add `last_payment_validation` and `payment_method_status` to `customers` table
+  - **UI Locations:**
+    - **Operations:** Visual indicator on customer cards/scheduling view (red badge for invalid payment)
+    - **Dashboard:** Report widget showing customers with payment issues
+    - **Billing/Completion:** Warning when attempting to charge invalid payment method
+    - **Portal:** Prompt customers to update payment method if validation failed
+  - **Technical Implementation:**
+    - Edge function: `validate-payment-methods` (runs monthly via cron job)
+    - Stripe API integration: SetupIntent or card verification endpoint
+    - Notification service: Send emails via Resend for failed validations
+    - Supabase cron job or Vercel cron to trigger monthly validation
+  - **Implementation Phases:**
+    - **Phase 1 (Week 1):** Research Stripe API - determine best validation method, test in Stripe test mode, document findings
+    - **Phase 2 (Week 1):** Database schema, validation edge function, logging infrastructure
+    - **Phase 3 (Week 2):** Build monthly validation cron job, test with real Stripe data
+    - **Phase 4 (Week 2):** Integrate pre-service check into Operations workflow, add UI indicators
+    - **Phase 5 (Week 3):** Customer notification system, Portal integration, automated reminder emails
+    - **Phase 6 (Week 3):** Dashboard reporting, testing, documentation
+  - **Impact:**
+    - Reduce failed payment attempts by catching expired/invalid cards proactively
+    - Improve cash flow (fewer declined charges, faster collections)
+    - Better customer experience (proactive notification vs. failed charge)
+    - Reduce administrative overhead (less time chasing failed payments)
+    - Prevent service delivery to customers with invalid payment methods
+    - Build trust with proactive communication about payment issues
+  - **Dependencies:**
+    - Stripe integration (✅ already exists)
+    - Customer Portal (✅ completed Q4 2025 - customers can update payment methods)
+    - Email notification system via Resend (✅ exists)
+  - **Blocks:** None (independent feature)
+  - **Priority:** Medium-High (Q1 2026 - after critical user accounts work, improves cash flow)
+  - **Estimated Effort:** 3-4 days (24-32 hours)
+    - Stripe API research: 0.5 day
+    - Database & edge function: 1 day
+    - Operations integration: 0.5 day
+    - Customer notifications: 1 day
+    - Dashboard reporting & testing: 0.5-1 day
+  - **Success Metrics:**
+    - 90%+ payment methods validated successfully each month
+    - 50%+ reduction in failed payment attempts
+    - 80%+ of customers with invalid payment methods update within 7 days
+    - Zero services provided to customers with invalid payment methods (if blocking enabled)
+  - **Questions for Decision:**
+    - Should we block scheduling if payment method is invalid? (Proposed: warning only, not hard block)
+    - Grace period for expired cards? (Proposed: allow scheduling within 7 days of expiration with warning)
+    - Validation frequency? (Proposed: monthly, can adjust based on findings)
+    - Customer communication tone? (Proposed: friendly reminder, not punitive)
+
+- [ ] **Customer Payment Method Migration Campaign**
+  - **Dependencies:** Customer Portal (completed Q4 2025), Monthly Payment Method Validation (optional - can run independently)
+  - **Blocks:** None
+  - **Rationale:** Many existing customers with active service plans (monthly/quarterly schedules) may not have payment methods on file in the new Stripe system. Need to identify these customers and proactively reach out with a streamlined workflow to capture payment information before their next service. Improves cash flow, reduces failed payment scenarios, and migrates customers to the modern payment system with minimal friction.
+  - **Scope:** Identify, communicate with, and convert customers with active services but missing payment methods
+    - **Phase 1: Identification & Analysis**
+      - Query database to find customers with active service plans (recurring schedules) but no Stripe payment method
+      - Segment by service type, plan frequency, customer lifetime value
+      - Generate prioritized outreach list (high-value customers first)
+      - Calculate potential revenue at risk from missing payment methods
+    - **Phase 2: Technical Implementation (Choose One or Both Approaches)**
+      - **Option A: Estimator Checkout with Pre-filled Data**
+        - Create unique checkout links per customer/boat with pre-populated data
+        - Auto-fill: customer name, email, phone, boat details, current service plan
+        - Streamlined flow: customer just needs to add payment method and confirm
+        - Track conversion rate per link (who completed payment setup)
+      - **Option B: Portal Payment Management Page**
+        - Build "Payment Methods" section in Portal account settings
+        - Allow customers to add/update/remove payment methods
+        - Show current payment method status (missing, valid, expired)
+        - Display upcoming service schedule requiring payment
+        - Send customers directly to Portal payment page via link
+      - **Recommendation:** Implement both - Estimator checkout for quick setup, Portal for ongoing management
+    - **Phase 3: Communication Strategy & Email Campaign**
+      - **Email Content:**
+        - Friendly tone: "We've upgraded our payment system..."
+        - Highlight benefits of new system: Portal access, online invoices, service history, instant receipts
+        - Emphasize new features: View service history, request additional services, track upcoming appointments
+        - Include direct link to payment setup (Estimator checkout OR Portal payment page)
+        - Provide clear call-to-action: "Update Your Payment Method"
+        - Offer support: "Need help? Reply to this email or call [phone]"
+      - **Email Sequence:**
+        - Email 1: Initial request with feature highlights (send to all identified customers)
+        - Email 2: Follow-up reminder after 7 days (if not completed)
+        - Email 3: Final reminder after 14 days (with urgency: "Update before your next service on [date]")
+        - Optional: Phone call for high-value customers who don't respond
+      - **Tracking & Metrics:**
+        - Track email open rates, click-through rates, conversion rates
+        - Monitor payment method additions via unique links
+        - Measure response time (how quickly customers update after email)
+        - Flag customers who don't respond for manual outreach
+  - **Database Queries:**
+    - **Identify Customers Missing Payment Methods:**
+      ```sql
+      SELECT c.id, c.customer_name, c.email, c.phone,
+             b.boat_name, so.service_type, so.plan_interval
+      FROM customers c
+      JOIN boats b ON c.id = b.customer_id
+      JOIN service_orders so ON b.id = so.boat_id
+      WHERE so.status = 'active'
+        AND so.plan_interval IN ('monthly', 'quarterly')
+        AND (c.stripe_customer_id IS NULL
+             OR NOT EXISTS (
+               SELECT 1 FROM payment_methods pm
+               WHERE pm.customer_id = c.id AND pm.status = 'active'
+             ))
+      ORDER BY c.customer_lifetime_value DESC;
+      ```
+    - **Calculate Revenue at Risk:**
+      ```sql
+      SELECT COUNT(*) as customer_count,
+             SUM(so.plan_price) as monthly_revenue_at_risk
+      FROM customers c
+      JOIN boats b ON c.id = b.customer_id
+      JOIN service_orders so ON b.id = so.boat_id
+      WHERE so.status = 'active'
+        AND (c.stripe_customer_id IS NULL OR ...);
+      ```
+  - **Email Template (Draft):**
+    ```
+    Subject: Action Required: Update Your Payment Method for [Service Type]
+
+    Hi [Customer Name],
+
+    We've recently upgraded our payment system to provide you with better service and new features!
+
+    **What's New:**
+    - Customer Portal: View your service history, invoices, and upcoming appointments anytime
+    - Instant Receipts: Get email receipts immediately after each service
+    - Service Requests: Request additional services or schedule changes online
+    - Secure Payments: Industry-standard encryption with Stripe
+
+    **Action Needed:**
+    To continue your [monthly/quarterly] [service type] service, please update your payment method:
+
+    👉 [Update Payment Method - Direct Link]
+
+    We've pre-filled your boat and service details to make this quick and easy (2 minutes max).
+
+    **Your Current Service Plan:**
+    - Boat: [Boat Name]
+    - Service: [Service Type]
+    - Schedule: [Plan Interval]
+    - Next Service: [Next Scheduled Date]
+
+    **Questions?** Reply to this email or call us at [phone number]. We're here to help!
+
+    Thank you for being a valued customer!
+
+    [Your Name]
+    [Company Name]
+    ```
+  - **Implementation Phases:**
+    - **Phase 1 (Day 1):** Run database query, generate customer list with missing payment methods, analyze segments
+    - **Phase 2 (Day 2):** Build Estimator pre-filled checkout link generator OR Portal payment management page (choose approach)
+    - **Phase 3 (Day 3):** Draft email template, configure email campaign in Resend, set up tracking links
+    - **Phase 4 (Day 4):** Send initial email batch (test with 10-20 customers first), monitor results
+    - **Phase 5 (Week 2):** Send follow-up emails (7-day and 14-day reminders), track conversion rates
+    - **Phase 6 (Week 3):** Manual outreach for high-value non-responders, document lessons learned
+  - **UI Locations:**
+    - **Estimator:** Pre-filled checkout link (accessible via unique URL per customer)
+    - **Portal:** New "Payment Methods" page in account settings (if building Portal approach)
+    - **Dashboard:** Campaign tracking widget (emails sent, opened, converted)
+    - **Operations:** Flag customers with missing payment methods in customer profile view
+  - **Impact:**
+    - Migrate existing customers to new payment system proactively
+    - Reduce failed payment scenarios (customer already has method on file)
+    - Improve cash flow (fewer declined charges, faster collections)
+    - Enhance customer experience (introduce Portal and new features)
+    - Build foundation for automated recurring billing
+    - Reduce manual payment collection effort
+  - **Dependencies:**
+    - Customer Portal (✅ completed Q4 2025 - if using Portal approach)
+    - Stripe integration (✅ exists)
+    - Email system via Resend (✅ exists)
+    - Database query access (✅ available)
+  - **Blocks:** None (independent campaign)
+  - **Priority:** Medium-High (Q1 2026 - important for cash flow and system migration)
+  - **Estimated Effort:** 3-4 days (24-32 hours) spread over 3 weeks
+    - Database analysis & customer segmentation: 0.5 day
+    - Technical implementation (Estimator links OR Portal page): 1-1.5 days
+    - Email template & campaign setup: 0.5 day
+    - Campaign execution & monitoring: 1 day
+    - Follow-up emails & manual outreach: 0.5-1 day
+  - **Success Metrics:**
+    - 80%+ of identified customers contacted within first week
+    - 60%+ email open rate
+    - 30%+ click-through rate (customers clicking payment link)
+    - 50%+ conversion rate (customers adding payment method)
+    - $X monthly revenue secured from payment method additions
+    - 90%+ of high-value customers converted within 3 weeks
+  - **Questions for Decision:**
+    - Which technical approach to prioritize? (Proposed: Start with Estimator pre-filled checkout for speed, add Portal payment page in Phase 2)
+    - Should we offer incentive for updating? (Proposed: highlight new features as "reward", no financial discount)
+    - Hard deadline for payment method or flexible? (Proposed: soft deadline - "before your next service", not blocking)
+    - Automatically pause service for customers who don't update? (Proposed: no - manual review and phone call first)
+    - Include link to video tutorial on using Portal? (Proposed: yes, 2-minute walkthrough video)
+
+### Operations Improvements
+- [x] **Historical Service Log Display with Dual Data Source** ✅
+  - **Completed:** 2025-11-05
+  - **Rationale:** Display 1,191 historical Notion service logs alongside new app-created logs with visual distinction to preserve data integrity
+  - **Features Implemented:**
+    - Visual styling for historical Notion data (gray background, gray border, monospace font)
+    - "(Historical)" badge on Notion service logs
+    - Edit/delete buttons hidden for historical data (read-only)
+    - Customer name display from joined customers table
+    - JSON string parsing for Notion propeller and anode data
+    - Handles dual data structures: Notion format (overall_condition) vs app format (location-based)
+  - **Technical Implementation:**
+    - Added `data_source` column to service_logs table (notion | sailorskills | manual)
+    - Updated BoatDetailPanel.js query to include `data_source` field
+    - Joined customers table for proper name display
+    - Parse JSONB strings for Notion propellers/anodes before rendering
+    - Conditional rendering based on data_source value
+  - **Impact:** ✅ 2.8 years of service history (1,191 records) now visible in Operations UI alongside new logs, maintaining clear distinction between historical import and app-created data
+  - **Location:** Operations service → Boats tab → Boat detail panel → Service History Timeline
+  - **Documentation:** SESSION_HANDOFF_2025-11-05_DEBUGGING.md
+
+- [x] **Service Forecast Bulk Scheduling Modal** ✅
+  - **Completed:** 2025-11-05
+  - **Rationale:** Enable bulk scheduling of multiple boats from forecast view with single modal form, replacing navigation-based workflow
+  - **Problem:** Bulk schedule button ("Schedule X Boats") navigated to dashboard instead of opening scheduling modal
+  - **Root Cause:** `scheduleSelectedBoats()` function used old `window.location.href` navigation pattern while single boat Schedule button had been updated to modal approach
+  - **Features Implemented:**
+    - Modal-based bulk scheduling for multiple boats simultaneously
+    - Shows list of all selected boats in modal for confirmation
+    - Single date/service type/amount applied to all boats
+    - Real-time total amount calculation (per boat amount × boat count)
+    - Creates service orders for all boats in parallel
+    - Updates `service_schedules.scheduled_date` for all boats to keep forecast in sync
+    - Success toast with boat count confirmation
+    - Auto-unchecks all checkboxes after successful scheduling
+    - Refreshes forecast to show updated scheduled dates
+  - **Technical Implementation:**
+    - Replaced navigation with `openFormModal()` consistent with single boat pattern
+    - Uses `Promise.all()` to create service orders in parallel for performance
+    - Generates unique order numbers per boat: `ORD-{timestamp}-{boat_id}`
+    - Handles errors gracefully without losing partial progress
+    - Maintains form state until successful completion
+  - **Impact:** ✅ Streamlined workflow for scheduling multiple boats - team can now schedule 5-10 boats to same date in one operation instead of individual modals. Matches single boat schedule modal pattern from 2025-11-05 session.
+  - **Location:** Operations service → Forecast view → Select boats → "Schedule X Boats" button
+  - **Commit:** e7fd666 (fix(forecast): open bulk schedule modal instead of navigation)
+  - **Documentation:** This roadmap entry
+
+- [x] **Customer Portal - Separated into Independent Service**
+  - **Completed:** 2025-10-25 (portal separation complete)
+  - **Status:** Portal is now a separate service at https://portal.sailorskills.com
+  - **Repository:** https://github.com/standardhuman/sailorskills-portal
+  - **Key Features Implemented:** Multi-boat access, dual auth (magic link + password), service history, invoices, messages, service requests, account management
+  - **Impact:** ✅ Complete separation achieved, independent deployments, improved security
+  - **Next Steps:** Enhance portal features (notifications, better mobile UX, dashboard widgets)
+
+- [ ] **Sailor Skills Community Forum & Knowledge Base**
+  - **Dependencies:** Customer Portal (completed Q4 2025 - for authentication integration)
+  - **Blocks:** None
+  - **Rationale:** Build engaged community of boat owners to share knowledge, reduce support burden through peer-to-peer help, increase customer retention through community engagement, gather product feedback, and establish Sailor Skills as thought leader in marine maintenance. Forums create "stickiness" - customers engaged in community are less likely to churn and more likely to refer others.
+  - **Scope:** Customer community platform with discussion forums, knowledge base, and member profiles
+    - **Core Forum Features:**
+      - Discussion categories: Boat Maintenance, Diving Tips, Product Recommendations, Bottom Paint, Anodes, Marina Recommendations, DIY Projects, Ask the Experts
+      - Thread creation, replies, nested comments
+      - Upvoting/downvoting for quality content
+      - Best answer selection for Q&A threads
+      - Rich text editor with image uploads
+      - Search across all discussions (keywords, tags, categories)
+      - Notifications for replies, mentions, followed threads
+      - Private messaging between members (optional)
+    - **Knowledge Base Integration:**
+      - Curated articles from best forum discussions
+      - Staff-authored guides (hull cleaning best practices, anode replacement, seasonal maintenance)
+      - Video tutorials embedded from Video service
+      - Searchable documentation library
+      - "Related Discussions" links from articles to forum threads
+    - **Member Profiles & Reputation:**
+      - User profiles linked to Portal accounts (seamless authentication)
+      - Display boats owned (opt-in visibility)
+      - Reputation points system (earned through helpful posts, best answers)
+      - Badges: Active Member, Expert Contributor, Helpful, etc.
+      - Activity feed: recent posts, comments, likes
+      - Optional bio and profile photo
+    - **Moderation & Safety:**
+      - Staff moderation tools (approve/delete posts, ban users, pin announcements)
+      - Community guidelines and code of conduct
+      - Report/flag system for inappropriate content
+      - Auto-moderation: spam detection, profanity filter
+      - Moderator roles (staff can designate trusted community members)
+    - **Technical Implementation Options:**
+      - **Option A: Third-Party Platform (Faster Launch)**
+        - Use Discourse (open-source, self-hosted or cloud)
+        - SSO integration with Portal authentication
+        - Custom branding to match Sailor Skills design
+        - Lower development effort (2-3 weeks setup)
+        - Proven features, active community, regular updates
+        - Cost: Free (self-hosted) or ~$50-100/month (cloud hosting)
+      - **Option B: Custom Build (Full Control)**
+        - Build from scratch with React + Supabase
+        - Full integration with existing services
+        - Custom features tailored to marine industry
+        - Higher development effort (6-8 weeks)
+        - Complete design and feature control
+        - No ongoing platform costs (only hosting)
+      - **Recommendation:** Start with Discourse (Option A) for fast launch, migrate to custom if needed after validating community engagement
+  - **Database Schema (if custom build):**
+    - New tables: `forum_categories`, `forum_threads`, `forum_posts`, `forum_reactions`, `forum_subscriptions`, `knowledge_base_articles`, `user_reputation`
+    - Link to existing `customers` table for authentication
+    - Full-text search indexes on posts and articles
+  - **UI/UX Locations:**
+    - **Standalone Service:** `community.sailorskills.com` (new subdomain)
+    - **Portal Integration:** "Community" navigation link from Portal
+    - **Marketing Site:** Link from main site footer + "Community" page showcasing benefits
+    - **Email Digests:** Weekly digest of popular discussions (opt-in)
+  - **Implementation Phases:**
+    - **Phase 1 (Week 1-2):** Platform selection, Discourse setup (or custom database schema), SSO integration with Portal
+    - **Phase 2 (Week 2-3):** Category structure, initial content seeding, moderation tools configuration
+    - **Phase 3 (Week 3-4):** Knowledge base setup, article migration from existing docs, video embedding
+    - **Phase 4 (Week 4):** Member profiles, reputation system, notification preferences
+    - **Phase 5 (Week 4-5):** Beta launch to 20-30 engaged customers, gather feedback, iterate
+    - **Phase 6 (Week 5-6):** Public launch, marketing campaign, email invitations to all customers
+  - **Content Strategy:**
+    - **Seed Content (Launch Week):**
+      - Create 10-15 initial threads covering common questions (hull cleaning frequency, best bottom paint, anode lifespan)
+      - Invite beta users to share their boat maintenance stories
+      - Staff post weekly "Ask Me Anything" threads
+    - **Ongoing Content:**
+      - Weekly discussion prompts from staff ("What's your pre-hurricane checklist?")
+      - Highlight customer success stories (before/after photos)
+      - Seasonal topics (spring commissioning, winter layup)
+      - Product spotlight threads (new anode types, eco-friendly paint)
+    - **Knowledge Base Articles:**
+      - Convert existing documentation to articles (12-15 guides)
+      - Create "Getting Started" series for new boat owners
+      - Embed video tutorials from Video service
+      - Update articles quarterly based on forum discussions
+  - **Community Management:**
+    - **Moderation Strategy:**
+      - Owner + 1-2 staff members as initial moderators
+      - Establish community guidelines (respectful, helpful, no spam/sales)
+      - Response time goal: 24 hours for flagged content, 48 hours for questions
+      - Identify and invite active/helpful members as volunteer moderators (after 3 months)
+    - **Engagement Tactics:**
+      - Weekly featured thread (highlight best discussion in email digest)
+      - Monthly "Member Spotlight" showcasing active contributor
+      - Contests/giveaways (best maintenance tip, photo contest)
+      - Seasonal events (spring cleaning tips, hurricane prep)
+  - **Impact:**
+    - **Customer Retention:** Engaged community members have 30-50% lower churn (industry benchmarks)
+    - **Support Efficiency:** Reduce support tickets by 20-30% as customers help each other
+    - **Brand Loyalty:** Build emotional connection beyond transactional service relationship
+    - **Organic Marketing:** Active forum ranks in Google search, drives new customer discovery
+    - **Product Feedback:** Direct pipeline for feature requests and improvement ideas
+    - **Referrals:** Community members become brand advocates, refer friends in their marina
+    - **Content Marketing:** User-generated content for social media, newsletters, marketing site
+  - **Success Metrics:**
+    - **Launch Targets (3 months):**
+      - 100+ registered members (20%+ of customer base)
+      - 200+ threads created
+      - 500+ posts/comments
+      - 30+ active weekly users
+    - **6-Month Targets:**
+      - 200+ registered members (40%+ of customer base)
+      - 50+ new threads per month
+      - 200+ posts per month
+      - 100+ active weekly users
+      - 20+ knowledge base articles published
+    - **Engagement Metrics:**
+      - Average session duration: 5+ minutes
+      - Return visit rate: 40%+ within 30 days
+      - Post reply rate: 60%+ of threads get at least 1 reply
+      - Staff response time: <24 hours for questions
+  - **Dependencies:**
+    - Customer Portal authentication (✅ completed Q4 2025)
+    - Email notification system via Resend (✅ exists)
+    - Video service (for embedding tutorials - ✅ exists)
+  - **Blocks:** None (independent feature, can run in parallel with other initiatives)
+  - **Priority:** Medium (Q1 2026 - valuable for retention but not critical infrastructure)
+  - **Estimated Effort:** 5-6 weeks (40-48 hours)
+    - **Discourse Setup (Option A):** 2-3 weeks
+      - Platform setup & hosting: 0.5 week
+      - SSO integration: 0.5 week
+      - Custom branding & configuration: 0.5 week
+      - Content seeding & moderation setup: 0.5 week
+      - Beta testing & launch: 0.5 week
+    - **Custom Build (Option B):** 6-8 weeks
+      - Database schema & backend: 2 weeks
+      - Forum UI (threads, posts, comments): 2 weeks
+      - Knowledge base & search: 1 week
+      - Profiles & reputation system: 1 week
+      - Moderation tools: 1 week
+      - Testing & launch: 1 week
+  - **Questions for Decision:**
+    - Discourse vs. custom build? (Proposed: Discourse for faster launch, proven platform)
+    - Allow public (non-customer) read access or members-only? (Proposed: members-only for exclusivity, can open later)
+    - Integrate private messaging between members? (Proposed: yes, builds community connections)
+    - Gamification elements (reputation points, badges)? (Proposed: yes, drives engagement)
+    - Staff time commitment for moderation? (Proposed: 5-10 hours/week initially, scale as needed)
+    - Beta group size? (Proposed: 20-30 most engaged customers, invite in phases)
+    - Offer incentives for early adopters? (Proposed: yes - beta testers get exclusive "Founding Member" badge)
+
+- [ ] **Scheduling Enhancements - Time-Slot Based Scheduling & Drag-and-Drop**
+  - **Dependencies:** None
+  - **Blocks:** None
+  - **Rationale:** Enhance scheduling system with time-slot based scheduling (using historical service duration data), drag-and-drop rescheduling, and multiple calendar view modes (Day/Week/Month) to improve operational efficiency and scheduling accuracy. Currently scheduling is date-only without time awareness or visual rescheduling capabilities.
+  - **Full Proposal:** See `/sailorskills-operations/docs/roadmap-submission-scheduling-enhancements.md`
+  - **Features:**
+    - **Time-Slot Based Scheduling:**
+      - Calculate average service duration per boat from `service_logs.total_hours`
+      - Display time slots (e.g., "9:00 AM - 11:30 AM") instead of just dates
+      - Configurable business hours (default: 8 AM - 6 PM)
+      - Show remaining capacity per time slot
+      - Handle boats with no service history (configurable default duration)
+    - **Drag & Drop Rescheduling:**
+      - Drag scheduled services between dates and time slots
+      - Visual feedback during drag (ghost element, valid/invalid drop zones)
+      - Real-time conflict detection for overlapping time slots
+      - Undo capability for accidental moves
+      - Touch support for mobile/tablet devices
+      - Accessibility: keyboard navigation, screen reader support
+    - **Multiple View Modes:**
+      - **Day View:** Hourly timeline (8 AM - 6 PM, 30-min increments) - best for daily dispatch planning
+      - **Week View:** 7-column grid with time slots - best for weekly route planning
+      - **Month View:** Enhanced calendar grid with time blocks - best for long-term planning
+      - View switcher UI: [Today] [Day] [Week] [Month]
+      - Date picker for navigation, persistent view preference
+  - **Database Schema Changes:**
+    - Add `scheduled_time TIME` and `estimated_duration_hours DECIMAL(4,2)` to `service_orders` table
+    - Create `scheduling_config` table: business hours, default duration, max concurrent services
+    - Migration for existing scheduled services
+  - **Technical Implementation:**
+    - Service duration calculation: `SELECT boat_id, AVG(total_hours) FROM service_logs GROUP BY boat_id`
+    - Drag & Drop library: `@dnd-kit/core` (modern, accessible) or native HTML5 Drag & Drop
+    - Date/Time library: `date-fns` (lightweight)
+    - Conflict detection logic, optimistic UI updates with rollback
+  - **Implementation Phases:**
+    - **Phase 1 (1 week):** Foundation - database schema, duration calculation, basic time slot UI
+    - **Phase 2 (1 week):** View modes - Day/Week view implementation, view switcher, navigation
+    - **Phase 3 (1 week):** Drag & Drop - library integration, conflict detection, undo/redo, accessibility
+    - **Phase 4 (ongoing):** Polish - animations, edge cases, performance, user testing
+  - **Impact:**
+    - Reduce scheduling conflicts by 80%
+    - Reduce time to schedule services by 50%
+    - Better capacity planning with time-aware scheduling
+    - Faster rescheduling with drag-and-drop
+    - Improved mobile/tablet scheduling experience for field use
+  - **Dependencies:** Existing `service_logs` table with `total_hours` (✅ exists)
+  - **Priority:** High (Q1 2026 - critical workflow enhancement)
+  - **Estimated Effort:** 2-3 weeks (large)
+  - **Success Metrics:**
+    - 90%+ adoption of new views within 2 weeks
+    - 80% reduction in scheduling conflicts
+    - 30%+ drag & drop operations from mobile devices
+  - **Questions for Review:**
+    - Should we support multi-day service windows?
+    - Default service duration for boats with no history? (proposed: 2.5 hours)
+    - Allow overlapping time slots for multiple technicians?
+    - Team/technician assignment in Phase 1 or defer?
+    - Include Google Calendar sync in this initiative?
+
+- [ ] **Internal Admin Design System Modernization**
+  - **Dependencies:** None
+  - **Blocks:** None
+  - **Rationale:** Unify visual design across internal admin services (Dashboard, Operations, Inventory, Completion/Billing, Video, Booking) with modern, polished aesthetic from Billing. Separate internal admin UX from customer-facing Estimator brand. Improve daily experience for team workflows.
+  - **Scope:** Internal services only (excludes Estimator, Site)
+  - **Visual Updates:**
+    - **Border Radius:** Sharp corners (0px) → Rounded (4-12px scale)
+    - **Color Palette:** Add purple accent (#667eea) + gradients for modern feel
+    - **Shadows:** Minimal flat → Stronger depth (cards, modals, nav)
+    - **Interactive States:** Add card elevation on hover, gradient nav accents
+    - **Three-Tier Nav:** Keep structure, apply visual polish (rounded active states, gradient backgrounds)
+  - **Technical Approach:**
+    - Phase 1 (Week 1): Update `sailorskills-shared/src/ui/design-tokens.css` + `styles.css`
+    - Phase 2 (Week 1): Pilot implementation on Dashboard, test thoroughly
+    - Phase 3 (Week 2): Roll out to Operations → Inventory → Completion
+    - Phase 4 (Week 3): Complete Video → Booking, final polish + documentation
+  - **Component Updates:**
+    - Buttons: Rounded corners, keep brightness hover
+    - Cards: Rounded + hover lift effect (translateY + shadow)
+    - Modals: Rounded, stronger shadows
+    - Forms: Rounded inputs, better focus states
+    - Navigation (all 3 tiers): Rounded active states, gradient accents
+    - Badges: Add gradient variant option
+    - New Shared components: Extract Billing's condition sliders, card patterns
+  - **Impact:** Unified, modern, delightful UX across all internal tools. Clearer separation between internal admin (modern/polished) and customer acquisition (professional/minimal). Improved daily experience for team with consistent, pleasant interface.
+  - **Dependencies:** None (self-contained design system update)
+  - **Priority:** High (Q1 2026 - foundational improvement)
+  - **Estimated Effort:** 24-35 hours over 3 weeks
+    - Shared updates: 6-9 hours
+    - Dashboard pilot: 3-4 hours
+    - 5 services rollout: 10-15 hours
+    - Testing/polish: 5-7 hours
+  - **Rollout Strategy:** Controlled pilot (Dashboard first) reduces risk, allows refinement before full expansion
+  - **Deliverables:**
+    - Updated Shared design tokens with purple palette, radius scale, stronger shadows, gradients
+    - Modernized Shared component library (buttons, cards, modals, forms, nav)
+    - All 6 internal services using consistent modern styling
+    - Visual regression test suite (Playwright screenshots)
+    - Design system documentation
+
+- [ ] **Admin Settings & Configuration Panels**
+  - **Dependencies:** Customer Portal (completed Q4 2025)
+  - **Blocks:** None
+  - **Rationale:** Need centralized control over business operations: email notifications, pricing variables, and customer-facing content. Currently these are hardcoded or require code changes.
+  - **Architecture:** Distributed approach - each service manages its own settings panel to maintain service autonomy
+  - **Features by Service:**
+    - **Estimator Settings:**
+      - Pricing variables panel (anode margin %, service base prices, surcharge rates)
+      - Labor rate configuration
+      - Tax/fee settings
+    - **Operations Settings:**
+      - Email toggles (service completion notifications, order confirmations)
+      - Customer portal format/content settings (branding, welcome text, feature visibility)
+      - Default service templates
+    - **Completion Settings:**
+      - Email toggles (payment receipts, invoice notifications)
+      - Email content configuration (footer text, payment terms)
+      - Invoice formatting options
+    - **Booking Settings:**
+      - Email toggles (booking confirmations, reminders, cancellations)
+      - Booking policy text customization
+  - **Technical Implementation:**
+    - New `business_settings` table in Supabase (JSONB for flexibility)
+    - Settings structure: `{ service: string, category: string, settings: jsonb }`
+    - Edge function for settings validation and defaults
+    - React settings panels with form validation
+  - **Impact:** Eliminates need for code deployments to adjust pricing, email behavior, or customer-facing content. Enables quick business process changes without developer intervention.
+  - **Dependencies:** Customer Portal implementation (portal must exist before format settings can be configured)
+  - **Priority:** Medium (Q1 2026 - after customer portal)
+  - **Estimated Effort:** 3-4 days (1 day planning/database, 2-3 days implementing panels across services)
+
+- [ ] **AI-Powered Scheduling Assistant from Email/iMessage**
+  - **Dependencies:** User Accounts (for assignment), Scheduling system
+  - **Blocks:** None
+  - **Rationale:** Automate scheduling workflow by using AI to scan Gmail and iMessage for client scheduling requests, understand natural language preferences, and propose schedule dates in Operations. Reduces manual effort of reading messages, interpreting requests, and manually creating schedule entries. Leverages Claude AI for message understanding and intent extraction.
+  - **Core Features:**
+    - **Message Scanning & Monitoring:**
+      - Connect to Gmail via Google Gmail API (OAuth authentication)
+      - Connect to iMessage via macOS AppleScript or Messages API (if available)
+      - Scan for messages containing scheduling-related keywords (hull cleaning, diving, service, appointment, schedule, etc.)
+      - Filter by sender (only existing customers, or learn new contacts)
+      - Real-time monitoring with periodic checks (e.g., every 15 minutes)
+    - **AI Message Understanding (Claude API):**
+      - Pass message content to Claude API with scheduling extraction prompt
+      - Extract key information:
+        - Customer identity (name, email, phone)
+        - Service type requested (hull cleaning, diving, pressure washing, etc.)
+        - Preferred date/time (explicit: "next Tuesday", implicit: "sometime next week")
+        - Urgency level (ASAP, flexible, specific deadline)
+        - Special requirements or notes
+        - Boat name (if mentioned)
+      - Handle ambiguous requests (multiple possible interpretations)
+      - Detect follow-up messages (referencing previous conversation)
+    - **Customer Matching:**
+      - Match sender to existing customer in database (email, phone, name)
+      - If unknown sender, create "potential customer" entry requiring review
+      - Link to correct boat if customer has multiple boats
+      - Flag if customer not found for manual review
+    - **Proposed Schedule Creation:**
+      - Generate proposed schedule entry in Operations "Needs Scheduling" queue
+      - Populate fields: customer, boat, service type, preferred date range, priority, notes
+      - Include original message text for context
+      - Tag as "AI-proposed" for review before confirmation
+      - Calculate suggested date based on:
+        - Customer preference
+        - Current schedule availability
+        - Historical service frequency for this customer/boat
+        - Service duration estimates
+    - **Review & Approval Workflow:**
+      - Create dedicated "AI Scheduling Suggestions" inbox in Operations
+      - Show proposed entries with confidence score (high/medium/low)
+      - Display original message alongside proposed schedule
+      - Actions: "Approve & Schedule", "Edit & Schedule", "Reject", "Mark as Spam"
+      - One-click approval adds to calendar, sends confirmation to customer
+      - Track accuracy over time (approved vs. rejected suggestions)
+  - **Technical Implementation:**
+    - **Gmail Integration:**
+      - Google Gmail API with OAuth 2.0
+      - Watch/subscribe to inbox for new messages (push notifications)
+      - Search API for historical message scanning
+      - Label processed messages to avoid duplicates
+    - **iMessage Integration:**
+      - macOS Messages app via AppleScript (if running on Mac)
+      - Alternative: Use third-party iMessage API service (less reliable)
+      - SQLite database monitoring (Messages app stores in SQLite on Mac)
+      - Requires Mac Mini or similar always-on Mac for monitoring
+    - **AI Processing:**
+      - Claude API (Anthropic) for message understanding
+      - Structured prompt engineering for consistent extraction
+      - JSON schema response format for parsed scheduling data
+      - Fallback to simpler extraction if Claude unavailable
+    - **Database Schema:**
+      - New `ai_scheduling_suggestions` table: `{ id: uuid, source: 'gmail'|'imessage', message_id: text, sender: text, message_text: text, customer_id: uuid, boat_id: uuid, service_type: text, preferred_date_range: daterange, urgency: text, confidence_score: decimal, status: 'pending'|'approved'|'rejected'|'spam', created_at: timestamp, reviewed_at: timestamp, reviewed_by: uuid }`
+      - Add `source_message_id` to `scheduling_queue` table to link approved suggestions
+    - **Edge Functions:**
+      - `scan-gmail-messages`: Periodically fetch new Gmail messages, send to Claude for parsing
+      - `scan-imessage-messages`: Periodically check iMessage database for new messages
+      - `process-scheduling-message`: Claude API integration for message understanding
+      - `create-scheduling-suggestion`: Create suggestion entry in database
+  - **UI Locations:**
+    - **Operations:** New "AI Scheduling Suggestions" tab/inbox
+      - List view of pending suggestions with confidence scores
+      - Side-by-side view: original message + proposed schedule
+      - Bulk actions: approve multiple suggestions at once
+      - Settings: configure keywords, confidence threshold, auto-approve for high confidence
+    - **Settings Dashboard:** AI Scheduling configuration
+      - Gmail OAuth connection management
+      - iMessage monitoring toggle (if Mac available)
+      - Keywords and filters for message scanning
+      - Claude API key configuration
+      - Auto-approval settings (e.g., auto-approve if confidence > 90%)
+  - **Implementation Phases:**
+    - **Phase 1 (Week 1):** Gmail integration, message fetching, basic keyword filtering
+    - **Phase 2 (Week 1-2):** Claude API integration, prompt engineering for scheduling extraction
+    - **Phase 3 (Week 2):** Customer matching logic, database schema for suggestions
+    - **Phase 4 (Week 2-3):** Operations UI for reviewing suggestions, approval workflow
+    - **Phase 5 (Week 3):** iMessage integration (if Mac available), confidence scoring
+    - **Phase 6 (Week 3):** Settings configuration, auto-approval rules, accuracy tracking
+  - **Example Message Scenarios:**
+    - **Explicit:** "Hi! Can you schedule a hull cleaning for my boat next Tuesday around 10am?" → Extract: service=hull_cleaning, date=next_tuesday, time=10am, confidence=high
+    - **Vague:** "My boat needs a cleaning sometime soon" → Extract: service=hull_cleaning, urgency=soon, confidence=medium, require manual date selection
+    - **Range:** "I need diving service in the next 2 weeks" → Extract: service=diving, date_range=next_2_weeks, confidence=high
+    - **Follow-up:** "Actually, can we move that to Thursday instead?" → Detect reference to previous conversation, update existing suggestion
+  - **Smart Features (Future Enhancements):**
+    - Learn from approval patterns (if certain customer always books Tuesdays, suggest Tuesday)
+    - Detect seasonal patterns (spring = more bottom painting requests)
+    - Auto-respond with confirmation email once scheduled
+    - Handle multi-turn conversations (back-and-forth scheduling negotiation)
+    - Integration with Google Calendar to check actual availability before suggesting
+  - **Privacy & Security Considerations:**
+    - Secure OAuth token storage for Gmail access
+    - Encrypt stored message content
+    - Respect user privacy - only scan for scheduling keywords, not full message history
+    - Clear data retention policy (delete message text after 30 days)
+    - Opt-in for customers (can disable AI processing per customer)
+  - **Impact:**
+    - Dramatically reduce time spent reading/processing scheduling messages
+    - Faster response to customer requests (AI processes instantly)
+    - Reduce missed scheduling requests (automated monitoring)
+    - Improve customer satisfaction (quick acknowledgment of requests)
+    - Free up owner time for higher-value work
+    - Data-driven insights (most common scheduling patterns, customer preferences)
+  - **Success Metrics:**
+    - 70%+ of AI suggestions approved without edits (accuracy)
+    - 80%+ reduction in time spent processing scheduling messages
+    - 90%+ of scheduling messages detected and processed
+    - <5% false positives (non-scheduling messages incorrectly flagged)
+    - Average response time to scheduling request: <1 hour (vs. hours/days manually)
+  - **Dependencies:**
+    - Gmail account with API access enabled
+    - Mac Mini (or similar) for iMessage monitoring (optional)
+    - Claude API account (Anthropic)
+    - Operations scheduling system (Needs Scheduling queue - completed Q4 2025)
+    - User Accounts for technician assignment
+  - **Blocks:** None (standalone feature)
+  - **Priority:** Medium-High (Q1 2026 - high-value automation)
+  - **Estimated Effort:** 3-4 weeks (24-32 hours)
+    - Gmail integration: 1 week
+    - Claude AI processing: 0.5 week
+    - Customer matching + database: 0.5 week
+    - Operations UI: 1 week
+    - iMessage integration: 0.5 week
+    - Settings + testing: 0.5 week
+  - **Questions for Decision:**
+    - Auto-approve high-confidence suggestions or always require manual review? (Proposed: manual review initially, auto-approve after proven accurate)
+    - iMessage integration priority? (Proposed: Phase 2 - Gmail first, iMessage if valuable)
+    - Should AI auto-respond to customer? (Proposed: no, just create suggestion for owner to review and respond)
+    - Scan all email folders or just Inbox? (Proposed: Inbox only, avoid spam/promotions)
+    - Handle non-customer messages (potential new leads)? (Proposed: yes, create "potential customer" entry for follow-up)
+
+- [ ] Enhance packing list automation
+- [ ] Improve service history visualization
+- [ ] Mobile optimization for field use
+
+- [ ] **Service Forecast Widget Layout Optimization**
+  - **Dependencies:** None
+  - **Blocks:** None
+  - **Rationale:** Current Service Forecast widgets are stretched full-width across the screen, creating poor visual hierarchy and wasted whitespace. Large numbers and metrics lose impact when spread too wide. Need to implement responsive grid layout with appropriately-sized widgets for better information density and visual appeal.
+  - **Current Issues:**
+    - Summary widgets (85 boats, 44 due this month, 0 overdue, 44 due soon) stretch full screen width
+    - Monthly forecast cards are too wide, making information harder to scan
+    - Excessive horizontal whitespace reduces information density
+    - Poor visual hierarchy - all widgets same size regardless of importance
+    - Not optimized for common screen sizes (looks stretched on large monitors)
+  - **Proposed Layout:**
+    - **Top Summary Row:** Grid layout (2x2 or 4 columns) for key metrics
+      - "Boats with Predictions" + "Due This Month" in top row
+      - "Overdue" + "Due Soon (Next 2 Weeks)" in bottom row
+      - Each widget: max-width 300-400px, responsive grid
+    - **Monthly Forecast Cards:** 3-4 column grid instead of full-width stretching
+      - Cards: max-width 280-320px each
+      - Responsive: 4 cols desktop (>1400px), 3 cols tablet (768-1400px), 2 cols mobile (<768px)
+      - Maintain current card content (month name, boat count, boat list)
+    - **Visual Improvements:**
+      - Add subtle shadows/borders to define widget boundaries
+      - Use container max-width (e.g., 1600px) to prevent excessive stretching
+      - Better spacing between widgets (16-24px gaps)
+      - Maintain current "Current" badge and highlight styling
+  - **Technical Implementation:**
+    - Update CSS Grid layout in Service Forecast component
+    - Add responsive breakpoints (mobile, tablet, desktop, wide)
+    - Set max-width constraints on widget containers
+    - Maintain existing functionality (Refresh Predictions, Export CSV)
+    - Test on various screen sizes (1920px, 1440px, 1280px, 768px, 375px)
+  - **Design Reference:**
+    - Similar to Insight service dashboard widgets (compact, grid-based)
+    - Follow internal admin design system (rounded corners, modern spacing)
+    - Maintain consistency with Operations dashboard layouts
+  - **Impact:**
+    - Improved visual hierarchy - easier to scan and understand
+    - Better information density - more content visible without scrolling
+    - Professional appearance - appropriate sizing for business analytics
+    - Responsive across screen sizes - works well on tablets and small laptops
+    - Reduced eye strain - less horizontal scanning required
+  - **Implementation Phases:**
+    - **Phase 1 (Day 1):** Update summary widget grid layout (2x2 grid for top metrics)
+    - **Phase 2 (Day 1):** Implement responsive monthly forecast card grid (3-4 columns)
+    - **Phase 3 (Day 2):** Add container max-width, spacing adjustments, visual polish
+    - **Phase 4 (Day 2):** Test across screen sizes, adjust breakpoints, verify responsiveness
+    - **Phase 5 (Day 2):** Deploy to preview, gather feedback, final adjustments
+  - **Dependencies:** None (self-contained CSS/layout changes)
+  - **Priority:** Medium-High (Q1 2026 - quick win, improves daily UX)
+  - **Estimated Effort:** 2-3 days (16-24 hours)
+    - Layout restructure: 0.5 day
+    - Responsive grid implementation: 0.5 day
+    - Visual polish & spacing: 0.5 day
+    - Testing across devices: 0.5 day
+    - Deployment & verification: 0.5 day
+  - **Success Metrics:**
+    - Widgets fit within 1600px max-width container
+    - Monthly forecast cards: 3-4 visible on standard laptop (1440px screen)
+    - No horizontal scrolling required on 1280px screens
+    - Maintains readability and visual hierarchy across all breakpoints
+    - Positive feedback from daily users (cleaner, more professional appearance)
+  - **Service Location:** Operations service (Service Forecast page) or Insight service (if forecast moved there)
+  - **Related Work:** Can apply similar layout improvements to other dashboard pages if successful
+
+### Development Workflow & Infrastructure
+- [ ] **Implement Development Branch Strategy for All Services**
+  - **Dependencies:** None
+  - **Blocks:** Comprehensive Responsive Testing (needs preview deployments for testing)
+  - **Rationale:** Currently all 10 services develop directly on `main` branch with immediate production deployment on every push. This creates significant risks: untested code can reach production, no staging environment for integration testing, difficulty rolling back problematic deployments, and inability to test cross-service features together. Need proper development → staging → production workflow with safety gates.
+  - **Current State:**
+    - All services (Portal, Operations, Billing/Completion, Estimator, Dashboard, Inventory, Booking, Video, Site, Shared) use single `main` branch
+    - Every push to `main` triggers immediate Vercel production deployment
+    - No `develop`, `staging`, or formal branching strategy exists
+    - Vercel preview deployments available but not utilized
+    - CLAUDE.md instructs to push directly to main after local testing
+    - Only 1 feature branch exists across all 10 services (estimator feature/transaction-viewing)
+  - **Proposed Workflow:** Modified GitHub Flow with `develop` branch
+    - **Branch Structure:** `feature/* → develop (staging) → main (production)`
+    - **Development Process:**
+      - Create feature branches from `develop` for new work
+      - Feature branch PRs merge to `develop` after review
+      - `develop` auto-deploys to Vercel preview URL (staging environment)
+      - Feature branches get individual preview URLs for PR review
+      - `main` remains production-only, updated via PR from `develop`
+      - Emergency hotfixes can bypass and go direct to `main` with backport to `develop`
+    - **Benefits:**
+      - Leverages existing Vercel preview deployment infrastructure (no new tools needed)
+      - Staging environment for integration testing before production
+      - Test database migrations on preview deployment first
+      - Coordinate cross-service releases (test compatible versions together on develop)
+      - Easy rollbacks (revert PR to main)
+      - Individual preview URLs for every feature PR
+  - **Implementation Plan:**
+    - **Phase 1 (Week 1):** Core Services Setup
+      - Create `develop` branches for Portal, Operations, and Billing/Completion
+      - Update Vercel project settings (main = production, develop = preview)
+      - Test workflow with small feature on each service
+      - Document preview URLs and staging access
+    - **Phase 2 (Week 2):** Remaining Services Rollout
+      - Create `develop` branches for remaining 7 services (Estimator, Dashboard, Inventory, Booking, Video, Site)
+      - Create `develop` branch for sailorskills-shared (special handling as submodule)
+      - Update git submodule references in services to point to shared@develop during development
+      - Verify all services have working preview deployments
+    - **Phase 3 (Week 3):** Documentation & Training
+      - Update all CLAUDE.md files with new branching workflow
+      - Document: feature branch creation, PR process, staging testing procedures, promote-to-production process
+      - Create workflow diagram showing feature → develop → main flow
+      - Document emergency hotfix procedure (when to bypass develop)
+      - Add database migration testing workflow (test on develop preview first)
+    - **Phase 4 (Week 4):** Protection & Validation
+      - Configure GitHub branch protection rules on all `main` branches
+      - Prevent direct pushes to `main` (require PR from develop)
+      - Set up status checks for automated tests (where applicable)
+      - Document rollback procedures (revert commits, revert merges)
+      - Test full workflow end-to-end on all services
+      - Update project manager guidelines in root CLAUDE.md
+  - **Special Considerations:**
+    - **Git Submodules (sailorskills-shared):** Need coordinated strategy - create shared@develop, services reference shared@develop during development, only update to shared@main when promoting to production. Document submodule branch coordination workflow.
+    - **Database Migrations:** Establish testing workflow - always test migrations on `develop` preview deployment before running on production. Document migration rollback procedures.
+    - **Cross-Service Dependencies:** When multiple services need compatible changes (e.g., database schema change affecting Portal + Operations + Billing), coordinate versions on `develop` branches and test together before promoting to `main`.
+    - **Environment Variables:** Document any differences between develop (staging) and main (production) environment configs.
+  - **Impact:**
+    - **Safety:** Significantly reduced risk of production bugs (staging environment catches issues first)
+    - **Testing:** Ability to test in production-like environment before release
+    - **Collaboration:** Better code review process with preview URLs
+    - **Rollbacks:** Easier to revert problematic changes (just revert PR)
+    - **Coordination:** Can test cross-service features together on develop before production
+    - **Confidence:** Team can deploy with higher confidence knowing changes passed staging validation
+  - **Dependencies:** None (self-contained workflow improvement, leverages existing Vercel infrastructure)
+  - **Priority:** High (reduces production risk, enables safer rapid development)
+  - **Estimated Effort:** 12-16 hours spread over 4 weeks
+    - Branch creation & Vercel configuration: 4-6 hours
+    - Documentation updates: 3-4 hours
+    - GitHub protection configuration: 2-3 hours
+    - Testing & validation across all services: 3-3 hours
+  - **Success Criteria:**
+    - All 10 services have `develop` branch created and set as default branch for development
+    - Vercel preview URLs working for all service `develop` branches
+    - All CLAUDE.md files updated with new workflow instructions
+    - Branch protection active on all `main` branches (prevent direct pushes)
+    - Emergency hotfix procedure documented
+    - At least one feature successfully deployed through full workflow (feature → develop → main) on each service
+    - sailorskills-shared submodule workflow documented and validated
+
+### Quality Assurance & Testing
+- [ ] **Comprehensive Responsive Testing Across All Services**
+  - **Dependencies:** Development Branch Strategy (needs preview deployments for testing)
+  - **Blocks:** None
+  - **Rationale:** Currently no systematic responsive testing across the 10-service suite. Services are developed primarily for desktop, but customers increasingly access on mobile/tablet (especially Portal, Estimator, Booking). Need comprehensive testing strategy to ensure all services work properly across all device sizes and orientations.
+  - **Current State:**
+    - Responsive design implemented ad-hoc without formal testing
+    - No automated responsive testing in place
+    - Visual regressions may occur when updating shared design system
+    - Customer-facing services (Portal, Estimator, Booking, Site) critical for mobile UX
+    - Internal admin tools (Dashboard, Operations, Inventory, Billing, Video) used on tablets in field
+  - **Scope:** All 10 services (Portal, Operations, Billing/Completion, Estimator, Dashboard, Inventory, Booking, Video, Site, Shared)
+    - **Customer-Facing Priority:** Portal, Estimator, Booking, Site (highest impact)
+    - **Admin Tools:** Dashboard, Operations, Inventory, Billing, Video (field use on tablets)
+  - **Testing Approaches (Multi-Layered Strategy):**
+    - **1. Automated Viewport Testing (Playwright):**
+      - Test all critical user flows across 3 breakpoints: mobile (375px), tablet (768px), desktop (1440px)
+      - Verify navigation, forms, modals, tables render correctly at each breakpoint
+      - Test both portrait and landscape orientations
+      - Run on every PR via GitHub Actions
+    - **2. Manual Testing Checklist:**
+      - Document comprehensive testing checklist per service
+      - Test on actual devices (iPhone, iPad, Android phone/tablet)
+      - Verify touch interactions (tap targets, swipe gestures, pinch zoom)
+      - Check for text overflow, layout breaks, missing scroll containers
+      - Test keyboard behavior on mobile (input focus, virtual keyboard)
+    - **3. Visual Regression Testing:**
+      - Screenshot comparison across all breakpoints using Playwright
+      - Integrate with design system changes (catch unintended responsive breakage)
+      - Baseline screenshots for all major pages/components
+      - Alert on visual diffs during CI/CD pipeline
+    - **4. Real Device Testing:**
+      - Test on physical devices (iPhone 13/14/15, iPad, Samsung Galaxy, etc.)
+      - Use BrowserStack or similar for broader device coverage
+      - Test on different screen densities (1x, 2x, 3x)
+      - Verify performance on low-end devices
+  - **Implementation Plan:**
+    - **Phase 1 (Week 1):** Setup & Infrastructure
+      - Configure Playwright for multi-viewport testing
+      - Set up visual regression baseline screenshots
+      - Document responsive breakpoints in shared design system
+      - Create manual testing checklist template
+    - **Phase 2 (Week 2):** Customer-Facing Services
+      - Implement automated tests for Portal (login, service history, invoices, messages)
+      - Test Estimator (quote builder, form flows, payment)
+      - Test Booking (calendar picker, confirmation flow)
+      - Test Site (marketing pages, contact forms)
+      - Capture visual regression baselines for all pages
+    - **Phase 3 (Week 3):** Admin Tools & Internal Services
+      - Test Dashboard (analytics widgets, navigation)
+      - Test Operations (service logs, customer management, calendar)
+      - Test Inventory (product search, AI assistant)
+      - Test Billing/Completion (service documentation, condition tracking, payment)
+      - Test Video (playlist management, upload workflows)
+    - **Phase 4 (Week 4):** Real Device Testing & Documentation
+      - Conduct manual testing on 5-8 physical devices
+      - Document device-specific issues and workarounds
+      - Create responsive testing runbook for future development
+      - Add responsive testing to PR template and CLAUDE.md
+      - Set up CI/CD integration for automated tests
+  - **Breakpoints to Test:**
+    - **Mobile Small:** 375px (iPhone SE, small phones)
+    - **Mobile Large:** 414px (iPhone 14 Pro Max)
+    - **Tablet Portrait:** 768px (iPad Mini)
+    - **Tablet Landscape:** 1024px (iPad)
+    - **Desktop Small:** 1280px (laptop)
+    - **Desktop Large:** 1440px+ (monitor)
+  - **Critical Test Scenarios by Service:**
+    - **Portal:** Login flow, service request, invoice viewing, boat selection, messages
+    - **Estimator:** Quote builder, anode selection, service options, pricing display, checkout
+    - **Operations:** Service log creation, condition tracking, customer search, calendar view
+    - **Dashboard:** Analytics widgets, revenue charts, table displays
+    - **Inventory:** Product search, AI assistant chat, order placement
+    - **Billing:** Service completion, condition sliders, payment processing
+    - **Booking:** Date picker, time slot selection, confirmation
+    - **Video:** Playlist management, upload interface
+    - **Site:** Navigation, contact forms, service pages
+  - **Deliverables:**
+    - Automated Playwright test suite covering all services and breakpoints
+    - Visual regression baseline screenshots (100+ pages across services)
+    - Manual testing checklist document
+    - Real device testing report with device compatibility matrix
+    - Responsive testing runbook for developers
+    - CI/CD integration (tests run on every PR)
+    - Documentation updates to CLAUDE.md and service READMEs
+  - **Impact:**
+    - Improved mobile/tablet experience for customers (higher conversion, satisfaction)
+    - Catch responsive regressions before production
+    - Confidence when updating shared design system
+    - Better field experience for technicians using admin tools on tablets
+    - Faster development (automated tests catch issues early)
+    - Professional mobile experience across all touchpoints
+  - **Dependencies:**
+    - Development branch strategy (to test on preview deployments)
+    - Playwright MCP already available for manual testing
+  - **Priority:** High (Q1 2026 - foundational for mobile-first customer experience)
+  - **Estimated Effort:** 5-6 days (40-48 hours)
+    - Infrastructure setup: 0.5 day
+    - Customer-facing services testing: 1.5 days
+    - Admin tools testing: 1.5 days
+    - Real device testing: 1 day
+    - Documentation & CI integration: 0.5-1 day
+  - **Success Criteria:**
+    - Automated tests pass for all services across 6 breakpoints
+    - Visual regression tests integrated into CI/CD
+    - Manual testing completed on 5+ physical devices
+    - Zero critical responsive issues in customer-facing services
+    - All services have documented responsive testing checklist
+    - Responsive testing added to development workflow
+
+---
+

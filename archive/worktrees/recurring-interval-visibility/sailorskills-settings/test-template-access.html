@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Email Template Access Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+    pre { background: #f5f5f5; padding: 20px; border-radius: 8px; overflow-x: auto; }
+    .error { color: red; }
+    .success { color: green; }
+  </style>
+</head>
+<body>
+  <h1>Email Template Access Diagnostic</h1>
+  <div id="output"></div>
+
+  <script type="module">
+    import { supabase } from './src/lib/supabase-client.js';
+
+    const output = document.getElementById('output');
+
+    function log(message, type = 'info') {
+      const div = document.createElement('div');
+      div.className = type;
+      div.innerHTML = message;
+      output.appendChild(div);
+    }
+
+    async function runDiagnostic() {
+      try {
+        log('<h2>Step 1: Check Authentication</h2>');
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+        if (authError || !user) {
+          log('<p class="error">❌ Not authenticated. Please login first.</p>', 'error');
+          log(`<p>Error: ${authError?.message || 'No user found'}</p>`);
+          return;
+        }
+
+        log(`<p class="success">✅ Authenticated as: ${user.email}</p>`, 'success');
+        log(`<p>User ID: ${user.id}</p>`);
+
+        log('<h2>Step 2: Check User Profile</h2>');
+        const { data: profile, error: profileError } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+
+        if (profileError) {
+          log(`<p class="error">❌ Error loading profile: ${profileError.message}</p>`, 'error');
+        } else if (!profile) {
+          log('<p class="error">❌ No user profile found</p>', 'error');
+        } else {
+          log(`<p class="success">✅ Profile found</p>`, 'success');
+          log(`<pre>${JSON.stringify(profile, null, 2)}</pre>`);
+        }
+
+        log('<h2>Step 3: Check Email Templates Access</h2>');
+        const { data: templates, error: templatesError } = await supabase
+          .from('email_templates')
+          .select('*')
+          .order('template_name');
+
+        if (templatesError) {
+          log(`<p class="error">❌ Error loading templates: ${templatesError.message}</p>`, 'error');
+          log(`<pre>${JSON.stringify(templatesError, null, 2)}</pre>`);
+        } else if (!templates || templates.length === 0) {
+          log('<p class="error">❌ No templates found (but no error - RLS may be blocking)</p>', 'error');
+        } else {
+          log(`<p class="success">✅ Successfully loaded ${templates.length} templates</p>`, 'success');
+          log(`<pre>${JSON.stringify(templates, null, 2)}</pre>`);
+        }
+
+      } catch (error) {
+        log(`<p class="error">❌ Unexpected error: ${error.message}</p>`, 'error');
+        console.error('Diagnostic error:', error);
+      }
+    }
+
+    runDiagnostic();
+  </script>
+</body>
+</html>

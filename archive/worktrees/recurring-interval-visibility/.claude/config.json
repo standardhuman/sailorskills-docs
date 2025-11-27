@@ -1,0 +1,21 @@
+{
+  "permissionPatterns": [
+    "Bash(psql:*)",
+    "Bash(git:*)",
+    "Bash(npm:*)",
+    "Bash(node:*)",
+    "Bash(npx:*)",
+    "Bash(source:*)",
+    "Bash(ls:*)",
+    "Bash(cat:*)",
+    "Bash(grep:*)",
+    "Bash(find:*)",
+    "Bash(echo:*)",
+    "Bash(mkdir:*)",
+    "Bash(kill:*)",
+    "Read(**)",
+    "Grep",
+    "Glob",
+    "Edit"
+  ]
+}
