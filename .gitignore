@@ -7,4 +7,18 @@ dist/
 .DS_Store
 .worktrees/
 .vercel
-.worktrees/
+
+# Service directories (independent git repos, not submodules)
+sailorskills-billing/
+sailorskills-booking/
+sailorskills-estimator/
+sailorskills-insight/
+sailorskills-inventory/
+sailorskills-login/
+sailorskills-marketing/
+sailorskills-operations/
+sailorskills-portal/
+sailorskills-settings/
+sailorskills-shared/
+sailorskills-site/
+sailorskills-video/

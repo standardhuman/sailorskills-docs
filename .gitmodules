@@ -1,3 +1,2 @@
-[submodule "sailorskills-settings/shared"]
-	path = sailorskills-settings/shared
-	url = https://github.com/standardhuman/sailorskills-shared.git
+# No submodules - service directories are independent git repos
+# Each service manages its own shared/ submodule internally
