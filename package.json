@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:integration": "npx playwright test tests/integration/",
+    "test:e2e": "npx playwright test tests/e2e/",
+    "test": "npx playwright test"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0"
